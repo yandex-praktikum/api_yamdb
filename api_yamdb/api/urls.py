@@ -4,10 +4,10 @@ from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt import views
 
-from .views import EmailViewSet
+#from .views import EmailViewSet
 
 router = DefaultRouter()
-router.register('auth/email', EmailViewSet, basename='email_post')
+#router.register('auth/email', EmailViewSet, basename='email_post')
 
 jwt = [
     path(

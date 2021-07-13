@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt import views
 
-from .views import EmailViewSet, ReviewViewSet, UserViewSet
+from .views import UserViewSet, EmailViewSet, CategoriesViewSet, GenresViewSet, TitlesViewSet, ReviewViewSet
 
 router = DefaultRouter()
 router.register('auth/email', EmailViewSet, basename='email_post')
@@ -13,6 +13,9 @@ router.register(
 )
 router.register('users', UserViewSet, basename='users')
 router.register('auth/email', EmailViewSet, basename='email')
+router.register('categories', CategoriesViewSet, basename='category')
+router.register('genres', GenresViewSet, basename='genre')
+router.register('titles', TitlesViewSet, basename='title')
 
 jwt = [
     path(

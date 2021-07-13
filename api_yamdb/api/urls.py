@@ -14,7 +14,6 @@ router.register(
     basename='reviews_api',
 )
 
-
 jwt = [
     path(
         '',

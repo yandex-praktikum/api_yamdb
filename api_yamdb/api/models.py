@@ -1,6 +1,19 @@
 from django.db import models
 
 class Review(models.Model):
+    RATING_LEVELS = (
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 5),
+        (6, 6),
+        (7, 7),
+        (8, 8),
+        (9, 9),
+        (10, 10)
+    )
+
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews'
     )
@@ -11,6 +24,7 @@ class Review(models.Model):
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews'
     )
+    score = models.IntegerField(verbose_name='Рейтинг', choices=RATING_LEVELS)
 
     class Meta:
         ordering = ['-pub_date']

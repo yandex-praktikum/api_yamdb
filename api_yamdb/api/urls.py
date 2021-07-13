@@ -2,10 +2,11 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt import views
 
-from .views import UserViewSet
+from .views import UserViewSet, EmailViewSet
 
 router = DefaultRouter()
 router.register('users', UserViewSet, basename='users')
+router.register('auth/email', EmailViewSet, basename='email')
 
 jwt = [
     path(

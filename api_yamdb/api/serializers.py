@@ -8,3 +8,9 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'role', 'description', 'first_name', 'last_name')
         read_only_fields = ('id', 'role', 'description', 'first_name', 'last_name')
         model = User
+
+
+class EmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('email',)
+        model = User

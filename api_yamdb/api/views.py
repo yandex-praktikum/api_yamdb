@@ -10,7 +10,15 @@ from rest_framework.permissions import (
     )
 
 from .models import User, Categories, Genres, Titles
-from .serializers import UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer, TitlesSerializer
+from .serializers import UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer, TitlesSerializer, ReviewSerializer
+
+from django.shortcuts import get_object_or_404
+
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
+
+from requests import Response
+
 
 class CreateViewSet(
     mixins.CreateModelMixin,
@@ -59,4 +67,20 @@ class GenresViewSet(CreateListViewSet):
 
 class TitlesViewSet(CreateListViewSet):
     queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer       
+    serializer_class = TitlesSerializer     
+    
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        serializer.save(author=self.request.user, title=title)
+        
+    

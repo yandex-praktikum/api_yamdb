@@ -10,3 +10,4 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='User')
     description = models.TextField(max_length=500, blank=True)
+    confirmation_code = models.IntegerField(default=0)

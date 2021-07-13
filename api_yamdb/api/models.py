@@ -75,7 +75,7 @@ class Review(models.Model):
     )
     text = models.TextField(verbose_name='Текст', max_length=5000)
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='reviews'
+        Titles, on_delete=models.CASCADE, related_name='reviews'
     )
     score = models.IntegerField(verbose_name='Рейтинг', choices=RATING_LEVELS)
 

@@ -1,23 +1,13 @@
 from requests import Response
-from rest_framework import viewsets, status, mixins, permissions, filters
-from .permissions import IsAdminOrReadOnly
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly
-    )
-
-from .models import User, Categories, Genres, Titles
-from .serializers import UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer, TitlesSerializer, ReviewSerializer
-
-from django.shortcuts import get_object_or_404
-
+from rest_framework import viewsets, status, mixins, filters
+from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
 
-from requests import Response
+from .models import User, Categories, Genres, Titles
+from .permissions import IsAdminOrReadOnly
+from .serializers import UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer, TitlesSerializer, \
+    ReviewSerializer
 
 
 class CreateViewSet(
@@ -26,10 +16,12 @@ class CreateViewSet(
 ):
     pass
 
+
 class CreateListViewSet(mixins.CreateModelMixin,
                         mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     pass
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -47,6 +39,7 @@ class EmailViewSet(CreateViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class CategoriesViewSet(CreateListViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
@@ -55,6 +48,7 @@ class CategoriesViewSet(CreateListViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
+
 
 class GenresViewSet(CreateListViewSet):
     queryset = Genres.objects.all()
@@ -65,10 +59,11 @@ class GenresViewSet(CreateListViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
+
 class TitlesViewSet(CreateListViewSet):
     queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer     
-    
+    serializer_class = TitlesSerializer
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
@@ -76,11 +71,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
-        
-    

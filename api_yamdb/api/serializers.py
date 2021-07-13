@@ -1,8 +1,6 @@
 from rest_framework import serializers
 
-
-from .models import User, Genres, Titles, Categories, Rewiew
-
+from .models import User, Genres, Titles, Categories, Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -18,7 +16,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         title = self.context['view'].kwargs.get('title_id')
         if (self.context['request'].method == 'POST'
-           and Review.objects.filter(author=user, title=title).exists()):
+                and Review.objects.filter(author=user, title=title).exists()):
             raise serializers.ValidationError('Ваш отзыв уже был опубликован')
         return data
 
@@ -40,17 +38,18 @@ class EmailSerializer(serializers.ModelSerializer):
         fields = ('email',)
         model = User
 
-class GenresSerializer(serializers.ModelSerializer):
 
+class GenresSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Genres
 
-class CategoriesSerializer(serializers.ModelSerializer):
 
+class CategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Categories
+
 
 class TitlesSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
@@ -60,6 +59,7 @@ class TitlesSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Categories.objects.all())
+
     class Meta:
         fields = '__all__'
-        model = Titles                        
+        model = Titles

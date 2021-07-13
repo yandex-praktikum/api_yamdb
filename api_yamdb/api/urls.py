@@ -1,10 +1,8 @@
-from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt import views
 
-from .views import EmailViewSet, ReviewViewSet
+from .views import EmailViewSet, ReviewViewSet, UserViewSet
 
 router = DefaultRouter()
 router.register('auth/email', EmailViewSet, basename='email_post')
@@ -13,6 +11,8 @@ router.register(
     ReviewViewSet,
     basename='reviews_api',
 )
+router.register('users', UserViewSet, basename='users')
+router.register('auth/email', EmailViewSet, basename='email')
 
 jwt = [
     path(

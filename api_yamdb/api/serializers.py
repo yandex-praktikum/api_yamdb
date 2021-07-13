@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import Review
+from api.models import Review, User
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -19,3 +19,21 @@ class ReviewSerializer(serializers.ModelSerializer):
            and Review.objects.filter(author=user, title=title).exists()):
             raise serializers.ValidationError('Ваш отзыв уже был опубликован')
         return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = (
+            'id', 'username', 'email', 'role', 'description',
+            'first_name', 'last_name'
+        )
+        read_only_fields = (
+            'id', 'role', 'description', 'first_name', 'last_name'
+        )
+        model = User
+
+
+class EmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('email',)
+        model = User

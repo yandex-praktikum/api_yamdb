@@ -1,11 +1,15 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status, mixins
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
 
-from api.models import Title
-from api.serializers import (ReviewSerializer,)
+from requests import Response
+
+from api.models import Title, User
+from api.serializers import (
+    ReviewSerializer, UserSerializer, EmailSerializer
+)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -20,3 +24,27 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
+
+
+class CreateViewSet(
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class EmailViewSet(CreateViewSet):
+    queryset = User.objects.all()
+    serializer_class = EmailSerializer
+
+    def post(self, request):
+        serializer = EmailSerializer
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,5 +1,10 @@
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
+
+GOOGLE_PASSWORD = os.getenv('GOOGLE_PASSWORD')
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -122,3 +127,13 @@ SIMPLE_JWT = {
    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
    'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+EMAIL_HOST = 'smtp.gmail.com'
+
+EMAIL_HOST_USER = 'django.test1.mail'
+
+EMAIL_HOST_PASSWORD = GOOGLE_PASSWORD
+
+EMAIL_PORT = 587
+
+EMAIL_USE_TLS = True

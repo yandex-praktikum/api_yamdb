@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User, Genres, Titles, Categories, Review
 
@@ -63,3 +65,21 @@ class TitlesSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Titles
+
+
+class TokenObtainPairSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('email', 'confirmation_code')
+        model = User
+
+    @classmethod
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
+
+    def validate(self, attrs):
+        user = get_object_or_404(User, email=attrs['email'])
+        refresh = self.get_token(user)
+        data = {'token': str(refresh.access_token)}
+        if user.confirmation_code != attrs['confirmation_code']:
+            return "Confirmation code is not correct"
+        return data

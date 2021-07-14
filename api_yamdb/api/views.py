@@ -1,13 +1,16 @@
-from requests import Response
-from rest_framework import viewsets, status, mixins, filters
+from random import randint
+
+from django.core.mail import send_mail
+from rest_framework import viewsets, mixins, filters
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
+from rest_framework_simplejwt.views import TokenViewBase
 
 from .models import User, Categories, Genres, Titles
 from .permissions import IsAdminOrReadOnly
 from .serializers import UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer, TitlesSerializer, \
-    ReviewSerializer
+    ReviewSerializer, TokenObtainPairSerializer
 
 
 class CreateViewSet(
@@ -32,12 +35,15 @@ class EmailViewSet(CreateViewSet):
     queryset = User.objects.all()
     serializer_class = EmailSerializer
 
-    def post(self, request):
-        serializer = EmailSerializer
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        confirmation_code = randint(100000, 999999)
+        serializer.save(confirmation_code=confirmation_code)
+        send_mail(
+            'Your confirmation code YaMDb',
+            f'Confirmation code:{confirmation_code}',
+            'django.test1.mail@gmail.com',
+            [serializer.data['email'], ],
+        )
 
 
 class CategoriesViewSet(CreateListViewSet):
@@ -77,3 +83,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
+
+
+class TokenObtainPairView(TokenViewBase):
+    serializer_class = TokenObtainPairSerializer
+
+# token_obtain_pair = TokenObtainPairView.as_view()

@@ -86,3 +86,24 @@ class Review(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class Comment(models.Model):
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='comments'
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации', auto_now_add=True
+    )
+    review = models.ForeignKey(
+        Review, on_delete=models.CASCADE, related_name='comments'
+    )
+    text = models.TextField(verbose_name='Текст комментария', max_length=450)
+
+    class Meta:
+        ordering = ['-pub_date']
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
+
+    def __str__(self):
+        return self.text

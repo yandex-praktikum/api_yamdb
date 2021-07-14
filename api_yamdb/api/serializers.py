@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import User, Genres, Titles, Categories, Review
+from .models import User, Genres, Titles, Categories, Review, Comment
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -83,3 +83,13 @@ class TokenObtainPairSerializer(serializers.ModelSerializer):
         if user.confirmation_code != attrs['confirmation_code']:
             return "Confirmation code is not correct"
         return data
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'pub_date')
+        model = Comment

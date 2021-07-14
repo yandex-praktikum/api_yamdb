@@ -7,10 +7,13 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
 from rest_framework_simplejwt.views import TokenViewBase
 
-from .models import User, Categories, Genres, Titles
+from .models import User, Categories, Genres, Titles, Review
 from .permissions import IsAdminOrReadOnly
-from .serializers import UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer, TitlesSerializer, \
-    ReviewSerializer, TokenObtainPairSerializer
+from .serializers import (
+    UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer,
+    TitlesSerializer, ReviewSerializer, TokenObtainPairSerializer,
+    CommentSerializer
+)
 
 
 class CreateViewSet(
@@ -83,6 +86,29 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    pagination_class = PageNumberPagination
+
+    def get_review_id(self):
+        return self.kwargs.get('review_id')
+
+    def get_title_id(self):
+        return self.kwargs.get('title_id')
+
+    def get_queryset(self):
+        review = get_object_or_404(
+            Review, pk=self.get_review_id(), title__id=self.get_title_id()
+        )
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(
+            Review, pk=self.get_review_id(), title__id=self.get_title_id()
+        )
+        serializer.save(author=self.request.user, review=review)
 
 
 class TokenObtainPairView(TokenViewBase):

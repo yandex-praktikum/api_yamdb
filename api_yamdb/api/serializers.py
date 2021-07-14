@@ -1,7 +1,5 @@
-from django.contrib.auth.models import update_last_login
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainSerializer
-from rest_framework_simplejwt.settings import api_settings
+from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User, Genres, Titles, Categories, Review
@@ -79,20 +77,9 @@ class TokenObtainPairSerializer(serializers.ModelSerializer):
         return RefreshToken.for_user(user)
 
     def validate(self, attrs):
-        data = super().validate(attrs)
-        user = User.objects.get(email=attrs['email'])
+        user = get_object_or_404(User, email=attrs['email'])
         refresh = self.get_token(user)
-
-        data['refresh'] = str(refresh)
-        data['access'] = str(refresh.access_token)
-
+        data = {'token': str(refresh.access_token)}
         if user.confirmation_code != attrs['confirmation_code']:
             return "Confirmation code is not correct"
         return data
-
-
-        # if api_settings.UPDATE_LAST_LOGIN:
-        #     update_last_login(None, self.user)
-
-
-

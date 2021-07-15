@@ -12,7 +12,7 @@ from .permissions import IsAdminOrReadOnly
 from .serializers import (
     UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer,
     TitlesSerializer, ReviewSerializer, TokenObtainPairSerializer,
-    CommentSerializer
+    CommentSerializer, TitlesSerializerWithRating
 )
 
 
@@ -71,7 +71,11 @@ class GenresViewSet(CreateListViewSet):
 
 class TitlesViewSet(CreateListViewSet):
     queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitlesSerializerWithRating
+        return TitlesSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

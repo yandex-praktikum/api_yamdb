@@ -67,6 +67,21 @@ class TitlesSerializer(serializers.ModelSerializer):
         model = Titles
 
 
+class TitlesSerializerWithRating(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        many=True,
+        slug_field='slug',
+        queryset=Genres.objects.all())
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Categories.objects.all())
+    rating = serializers.FloatField()
+
+    class Meta:
+        fields = '__all__'
+        model = Titles
+
+
 class TokenObtainPairSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('email', 'confirmation_code')

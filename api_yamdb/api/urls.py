@@ -9,6 +9,12 @@ from .views import (
 
 router = DefaultRouter()
 router.register('auth/email', EmailViewSet, basename='email_post')
+
+router.register('users', UserViewSet, basename='users')
+router.register('auth/email', EmailViewSet, basename='email')
+router.register('categories', CategoriesViewSet, basename='category')
+router.register('genres', GenresViewSet, basename='genre')
+router.register('titles', TitlesViewSet, basename='title')
 router.register(
     r'titles/(?P<title_id>\d+)/reviews',
     ReviewViewSet,
@@ -19,12 +25,6 @@ router.register(
     CommentViewSet,
     basename='comments',
 )
-router.register('users', UserViewSet, basename='users')
-router.register('auth/email', EmailViewSet, basename='email')
-router.register('categories', CategoriesViewSet, basename='category')
-router.register('genres', GenresViewSet, basename='genre')
-router.register('titles', TitlesViewSet, basename='title')
-
 jwt = [
     path(
         '',

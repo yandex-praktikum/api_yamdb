@@ -1,11 +1,13 @@
 from random import randint
-
+from django.shortcuts import get_object_or_404 
 from django.core.mail import send_mail
-from rest_framework import viewsets, mixins, filters
+
+from rest_framework import viewsets, mixins, filters, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
 from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework.response import Response 
 
 from .models import User, Categories, Genres, Titles, Review
 from .permissions import IsAdminOrReadOnly
@@ -25,6 +27,7 @@ class CreateViewSet(
 
 class CreateListViewSet(mixins.CreateModelMixin,
                         mixins.ListModelMixin,
+                        mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
     pass
 
@@ -53,8 +56,9 @@ class CategoriesViewSet(CreateListViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
+    permission_classes = (IsAdminOrReadOnly,)
+
     search_fields = ('name',)
     lookup_field = 'slug'
 
@@ -72,6 +76,7 @@ class GenresViewSet(CreateListViewSet):
 class TitlesViewSet(CreateListViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
+    pagination_class = PageNumberPagination
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

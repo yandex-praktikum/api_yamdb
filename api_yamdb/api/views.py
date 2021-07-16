@@ -3,8 +3,9 @@ from requests import Response
 from collections import OrderedDict
 from django_filters.rest_framework import DjangoFilterBackend
 from random import randint
-from django.shortcuts import get_object_or_404 
+# from django.shortcuts import get_object_or_404 
 from django.core.mail import send_mail
+from django.db.models import Avg
 
 
 from rest_framework import viewsets, mixins, filters, status
@@ -18,8 +19,9 @@ from .models import User, Categories, Genres, Titles, Review
 from .permissions import IsAdminOrReadOnly
 from .serializers import (
     UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer,
-    TitlesPostSerializer, TitlesGetSerializer, ReviewSerializer, TokenObtainPairSerializer,
-    CommentSerializer
+    ReviewSerializer, TokenObtainPairSerializer, CommentSerializer,
+    TitlesPostSerializer, TitlesGetSerializer, ReviewSerializer,
+    TokenObtainPairSerializer, CommentSerializer
 )
 
 
@@ -31,7 +33,6 @@ class CreateViewSet(
 
 
 class CreateListViewSet(mixins.CreateModelMixin,
-                        mixins.DestroyModelMixin,
                         mixins.ListModelMixin,
                         mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
@@ -78,13 +79,15 @@ class GenresViewSet(CreateListViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
+
 class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
+    queryset = Titles.objects.annotate(rating=Avg('reviews__score'))
+    pagination_class = PageNumberPagination
     permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
-            return TitlesGetSerializer 
+            return TitlesGetSerializer
         return TitlesPostSerializer
 
 

@@ -67,14 +67,18 @@ class TitlesPostSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles
-        
+
+
 class TitlesGetSerializer(serializers.ModelSerializer):
     genre = CategoriesSerializer(many=True)
     category = CategoriesSerializer(read_only=True)
+    rating = serializers.FloatField()
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
-        model = Titles                                
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
+        model = Titles
 
 
 class TokenObtainPairSerializer(serializers.ModelSerializer):

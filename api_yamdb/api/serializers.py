@@ -1,9 +1,9 @@
 from rest_framework import serializers
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import User, Genres, Titles, Categories, Review, Comment
-
+from .models import Categories, Comment, Genres, Review, Titles, User
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -26,14 +26,17 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = (
-            'id', 'username', 'email', 'role', 'description',
-            'first_name', 'last_name'
-        )
-        read_only_fields = (
-            'id', 'role', 'description', 'first_name', 'last_name'
-        )
+        fields = ('first_name', 'last_name', 'username', 'bio',
+                  'email', 'role'
+                  )
         model = User
+        lookup_field = 'username'
+
+    # def get_fields(self, *args, **kwargs):
+    #     fields = super(UserSerializer, self).get_fields(*args, **kwargs)
+    #     request = self.context.get('request', None)
+    #     if request and getattr(request, 'method', None) == "POST":
+    #         fields['email'].required = True
 
 
 class EmailSerializer(serializers.ModelSerializer):
@@ -107,3 +110,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
+
+
+def TitlesSerializer():
+    return None

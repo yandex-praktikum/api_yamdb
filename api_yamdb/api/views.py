@@ -1,28 +1,21 @@
-
-from requests import Response
-from collections import OrderedDict
-from django_filters.rest_framework import DjangoFilterBackend
 from random import randint
-# from django.shortcuts import get_object_or_404 
+
 from django.core.mail import send_mail
 from django.db.models import Avg
-
-
-from rest_framework import viewsets, mixins, filters, status
+from django.shortcuts import get_object_or_404
+from rest_framework import filters, mixins, viewsets
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.views import TokenViewBase
-from rest_framework.response import Response 
 
-from .models import User, Categories, Genres, Titles, Review
-from .permissions import IsAdminOrReadOnly
-from .serializers import (
-    UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer,
-    ReviewSerializer, TokenObtainPairSerializer, CommentSerializer,
-    TitlesPostSerializer, TitlesGetSerializer, ReviewSerializer,
-    TokenObtainPairSerializer, CommentSerializer
-)
+from .models import Categories, Genres, Review, Titles, User
+from .permissions import IsAdminOrDenied, IsAdminOrReadOnly
+from .serializers import (CategoriesSerializer, CommentSerializer,
+                          EmailSerializer, GenresSerializer, ReviewSerializer,
+                          TitlesGetSerializer, TitlesPostSerializer,
+                          TokenObtainPairSerializer, UserSerializer)
 
 
 class CreateViewSet(
@@ -42,6 +35,21 @@ class CreateListViewSet(mixins.CreateModelMixin,
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    lookup_field = 'username'
+    permission_classes = (IsAdminOrDenied,)
+    # pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+
+    @action(detail=False, methods=['get', 'patch'])
+    def me(self, request):
+        self.kwargs['username'] = request.user.username
+        if request.method == 'GET':
+            return self.retrieve(request)
+        elif request.method == 'PATCH':
+            return self.partial_update(request)
+        else:
+            raise Exception('Not implemented')
 
 
 class EmailViewSet(CreateViewSet):

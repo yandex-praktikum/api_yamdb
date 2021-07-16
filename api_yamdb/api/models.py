@@ -1,18 +1,20 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
     ROLE_CHOICES = (
-        ('User', 'user'),
-        ('Moderator', 'moderator'),
-        ('Admin', 'admin')
+        ('user', 'User'),
+        ('moderator', 'Moderator'),
+        ('admin', 'Admin')
     )
     role = models.CharField(
-        max_length=20, choices=ROLE_CHOICES, default='User'
+        max_length=20, choices=ROLE_CHOICES, default='user'
     )
-    description = models.TextField(max_length=500, blank=True)
+    bio = models.TextField(max_length=500, blank=True)
     confirmation_code = models.IntegerField(default=0)
+    email = models.EmailField(_('email address'), blank=True, unique=True)
 
 
 class Genres(models.Model):

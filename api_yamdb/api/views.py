@@ -11,7 +11,8 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.views import TokenViewBase
 
 from .models import Categories, Genres, Review, Titles, User
-from .permissions import IsAdminOrDenied, IsAdminOrReadOnly, IsAdminOrModeratororAuthor
+from .permissions import (IsAdminOrDenied, IsAdminOrModeratororAuthor,
+                          IsAdminOrReadOnly)
 from .serializers import (CategoriesSerializer, CommentSerializer,
                           EmailSerializer, GenresSerializer, ReviewSerializer,
                           TitlesGetSerializer, TitlesPostSerializer,
@@ -102,7 +103,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrModeratororAuthor,)
+    permission_classes = (IsAuthenticatedOrReadOnly,
+                          IsAdminOrModeratororAuthor,)
 
     def get_queryset(self):
         title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
@@ -116,7 +118,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrModeratororAuthor,)
+    permission_classes = (IsAuthenticatedOrReadOnly,
+                          IsAdminOrModeratororAuthor,)
 
     def get_review_id(self):
         return self.kwargs.get('review_id')

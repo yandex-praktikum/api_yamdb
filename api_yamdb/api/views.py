@@ -3,6 +3,7 @@ from random import randint
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -10,6 +11,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework_simplejwt.views import TokenViewBase
 
+from .filters import ModelFilter
 from .models import Categories, Genres, Review, Titles, User
 from .permissions import (IsAdminOrDenied, IsAdminOrModeratororAuthor,
                           IsAdminOrReadOnly)
@@ -93,6 +95,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.annotate(rating=Avg('reviews__score'))
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = [DjangoFilterBackend]
+    filter_class = ModelFilter
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':

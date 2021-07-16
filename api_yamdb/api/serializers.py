@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -30,16 +31,15 @@ class UserSerializer(serializers.ModelSerializer):
                   'email', 'role'
                   )
         model = User
+        lookup_field = 'username'
 
-    def get_fields(self, *args, **kwargs):
-        pk = self.kwargs.get('pk')
-        fields = super(UserSerializer, self).get_fields(*args, **kwargs)
-        request = self.context.get('request', None)
-        if request and getattr(request, 'method', None) == "POST":
-            fields['email'].required = True
-        if pk == "me":
-            return self.request.user
-        return fields
+    # def get_fields(self, *args, **kwargs):
+    #     fields = super(UserSerializer, self).get_fields(*args, **kwargs)
+    #     request = self.context.get('request', None)
+    #     if request and getattr(request, 'method', None) == "POST":
+    #         fields['email'].required = True
+
+
 
 
 class MeSerializer(serializers.ModelSerializer):
@@ -122,3 +122,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
+
+
+def TitlesSerializer():
+    return None

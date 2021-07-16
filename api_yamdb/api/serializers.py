@@ -31,8 +31,9 @@ class UserSerializer(serializers.ModelSerializer):
                   )
         model = User
         lookup_field = 'username'
+        extra_kwargs = {'email': {'required': True}}
 
-    # def get_fields(self, *args, **kwargs):
+        # def get_fields(self, *args, **kwargs):
     #     fields = super(UserSerializer, self).get_fields(*args, **kwargs)
     #     request = self.context.get('request', None)
     #     if request and getattr(request, 'method', None) == "POST":
@@ -110,7 +111,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
-
-
-def TitlesSerializer():
-    return None

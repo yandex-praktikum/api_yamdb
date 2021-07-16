@@ -25,24 +25,11 @@ class CreateViewSet(
     pass
 
 
-class RetrieveUpdateViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet):
-    pass
-
-
 class CreateListViewSet(mixins.CreateModelMixin,
                         mixins.ListModelMixin,
                         mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
     pass
-
-
-class MeViewSet(RetrieveUpdateViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAdminOrReadOnly,)
 
 
 class UserViewSet(viewsets.ModelViewSet):

@@ -4,13 +4,14 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     UserViewSet, EmailViewSet, CategoriesViewSet,
     GenresViewSet, TitlesViewSet, ReviewViewSet,
-    TokenObtainPairView, CommentViewSet
+    TokenObtainPairView, CommentViewSet, MeViewSet
 )
 
 router = DefaultRouter()
 router.register('auth/email', EmailViewSet, basename='email_post')
 
 router.register('users', UserViewSet, basename='users')
+# router.register('users/me', MeViewSet, basename='me')
 router.register('auth/email', EmailViewSet, basename='email')
 router.register('categories', CategoriesViewSet, basename='category')
 router.register('genres', GenresViewSet, basename='genre')

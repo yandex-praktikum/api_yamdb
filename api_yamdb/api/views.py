@@ -1,20 +1,19 @@
 from random import randint
-from django.shortcuts import get_object_or_404 
-from django.core.mail import send_mail
 
-from rest_framework import viewsets, mixins, filters, status
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, mixins, filters
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
 from rest_framework_simplejwt.views import TokenViewBase
-from rest_framework.response import Response 
 
 from .models import User, Categories, Genres, Titles, Review
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAdminOrDenied
 from .serializers import (
     UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer,
     TitlesSerializer, ReviewSerializer, TokenObtainPairSerializer,
-    CommentSerializer
+    CommentSerializer, MeSerializer
 )
 
 
@@ -25,6 +24,13 @@ class CreateViewSet(
     pass
 
 
+class RetrieveUpdateViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet):
+    pass
+
+
 class CreateListViewSet(mixins.CreateModelMixin,
                         mixins.ListModelMixin,
                         mixins.DestroyModelMixin,
@@ -32,9 +38,20 @@ class CreateListViewSet(mixins.CreateModelMixin,
     pass
 
 
+class MeViewSet(RetrieveUpdateViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    lookup_field = 'username'
+    permission_classes = (IsAdminOrDenied,)
+    # pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+
 
 
 class EmailViewSet(CreateViewSet):
@@ -118,5 +135,3 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class TokenObtainPairView(TokenViewBase):
     serializer_class = TokenObtainPairSerializer
-
-# token_obtain_pair = TokenObtainPairView.as_view()

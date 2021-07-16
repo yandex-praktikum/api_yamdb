@@ -25,12 +25,27 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = (
-            'id', 'username', 'email', 'role', 'description',
-            'first_name', 'last_name'
-        )
+        fields = ('first_name', 'last_name', 'username', 'bio',
+                  'email', 'role'
+                  )
+        model = User
+
+    def get_fields(self, *args, **kwargs):
+        pk = self.kwargs.get('pk')
+        fields = super(UserSerializer, self).get_fields(*args, **kwargs)
+        request = self.context.get('request', None)
+        if request and getattr(request, 'method', None) == "POST":
+            fields['email'].required = True
+        if pk == "me":
+            return self.request.user
+        return fields
+
+
+class MeSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('id', 'first_name', 'last_name', 'username', 'bio', 'email', 'role',)
         read_only_fields = (
-            'id', 'role', 'description', 'first_name', 'last_name'
+           # 'id', 'first_name', 'last_name', 'username', 'bio', 'email', 'role',
         )
         model = User
 

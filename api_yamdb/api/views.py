@@ -1,6 +1,11 @@
+
+from requests import Response
+from collections import OrderedDict
+from django_filters.rest_framework import DjangoFilterBackend
 from random import randint
 # from django.shortcuts import get_object_or_404 
 from django.core.mail import send_mail
+
 
 from rest_framework import viewsets, mixins, filters, status
 from rest_framework.generics import get_object_or_404
@@ -13,8 +18,9 @@ from .models import User, Categories, Genres, Titles, Review
 from .permissions import IsAdminOrReadOnly
 from .serializers import (
     UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer,
-    TitlesSerializer, ReviewSerializer, TokenObtainPairSerializer,
-    CommentSerializer, TitlesSerializerWithRating
+    ReviewSerializer, TokenObtainPairSerializer, CommentSerializer,
+    TitlesSerializerWithRating, TitlesPostSerializer, TitlesGetSerializer,
+    ReviewSerializer, TokenObtainPairSerializer, CommentSerializer
 )
 
 
@@ -26,6 +32,7 @@ class CreateViewSet(
 
 
 class CreateListViewSet(mixins.CreateModelMixin,
+                        mixins.DestroyModelMixin,
                         mixins.ListModelMixin,
                         mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
@@ -73,14 +80,15 @@ class GenresViewSet(CreateListViewSet):
     lookup_field = 'slug'
 
 
-class TitlesViewSet(CreateListViewSet):
+class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     pagination_class = PageNumberPagination
+    permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return TitlesSerializerWithRating
-        return TitlesSerializer
+        if self.action == 'list' or self.action == 'retrieve':
+            return TitlesGetSerializer
+        return TitlesPostSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

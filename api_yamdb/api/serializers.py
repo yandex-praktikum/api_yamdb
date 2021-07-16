@@ -5,6 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User, Genres, Titles, Categories, Review, Comment
 
 
+
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True
@@ -53,7 +54,8 @@ class CategoriesSerializer(serializers.ModelSerializer):
         model = Categories
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitlesPostSerializer(serializers.ModelSerializer):
+
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
@@ -63,8 +65,16 @@ class TitlesSerializer(serializers.ModelSerializer):
         queryset=Categories.objects.all())
 
     class Meta:
-        fields = '__all__'
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles
+        
+class TitlesGetSerializer(serializers.ModelSerializer):
+    genre = CategoriesSerializer(many=True)
+    category = CategoriesSerializer(read_only=True)
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        model = Titles                                
 
 
 class TitlesSerializerWithRating(serializers.ModelSerializer):

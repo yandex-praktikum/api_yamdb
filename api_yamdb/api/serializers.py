@@ -52,7 +52,7 @@ class CategoriesSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
         model = Categories
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitlesPostSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
@@ -60,6 +60,18 @@ class TitlesSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Categories.objects.all())
+
     class Meta:
-        fields = '__all__'
-        model = Titles                        
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        model = Titles
+
+class TitlesGetSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        many=True,
+        slug_field='slug',
+        queryset=Genres.objects.all())
+    category = CategoriesSerializer(read_only=True)
+
+    class Meta:
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        model = Titles                                

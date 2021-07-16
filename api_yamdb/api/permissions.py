@@ -1,7 +1,9 @@
-from rest_framework.permissions import IsAdminUser, SAFE_METHODS
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-class IsAdminOrReadOnly(IsAdminUser):
 
+class IsAdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
-        is_admin = super().has_permission(request, view)
-        return request.method in SAFE_METHODS or is_admin
+        if request.method in SAFE_METHODS:
+            return True
+        else:
+            return request.user.is_superuser

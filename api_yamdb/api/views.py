@@ -11,7 +11,7 @@ from rest_framework.permissions import (
     )
 
 from .models import User, Categories, Genres, Titles
-from .serializers import UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer, TitlesSerializer, ReviewSerializer
+from .serializers import UserSerializer, EmailSerializer, CategoriesSerializer, TitlesPostSerializer, TitlesGetSerializer, GenresSerializer, ReviewSerializer
 
 from django.shortcuts import get_object_or_404
 
@@ -28,6 +28,7 @@ class CreateViewSet(
     pass
 
 class CreateListViewSet(mixins.CreateModelMixin,
+                        mixins.DestroyModelMixin,
                         mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     pass
@@ -66,10 +67,14 @@ class GenresViewSet(CreateListViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
-class TitlesViewSet(CreateListViewSet):
+class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer     
-    
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_serializer_class(self):
+        if self.action == 'list' or 'retrieve':
+            return TitlesGetSerializer 
+        return TitlesPostSerializer
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer

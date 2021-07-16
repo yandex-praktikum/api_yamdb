@@ -5,6 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from random import randint
 # from django.shortcuts import get_object_or_404 
 from django.core.mail import send_mail
+from django.db.models import Avg
 
 
 from rest_framework import viewsets, mixins, filters, status
@@ -19,8 +20,8 @@ from .permissions import IsAdminOrReadOnly
 from .serializers import (
     UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer,
     ReviewSerializer, TokenObtainPairSerializer, CommentSerializer,
-    TitlesSerializerWithRating, TitlesPostSerializer, TitlesGetSerializer,
-    ReviewSerializer, TokenObtainPairSerializer, CommentSerializer
+    TitlesPostSerializer, TitlesGetSerializer, ReviewSerializer,
+    TokenObtainPairSerializer, CommentSerializer
 )
 
 
@@ -32,7 +33,6 @@ class CreateViewSet(
 
 
 class CreateListViewSet(mixins.CreateModelMixin,
-                        mixins.DestroyModelMixin,
                         mixins.ListModelMixin,
                         mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
@@ -81,7 +81,7 @@ class GenresViewSet(CreateListViewSet):
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
+    queryset = Titles.objects.annotate(rating=Avg('reviews__score'))
     pagination_class = PageNumberPagination
     permission_classes = (IsAdminOrReadOnly,)
 

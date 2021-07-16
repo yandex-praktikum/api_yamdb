@@ -1,24 +1,26 @@
+
 from requests import Response
 from collections import OrderedDict
-from rest_framework import viewsets, status, mixins, permissions, filters
-from .permissions import IsAdminOrReadOnly
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly
-    )
+from random import randint
+from django.shortcuts import get_object_or_404 
+from django.core.mail import send_mail
 
-from .models import User, Categories, Genres, Titles
-from .serializers import UserSerializer, EmailSerializer, CategoriesSerializer, TitlesPostSerializer, TitlesGetSerializer, GenresSerializer, ReviewSerializer
 
-from django.shortcuts import get_object_or_404
-
+from rest_framework import viewsets, mixins, filters, status
+from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
+from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework.response import Response 
 
-from requests import Response
+from .models import User, Categories, Genres, Titles, Review
+from .permissions import IsAdminOrReadOnly
+from .serializers import (
+    UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer,
+    TitlesPostSerializer, TitlesGetSerializer, ReviewSerializer, TokenObtainPairSerializer,
+    CommentSerializer
+)
 
 
 class CreateViewSet(
@@ -27,11 +29,14 @@ class CreateViewSet(
 ):
     pass
 
+
 class CreateListViewSet(mixins.CreateModelMixin,
                         mixins.DestroyModelMixin,
                         mixins.ListModelMixin,
+                        mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
     pass
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -42,21 +47,27 @@ class EmailViewSet(CreateViewSet):
     queryset = User.objects.all()
     serializer_class = EmailSerializer
 
-    def post(self, request):
-        serializer = EmailSerializer
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        confirmation_code = randint(100000, 999999)
+        serializer.save(confirmation_code=confirmation_code)
+        send_mail(
+            'Your confirmation code YaMDb',
+            f'Confirmation code:{confirmation_code}',
+            'django.test1.mail@gmail.com',
+            [serializer.data['email'], ],
+        )
+
 
 class CategoriesViewSet(CreateListViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
+    permission_classes = (IsAdminOrReadOnly,)
+
     search_fields = ('name',)
     lookup_field = 'slug'
+
 
 class GenresViewSet(CreateListViewSet):
     queryset = Genres.objects.all()
@@ -76,17 +87,45 @@ class TitlesViewSet(viewsets.ModelViewSet):
             return TitlesGetSerializer 
         return TitlesPostSerializer
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
-        
-    
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    pagination_class = PageNumberPagination
+
+    def get_review_id(self):
+        return self.kwargs.get('review_id')
+
+    def get_title_id(self):
+        return self.kwargs.get('title_id')
+
+    def get_queryset(self):
+        review = get_object_or_404(
+            Review, pk=self.get_review_id(), title__id=self.get_title_id()
+        )
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(
+            Review, pk=self.get_review_id(), title__id=self.get_title_id()
+        )
+        serializer.save(author=self.request.user, review=review)
+
+
+class TokenObtainPairView(TokenViewBase):
+    serializer_class = TokenObtainPairSerializer
+
+# token_obtain_pair = TokenObtainPairView.as_view()

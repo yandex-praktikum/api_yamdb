@@ -10,3 +10,7 @@ pytest
 pytest-pythonpath==0.7.3
 pytest-django
 djangorestframework
+djangorestframework-simplejwt
+djoser
+django-filter
+python-dotenv

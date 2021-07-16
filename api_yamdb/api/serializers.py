@@ -1,7 +1,8 @@
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
+from rest_framework_simplejwt.tokens import RefreshToken
 
-
-from .models import User, Genres, Titles, Categories, Review
+from .models import User, Genres, Titles, Categories, Review, Comment
 
 
 
@@ -18,7 +19,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         title = self.context['view'].kwargs.get('title_id')
         if (self.context['request'].method == 'POST'
-           and Review.objects.filter(author=user, title=title).exists()):
+                and Review.objects.filter(author=user, title=title).exists()):
             raise serializers.ValidationError('Ваш отзыв уже был опубликован')
         return data
 
@@ -40,19 +41,21 @@ class EmailSerializer(serializers.ModelSerializer):
         fields = ('email',)
         model = User
 
-class GenresSerializer(serializers.ModelSerializer):
 
+class GenresSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Genres
 
-class CategoriesSerializer(serializers.ModelSerializer):
 
+class CategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
         model = Categories
 
+
 class TitlesPostSerializer(serializers.ModelSerializer):
+
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
@@ -64,7 +67,7 @@ class TitlesPostSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles
-
+        
 class TitlesGetSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         many=True,
@@ -75,3 +78,31 @@ class TitlesGetSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles                                
+
+
+class TokenObtainPairSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('email', 'confirmation_code')
+        model = User
+
+    @classmethod
+    def get_token(cls, user):
+        return RefreshToken.for_user(user)
+
+    def validate(self, attrs):
+        user = get_object_or_404(User, email=attrs['email'])
+        refresh = self.get_token(user)
+        data = {'token': str(refresh.access_token)}
+        if user.confirmation_code != attrs['confirmation_code']:
+            return "Confirmation code is not correct"
+        return data
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'pub_date')
+        model = Comment

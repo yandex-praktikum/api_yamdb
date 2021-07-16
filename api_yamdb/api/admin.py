@@ -17,8 +17,7 @@ class CategoriesAdmin(admin.ModelAdmin):
 
 
 class TitlesAdmin(admin.ModelAdmin):
-    list_display = ("pk", "name", "year",
-                    "description", "genre", "category")
+    list_display = ("pk", "name", "year")
     search_fields = ("name",)
     empty_value_display = "-пусто-"
 

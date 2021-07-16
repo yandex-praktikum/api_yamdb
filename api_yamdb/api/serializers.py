@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -33,12 +32,6 @@ class UserSerializer(serializers.ModelSerializer):
         lookup_field = 'username'
         extra_kwargs = {'email': {'required': True}}
 
-        # def get_fields(self, *args, **kwargs):
-    #     fields = super(UserSerializer, self).get_fields(*args, **kwargs)
-    #     request = self.context.get('request', None)
-    #     if request and getattr(request, 'method', None) == "POST":
-    #         fields['email'].required = True
-
 
 class EmailSerializer(serializers.ModelSerializer):
     class Meta:
@@ -59,7 +52,6 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class TitlesPostSerializer(serializers.ModelSerializer):
-
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',

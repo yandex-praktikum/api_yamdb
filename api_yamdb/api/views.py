@@ -13,12 +13,17 @@ from rest_framework_simplejwt.views import TokenViewBase
 
 from .filters import ModelFilter
 from .models import Categories, Genres, Review, Titles, User
-from .permissions import (IsAdminOrDenied, IsAdminOrModeratororAuthor,
-                          IsAdminOrReadOnly)
-from .serializers import (CategoriesSerializer, CommentSerializer,
-                          EmailSerializer, GenresSerializer, ReviewSerializer,
-                          TitlesGetSerializer, TitlesPostSerializer,
-                          TokenObtainPairSerializer, UserSerializer)
+from .permissions import (
+    IsAdminOrMeEndpointOrDenied,
+    IsAdminOrModeratororAuthor,
+    IsAdminOrReadOnly
+)
+from .serializers import (
+    CategoriesSerializer, CommentSerializer,
+    EmailSerializer, GenresSerializer, ReviewSerializer,
+    TitlesGetSerializer, TitlesPostSerializer,
+    TokenObtainPairSerializer, UserSerializer
+)
 
 
 class CreateViewSet(
@@ -39,8 +44,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
-    permission_classes = (IsAdminOrDenied,)
-    # pagination_class = PageNumberPagination
+    permission_classes = (IsAdminOrMeEndpointOrDenied,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 

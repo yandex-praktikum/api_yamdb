@@ -1,8 +1,10 @@
 from random import randint
-
+from django.shortcuts import get_object_or_404 
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, mixins, filters
+from django.db.models import Avg
+
+
+from rest_framework import viewsets, mixins, filters, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (IsAuthenticatedOrReadOnly)
@@ -14,6 +16,9 @@ from .serializers import (
     UserSerializer, EmailSerializer, CategoriesSerializer, GenresSerializer,
     TitlesSerializer, ReviewSerializer, TokenObtainPairSerializer,
     CommentSerializer, MeSerializer
+    ReviewSerializer, TokenObtainPairSerializer, CommentSerializer,
+    TitlesPostSerializer, TitlesGetSerializer, ReviewSerializer,
+    TokenObtainPairSerializer, CommentSerializer
 )
 
 
@@ -90,10 +95,15 @@ class GenresViewSet(CreateListViewSet):
     lookup_field = 'slug'
 
 
-class TitlesViewSet(CreateListViewSet):
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+class TitlesViewSet(viewsets.ModelViewSet):
+    queryset = Titles.objects.annotate(rating=Avg('reviews__score'))
     pagination_class = PageNumberPagination
+    permission_classes = (IsAdminOrReadOnly,)
+
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return TitlesGetSerializer
+        return TitlesPostSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -135,3 +145,5 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class TokenObtainPairView(TokenViewBase):
     serializer_class = TokenObtainPairSerializer
+
+# token_obtain_pair = TokenObtainPairView.as_view()

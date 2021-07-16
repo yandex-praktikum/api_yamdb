@@ -43,7 +43,7 @@ class Categories(models.Model):
 
 class Titles(models.Model):
     name = models.CharField('Название', max_length=200)
-    year = models.CharField('Год выпуска', max_length=200)
+    year = models.IntegerField('Год выпуска')
     description = models.TextField('Описание')
     genre = models.ManyToManyField(Genres, related_name='titles', blank=True,
                                    verbose_name='Жанр')

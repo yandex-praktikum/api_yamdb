@@ -5,7 +5,7 @@ from django.urls import include, path
 from .views import SendConfirmCodeView, TokenReceiveView, UserViewSet
 
 router_v1 = DefaultRouter()
-router_v1.register('user', UserViewSet, basename='user')
+router_v1.register('users', UserViewSet, basename='user')
 
 urlpatterns = [
     path('v1/auth/token/', TokenReceiveView.as_view(),

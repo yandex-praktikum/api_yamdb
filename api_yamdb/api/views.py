@@ -83,5 +83,5 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
-    pagination_class = PageNumberPagination
+    pagination_class = ()
     filterset_class = UserFilter

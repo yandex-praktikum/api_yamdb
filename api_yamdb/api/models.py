@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.db.models import (CharField, CheckConstraint, EmailField, F, Q,
+from django.db import models
+from django.db.models import (CharField, CheckConstraint, EmailField, Q,
                               TextField)
-from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from .managers import APIUserManager
@@ -101,67 +101,55 @@ class Comments(models.Model):
 
 
 class Categories(models.Model):
-    name = models.CharField('Название', max_length=200)
-    slug = models.SlugField('Category_Slug', unique=True)
+    name = models.CharField(verbose_name='Название', max_length=200)
+    slug = models.SlugField(verbose_name='URL', unique=True)
 
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Все категории'
+        ordering = ('name',)
 
     def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
-        super(Genres, self).save(*args, **kwargs)
-
+        return f'{self.name}: {self.slug}'
 
 class Genres(models.Model):
-    name = models.CharField('Название', max_length=200)
-    slug = models.SlugField('Genre_Slug', unique=True)
+    name = models.CharField(verbose_name='Название', max_length=200)
+    slug = models.SlugField(verbose_name='URL', unique=True)
 
     class Meta:
         verbose_name = 'Жанр'
-        verbose_name_plural = 'Все жанры'
+        verbose_name_plural = 'Жанры'
+        ordering = ('name',)
 
     def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
-        super(Genres, self).save(*args, **kwargs)
+        return f'{self.name}: {self.slug}'
 
 
 class Titles(models.Model):
-    name = models.CharField('Название', max_length=200)
+    name = models.CharField(verbose_name='Название', max_length=200)
     year = models.PositiveSmallIntegerField(
-        'Год создания',
-        blank=True,
-        null=True
+        verbose_name='Год создания',
+        blank=True, null=True
     )
     description = models.TextField(
-        'Описание',
-        blank=True,
-        null=True
+        verbose_name='Описание',
+        blank=True, null=True
     )
-    # Сделать ссылку на Жанры throw доп модель Произведение-Жанры аля following
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genres,
-        on_delete=models.SET_NULL,
-        blank=True, null=True,
-        verbose_name='Жанры',
-        related_name='genres'
+        verbose_name='Жанр',
+        blank=True, null=True
     )
     category = models.ForeignKey(
         Categories,
         on_delete=models.SET_NULL,
         blank=True, null=True,
         verbose_name='Категория',
-        related_name='category'
+        related_name='titles'
     )
 
     class Meta:
-        verbose_name = 'Произведения'
+        verbose_name = 'Произведение'
         verbose_name_plural = 'Все произведения'
 
     def __str__(self):

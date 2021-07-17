@@ -1,6 +1,8 @@
+from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models import (CharField, CheckConstraint, EmailField, F, Q,
                               TextField)
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from .managers import APIUserManager
@@ -33,8 +35,6 @@ class User(AbstractUser):
 
     objects = APIUserManager()
 
-    USERNAME_FIELD = 'id'
-
     class Meta(AbstractUser.Meta):
         constraints = (
             CheckConstraint(
@@ -45,3 +45,124 @@ class User(AbstractUser):
 
     def __str__(self):
         return str(self.pk)
+
+
+class Reviews(models.Model):
+    CHOOSE_RATING = (
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 5),
+        (6, 6),
+        (7, 7),
+        (8, 8),
+        (9, 9),
+        (10, 10),
+    )
+
+    author = models.ForeignKey('User', on_delete=models.CASCADE,
+                               related_name='reviews',
+                               verbose_name='Автор отзыва')
+    title = models.ForeignKey('Titles', on_delete=models.CASCADE,
+                              related_name='reviews',
+                              verbose_name='Произведение')
+    text = models.TextField(verbose_name='Отзыв')
+    pub_date = models.DateTimeField(verbose_name='Дата публикации отзыва',
+                                    auto_now_add=True)
+    score = models.PositiveSmallIntegerField(choices=CHOOSE_RATING)
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.text[:15]
+
+
+class Comments(models.Model):
+    author = models.ForeignKey('User', on_delete=models.CASCADE,
+                               verbose_name='Автор комментария')
+    review = models.ForeignKey(Reviews, on_delete=models.CASCADE,
+                               related_name='comments',
+                               verbose_name='Отзыв')
+    text = models.TextField(verbose_name='Текст комментария')
+    pub_date = models.DateTimeField(verbose_name='Дата добавления комментария',
+                                    auto_now_add=True, )
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.text[:15]
+
+
+class Categories(models.Model):
+    name = models.CharField('Название', max_length=200)
+    slug = models.SlugField('Category_Slug', unique=True)
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Все категории'
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Genres, self).save(*args, **kwargs)
+
+
+class Genres(models.Model):
+    name = models.CharField('Название', max_length=200)
+    slug = models.SlugField('Genre_Slug', unique=True)
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Все жанры'
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Genres, self).save(*args, **kwargs)
+
+
+class Titles(models.Model):
+    name = models.CharField('Название', max_length=200)
+    year = models.PositiveSmallIntegerField(
+        'Год создания',
+        blank=True,
+        null=True
+    )
+    description = models.TextField(
+        'Описание',
+        blank=True,
+        null=True
+    )
+    # Сделать ссылку на Жанры throw доп модель Произведение-Жанры аля following
+    genre = models.ForeignKey(
+        Genres,
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        verbose_name='Жанры',
+        related_name='genres'
+    )
+    category = models.ForeignKey(
+        Categories,
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        verbose_name='Категория',
+        related_name='category'
+    )
+
+    class Meta:
+        verbose_name = 'Произведения'
+        verbose_name_plural = 'Все произведения'
+
+    def __str__(self):
+        return self.name

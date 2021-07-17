@@ -2,7 +2,6 @@ import datetime as dt
 
 import jwt
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,8 +20,6 @@ from .serializers import (
     CategoriesSerializer, GenresSerializer, TitlesSerializer
 )
 from .throttling import NonEmployeeScopedRateThrottle, NonEmployeeRateThrottle
-
-
 
 MAIL_SUBJECT = 'Код подтверждения'
 
@@ -87,41 +84,32 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
-    pagination_class = ()
     filterset_class = UserFilter
 
 
-class CreateListDestroyViewSet(
-    mixins.CreateModelMixin, mixins.ListModelMixin,
-    mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    pass
+class CreateListDestroyViewSet(mixins.CreateModelMixin,
+                               mixins.ListModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet):
+    permission_classes = (IsAdmin | IsReadOnly)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class CategoriesViewSet(CreateListDestroyViewSet):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
-    pagination_class = PageNumberPagination
-    permission_classes = (IsAdmin, IsReadOnly)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class GenresViewSet(CreateListDestroyViewSet):
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
-    pagination_class = PageNumberPagination
-    permission_classes = (IsAdmin, IsReadOnly)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
-    pagination_class = PageNumberPagination
-    permission_classes = (IsAdmin, IsReadOnly)
+    permission_classes = (IsAdmin | IsReadOnly)
     #ToDo Написать фильтр
     #ToDo Написать отдельные поля

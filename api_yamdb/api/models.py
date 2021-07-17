@@ -1,4 +1,3 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import (CharField, CheckConstraint, EmailField, Q,
@@ -106,11 +105,12 @@ class Categories(models.Model):
 
     class Meta:
         verbose_name = 'Категория'
-        verbose_name_plural = 'Все категории'
+        verbose_name_plural = 'Категории'
         ordering = ('name',)
 
     def __str__(self):
         return f'{self.name}: {self.slug}'
+
 
 class Genres(models.Model):
     name = models.CharField(verbose_name='Название', max_length=200)
@@ -138,7 +138,8 @@ class Titles(models.Model):
     genre = models.ManyToManyField(
         Genres,
         verbose_name='Жанр',
-        blank=True, null=True
+        blank=True,
+        related_name='titles'
     )
     category = models.ForeignKey(
         Categories,
@@ -150,7 +151,7 @@ class Titles(models.Model):
 
     class Meta:
         verbose_name = 'Произведение'
-        verbose_name_plural = 'Все произведения'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
         return self.name

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models import (CharField, CheckConstraint, EmailField, F, Q,
                               TextField)
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from .managers import APIUserManager
@@ -33,8 +34,6 @@ class User(AbstractUser):
     bio = TextField('Биография', blank=True)
 
     objects = APIUserManager()
-
-    USERNAME_FIELD = 'id'
 
     class Meta(AbstractUser.Meta):
         constraints = (
@@ -99,3 +98,71 @@ class Comments(models.Model):
 
     def __str__(self):
         return self.text[:15]
+
+
+class Categories(models.Model):
+    name = models.CharField('Название', max_length=200)
+    slug = models.SlugField('Category_Slug', unique=True)
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Все категории'
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Genres, self).save(*args, **kwargs)
+
+
+class Genres(models.Model):
+    name = models.CharField('Название', max_length=200)
+    slug = models.SlugField('Genre_Slug', unique=True)
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Все жанры'
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Genres, self).save(*args, **kwargs)
+
+
+class Titles(models.Model):
+    name = models.CharField('Название', max_length=200)
+    year = models.PositiveSmallIntegerField(
+        'Год создания',
+        blank=True,
+        null=True
+    )
+    description = models.TextField(
+        'Описание',
+        blank=True,
+        null=True
+    )
+    # Сделать ссылку на Жанры throw доп модель Произведение-Жанры аля following
+    genre = models.ForeignKey(
+        Genres,
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        verbose_name='Жанры',
+        related_name='genres'
+    )
+    category = models.ForeignKey(
+        Categories,
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        verbose_name='Категория',
+        related_name='category'
+    )
+
+    class Meta:
+        verbose_name = 'Произведения'
+        verbose_name_plural = 'Все произведения'
+
+    def __str__(self):
+        return self.name

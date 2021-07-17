@@ -105,7 +105,9 @@ REST_FRAMEWORK = {
         'email-non-employee': '2/m',
         # 'anon': '100/minute',
     },
-    'PAGE_SIZE': 2
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 SIMPLE_JWT = {

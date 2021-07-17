@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from django.conf import settings
 
-from .models import User
+from .models import Categories, Genres, Titles, User
 
 
 def check_rights_to_change_role(serializer, changing_role):
@@ -66,3 +66,23 @@ class UserSerializer(serializers.ModelSerializer):
         if data.get('role') == 'admin':
             data['is_staff'] = True
         return data
+
+
+class CategoriesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Categories
+        fields = ('name', 'slug')
+
+
+class GenresSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Genres
+        fields = ('name', 'slug')
+
+
+class TitlesSerializer(serializers.ModelSerializer):
+
+    model = Titles
+    fields = ('name', 'year', 'description', 'genre', 'category')

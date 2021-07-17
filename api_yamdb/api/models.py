@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models import (CharField, CheckConstraint, EmailField, F, Q,
+from django.db import models
+from django.db.models import (CharField, CheckConstraint, EmailField, Q,
                               TextField)
 from django.utils.translation import gettext_lazy as _
 
@@ -45,3 +46,60 @@ class User(AbstractUser):
 
     def __str__(self):
         return str(self.pk)
+
+
+class Categories(models.Model):
+    name = models.CharField(verbose_name='Название', max_length=200)
+    slug = models.SlugField(verbose_name='URL', unique=True)
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Все категории'
+        ordering = ('name',)
+
+    def __str__(self):
+        return f'{self.name}: {self.slug}'
+
+
+class Genres(models.Model):
+    name = models.CharField(verbose_name='Название', max_length=200)
+    slug = models.SlugField(verbose_name='URL', unique=True)
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+        ordering = ('name',)
+
+    def __str__(self):
+        return f'{self.name}: {self.slug}'
+
+
+class Titles(models.Model):
+    name = models.CharField(verbose_name='Название', max_length=200)
+    year = models.PositiveSmallIntegerField(
+        verbose_name='Год создания',
+        blank=True, null=True
+    )
+    description = models.TextField(
+        verbose_name='Описание',
+        blank=True, null=True
+    )
+    genre = models.ManyToManyField(
+        Genres,
+        verbose_name='Жанр',
+        blank=True, null=True
+    )
+    category = models.ForeignKey(
+        Categories,
+        on_delete=models.SET_NULL,
+        blank=True, null=True,
+        verbose_name='Категория',
+        related_name='titles'
+    )
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Все произведения'
+
+    def __str__(self):
+        return self.name

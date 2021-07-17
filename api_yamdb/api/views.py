@@ -1,7 +1,7 @@
 import datetime as dt
 
 import jwt
-from rest_framework import status
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -13,11 +13,15 @@ from django.conf import settings
 from django.core.mail import send_mail
 
 from .filters import UserFilter
-from .models import User
+from .models import Categories, Genres, Titles, User
 from .permissions import IsAdmin, IsAuthor, IsModerator, IsReadOnly
 from .serializers import (SendConfirmCodeSerializer, TokenReceiveSerializer,
                           UserSerializer)
+from .serializers import (
+    CategoriesSerializer, GenresSerializer, TitlesSerializer
+)
 from .throttling import NonEmployeeScopedRateThrottle, NonEmployeeRateThrottle
+
 
 
 MAIL_SUBJECT = 'Код подтверждения'
@@ -85,3 +89,39 @@ class UserViewSet(ModelViewSet):
     permission_classes = (IsAdmin,)
     pagination_class = PageNumberPagination
     filterset_class = UserFilter
+
+
+class CreateListDestroyViewSet(
+    mixins.CreateModelMixin, mixins.ListModelMixin,
+    mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    pass
+
+
+class CategoriesViewSet(CreateListDestroyViewSet):
+    queryset = Categories.objects.all()
+    serializer_class = CategoriesSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (IsAdmin, IsReadOnly)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class GenresViewSet(CreateListDestroyViewSet):
+    queryset = Genres.objects.all()
+    serializer_class = GenresSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (IsAdmin, IsReadOnly)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class TitlesViewSet(viewsets.ModelViewSet):
+    queryset = Titles.objects.all()
+    serializer_class = TitlesSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (IsAdmin, IsReadOnly)
+    #ToDo Написать фильтр
+    #ToDo Написать отдельные поля

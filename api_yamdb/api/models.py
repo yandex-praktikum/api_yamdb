@@ -2,19 +2,48 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+USER_ROLE = 'user'
+MODERATOR_ROLE = 'moderator'
+ADMIN_ROLE = 'admin'
+
 
 class User(AbstractUser):
+    is_user = False
+    is_moderator = False
+    is_admin = False
+
     ROLE_CHOICES = (
-        ('user', 'User'),
-        ('moderator', 'Moderator'),
-        ('admin', 'Admin')
+        (USER_ROLE, 'User'),
+        (MODERATOR_ROLE, 'Moderator'),
+        (ADMIN_ROLE, 'Admin')
     )
     role = models.CharField(
-        max_length=20, choices=ROLE_CHOICES, default='user'
+        max_length=20, choices=ROLE_CHOICES, default=USER_ROLE
     )
-    bio = models.TextField(max_length=500, blank=True)
+    bio = models.TextField(blank=True)
     confirmation_code = models.IntegerField(default=0)
-    email = models.EmailField(_('email address'), blank=True, unique=True)
+    email = models.EmailField(_('email address'), unique=True)
+
+    class Meta:
+        ordering = ['-username']
+
+    def __str__(self):
+        return self.username
+
+    @property
+    def is_user(self):
+        if self.role == USER_ROLE:
+            return True
+
+    @property
+    def is_moderator(self):
+        if self.role == MODERATOR_ROLE:
+            return True
+
+    @property
+    def is_admin(self):
+        if self.role == ADMIN_ROLE:
+            return True
 
 
 class Genres(models.Model):

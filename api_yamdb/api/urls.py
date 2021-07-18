@@ -2,8 +2,9 @@ from rest_framework.routers import DefaultRouter
 
 from django.urls import include, path
 
-from .views import (CategoriesViewSet, GenresViewSet, TitlesViewSet,
-                    SendConfirmCodeView, TokenReceiveView, UserViewSet)
+from .views import (CategoriesViewSet, GenresViewSet, SendConfirmCodeView,
+                    TitlesViewSet, TokenReceiveView, UserViewSet,
+                    UserMeViewSet)
 
 router_v1 = DefaultRouter()
 router_v1.register('users', UserViewSet, basename='user')
@@ -16,5 +17,8 @@ urlpatterns = [
          name='token_receive_view'),
     path('v1/auth/email/', SendConfirmCodeView.as_view(),
          name='send_confirm_code_view'),
+    path('v1/users/me/', UserMeViewSet.as_view({'get': 'retrieve',
+                                                'patch': 'partial_update'}),
+         name='user_me_view_set'),
     path('v1/', include(router_v1.urls)),
 ]

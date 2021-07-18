@@ -5,15 +5,14 @@ from rest_framework import filters, mixins, status, viewsets
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
 
+from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.core.mail import send_mail
 
-from .filters import UserFilter
 from .models import Categories, Genres, Titles, User
-from .permissions import IsAdmin, IsAuthor, IsModerator, IsReadOnly
+from .permissions import IsAdmin, IsAuthor, IsHasUsername, IsModerator, IsReadOnly
 from .serializers import (SendConfirmCodeSerializer, TokenReceiveSerializer,
                           UserSerializer)
 from .serializers import (
@@ -32,7 +31,7 @@ class SendConfirmCodeView(APIView):
     def create_jwt(self, email):
         """
         Create and sign a confirmation_code like a JSON Web Token.
-        Payload is a user_id and an expiration time.
+        Payload is an email and an expiration time.
         """
         secret_key = settings.SECRET_KEY
         expire = dt.datetime.utcnow() + settings.EMAIL_EXPIRATION_TIME
@@ -80,19 +79,29 @@ class TokenReceiveView(APIView):
         return Response({'token': access}, status=status.HTTP_200_OK)
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.exclude(username__isnull=True)
+    serializer_class = UserSerializer
+    search_fields = ('username',)
+    lookup_field = 'username'
+
+
+class UserMeViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAdmin,)
-    filterset_class = UserFilter
+    permission_classes = (IsAuthor | IsHasUsername | IsReadOnly,)
+    http_method_names = ('get', 'patch')
+
+    def get_object(self):
+        user = get_object_or_404(User, pk=self.request.user.id)
+        return user
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,
                                mixins.ListModelMixin,
                                mixins.DestroyModelMixin,
                                viewsets.GenericViewSet):
-    permission_classes = (IsAdmin | IsReadOnly)
-    filter_backends = (filters.SearchFilter,)
+    permission_classes = (IsAdmin | IsHasUsername | IsReadOnly,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
@@ -110,6 +119,6 @@ class GenresViewSet(CreateListDestroyViewSet):
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
-    permission_classes = (IsAdmin | IsReadOnly)
+    permission_classes = (IsAdmin | IsHasUsername | IsReadOnly,)
     #ToDo Написать фильтр
     #ToDo Написать отдельные поля

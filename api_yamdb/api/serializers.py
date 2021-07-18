@@ -1,9 +1,8 @@
 import jwt
+from django.conf import settings
 from rest_framework import serializers
 
-from django.conf import settings
-
-from .models import User, Reviews, Comments
+from .models import Categories, Comments, Genres, Reviews, Titles, User
 
 
 def check_rights_to_change_role(serializer, changing_role):
@@ -93,3 +92,21 @@ class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         models = Comments
+
+
+class CategoriesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Categories
+        fields = ('name', 'slug')
+
+
+class GenresSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genres
+        fields = ('name', 'slug')
+
+
+class TitlesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Titles
+        fields = ('name', 'year', 'description', 'genre', 'category')

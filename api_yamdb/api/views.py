@@ -1,8 +1,8 @@
 import datetime as dt
 
 import jwt
-from rest_framework import filters, mixins, status, viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework import mixins, serializers, status, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
@@ -12,21 +12,19 @@ from django.conf import settings
 from django.core.mail import send_mail
 
 from .models import Categories, Genres, Titles, User
-from .permissions import IsAdmin, IsAuthor, IsHasUsername, IsModerator, IsReadOnly
+from .permissions import (IsAdmin, IsAuthor, HasUsernameForPOST,
+                          IsModerator, IsSafeMethod)
 from .serializers import (SendConfirmCodeSerializer, TokenReceiveSerializer,
                           UserSerializer)
-from .serializers import (
-    CategoriesSerializer, GenresSerializer, TitlesSerializer
-)
-from .throttling import NonEmployeeScopedRateThrottle, NonEmployeeRateThrottle
+from .serializers import (CategoriesSerializer, GenresSerializer,
+                          TitlesSerializer)
 
 MAIL_SUBJECT = 'Код подтверждения'
 
 
 class SendConfirmCodeView(APIView):
     permission_classes = (AllowAny,)
-    throttle_classes = (NonEmployeeScopedRateThrottle,)
-    throttle_scope = 'email-non-employee'
+    throttle_scope = 'auth-non-employee'
 
     def create_jwt(self, email):
         """
@@ -42,10 +40,10 @@ class SendConfirmCodeView(APIView):
 
     def post(self, request):
         serializer = SendConfirmCodeSerializer(data=request.data)
+
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
             signed_code = self.create_jwt(email)
-
             send_mail(subject=MAIL_SUBJECT, from_email=None,
                       message=signed_code, recipient_list=(email,),
                       fail_silently=True)
@@ -58,8 +56,7 @@ class SendConfirmCodeView(APIView):
 
 class TokenReceiveView(APIView):
     permission_classes = (AllowAny,)
-    throttle_classes = (NonEmployeeScopedRateThrottle,)
-    throttle_scope = 'token-non-employee'
+    throttle_scope = 'auth-non-employee'
 
     def post(self, request):
         serializer = TokenReceiveSerializer(data=request.data)
@@ -89,7 +86,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class UserMeViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthor | IsHasUsername | IsReadOnly,)
+    permission_classes = (IsAuthenticated,)
     http_method_names = ('get', 'patch')
 
     def get_object(self):
@@ -101,7 +98,7 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
                                mixins.ListModelMixin,
                                mixins.DestroyModelMixin,
                                viewsets.GenericViewSet):
-    permission_classes = (IsAdmin | IsHasUsername | IsReadOnly,)
+    permission_classes = (IsAdmin | IsSafeMethod,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
@@ -119,6 +116,6 @@ class GenresViewSet(CreateListDestroyViewSet):
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
-    permission_classes = (IsAdmin | IsHasUsername | IsReadOnly,)
+    permission_classes = (IsAdmin | IsSafeMethod,)
     #ToDo Написать фильтр
     #ToDo Написать отдельные поля

@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -85,30 +86,22 @@ class Title(models.Model):
 
 
 class Review(models.Model):
-    RATING_LEVELS = (
-        (1, 1),
-        (2, 2),
-        (3, 3),
-        (4, 4),
-        (5, 5),
-        (6, 6),
-        (7, 7),
-        (8, 8),
-        (9, 9),
-        (10, 10)
-    )
-
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='reviews'
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации', auto_now_add=True
     )
-    text = models.TextField(verbose_name='Текст', max_length=5000)
+    text = models.TextField(verbose_name='Текст')
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE, related_name='reviews'
     )
-    score = models.IntegerField(verbose_name='Рейтинг', choices=RATING_LEVELS)
+    score = models.PositiveSmallIntegerField(
+        verbose_name='Рейтинг',
+        validators=[
+            MinValueValidator(1), MaxValueValidator(10)
+        ]
+    )
 
     class Meta:
         ordering = ['-pub_date']
@@ -116,7 +109,7 @@ class Review(models.Model):
         verbose_name_plural = 'Отзывы'
 
     def __str__(self):
-        return self.text
+        return self.text[:15]
 
 
 class Comment(models.Model):
@@ -129,7 +122,7 @@ class Comment(models.Model):
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments'
     )
-    text = models.TextField(verbose_name='Текст комментария', max_length=450)
+    text = models.TextField(verbose_name='Текст комментария')
 
     class Meta:
         ordering = ['-pub_date']
@@ -137,4 +130,4 @@ class Comment(models.Model):
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.text
+        return self.text[:15]

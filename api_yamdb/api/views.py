@@ -1,35 +1,34 @@
 import datetime as dt
 
 import jwt
-from django.conf import settings
-from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
-from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny
+from rest_framework import mixins, serializers, status, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
-from .models import Categories, Comments, Genres, Reviews, Titles, User
-from .permissions import (IsAdmin, IsAuthor, IsHasUsername, IsModerator,
-                          IsReadOnly)
-from .serializers import (CategoriesSerializer, CommentsSerializer,
-                          GenresSerializer, ReviewsSerializer,
-                          SendConfirmCodeSerializer, TitlesSerializer,
-                          TokenReceiveSerializer, UserSerializer)
-from .throttling import NonEmployeeRateThrottle, NonEmployeeScopedRateThrottle
+from django.shortcuts import get_object_or_404
+from django.conf import settings
+from django.core.mail import send_mail
+
+from .models import Categories, Genres, Titles, User, Reviews
+from .permissions import (IsAdmin, IsAuthor, HasUsernameForPOST,
+                          IsModerator, IsSafeMethod, )
+from .serializers import (SendConfirmCodeSerializer, TokenReceiveSerializer,
+                          UserSerializer, CommentsSerializer,
+                          ReviewsSerializer)
+from .serializers import (CategoriesSerializer, GenresSerializer,
+                          TitlesSerializer)
 
 MAIL_SUBJECT = 'Код подтверждения'
 
 
 class SendConfirmCodeView(APIView):
     permission_classes = (AllowAny,)
-    throttle_classes = (NonEmployeeScopedRateThrottle,)
-    throttle_scope = 'email-non-employee'
+    throttle_scope = 'auth-non-employee'
 
     def create_jwt(self, email):
         """
@@ -45,10 +44,10 @@ class SendConfirmCodeView(APIView):
 
     def post(self, request):
         serializer = SendConfirmCodeSerializer(data=request.data)
+
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
             signed_code = self.create_jwt(email)
-
             send_mail(subject=MAIL_SUBJECT, from_email=None,
                       message=signed_code, recipient_list=(email,),
                       fail_silently=True)
@@ -61,8 +60,7 @@ class SendConfirmCodeView(APIView):
 
 class TokenReceiveView(APIView):
     permission_classes = (AllowAny,)
-    throttle_classes = (NonEmployeeScopedRateThrottle,)
-    throttle_scope = 'token-non-employee'
+    throttle_scope = 'auth-non-employee'
 
     def post(self, request):
         serializer = TokenReceiveSerializer(data=request.data)
@@ -92,7 +90,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class UserMeViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsAuthor | IsHasUsername | IsReadOnly,)
+    permission_classes = (IsAuthenticated,)
     http_method_names = ('get', 'patch')
 
     def get_object(self):
@@ -100,7 +98,7 @@ class UserMeViewSet(viewsets.ModelViewSet):
         return user
 
 
-@permission_classes([IsAuthor, IsReadOnly])
+@permission_classes([IsAuthor, IsAuthenticated])
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
 
@@ -116,7 +114,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, title=title)
 
 
-@permission_classes([IsAdmin | IsReadOnly | IsModerator])
+@permission_classes([IsAdmin | IsAuthenticated | IsModerator])
 class CommentsViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
 
@@ -133,7 +131,7 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
                                mixins.ListModelMixin,
                                mixins.DestroyModelMixin,
                                viewsets.GenericViewSet):
-    permission_classes = (IsAdmin | IsHasUsername | IsReadOnly,)
+    permission_classes = (IsAdmin | IsSafeMethod,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
@@ -151,6 +149,6 @@ class GenresViewSet(CreateListDestroyViewSet):
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
-    permission_classes = (IsAdmin | IsHasUsername | IsReadOnly,)
+    permission_classes = (IsAdmin | IsSafeMethod,)
     # ToDo Написать фильтр
     # ToDo Написать отдельные поля

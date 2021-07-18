@@ -5,17 +5,6 @@ from rest_framework import serializers
 from .models import Categories, Comments, Genres, Reviews, Titles, User
 
 
-def check_rights_to_change_role(serializer, changing_role):
-    message = ('Вы не можете изменить роль на ту, которая дает больше прав, '
-               'чем вы сами имеете.')
-    changer = serializer.context['request'].user.role
-
-    if changer == 'moderator' and changing_role == 'admin':
-        raise serializers.ValidationError(message)
-    if changer == 'user' and changing_role in ('admin', 'moderator'):
-        raise serializers.ValidationError(message)
-
-
 class SendConfirmCodeSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -55,15 +44,34 @@ class UserSerializer(serializers.ModelSerializer):
                   'bio', 'email', 'role')
         extra_kwargs = {'username': {'required': True}}
 
-    def validate_role(self, value):
-        check_rights_to_change_role(self, value)
-        return value
+    def validate_role(self, role):
+        message = (
+            'Вы не можете изменить роль на ту, которая дает больше прав, '
+            'чем вы сами имеете.')
+
+        changer = self.context['request'].user.role
+
+        if changer == 'moderator' and role == 'admin':
+            raise serializers.ValidationError(message)
+        if changer == 'user' and role in ('admin', 'moderator'):
+            raise serializers.ValidationError(message)
+
+        return role
 
     def validate(self, data):
+        request = self.context['request']
+        is_username = data.get('username') or request.user.username
+
+        if request.method == 'PATCH' and not is_username:
+            raise serializers.ValidationError(
+                'Поле username обязательно для заполнения.'
+            )
+
         if data.get('role') in ('user', 'moderator'):
             data['is_staff'] = False
         if data.get('role') == 'admin':
             data['is_staff'] = True
+
         return data
 
 
@@ -109,4 +117,4 @@ class GenresSerializer(serializers.ModelSerializer):
 class TitlesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Titles
-        fields = ('name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')

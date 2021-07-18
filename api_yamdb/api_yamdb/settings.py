@@ -100,11 +100,11 @@ REST_FRAMEWORK = {
         'rest_framework.filters.SearchFilter',
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'api.throttling.NonEmployeeScopedRateThrottle',
+    ],
     'DEFAULT_THROTTLE_RATES': {
-        # 'non-employee': '5/minute',
-        'token-non-employee': '1/minute',
-        'email-non-employee': '2/m',
-        # 'anon': '100/minute',
+        'auth-non-employee': '20/hour',
     },
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.PageNumberPagination',

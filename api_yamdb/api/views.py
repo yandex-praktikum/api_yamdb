@@ -69,7 +69,7 @@ class EmailViewSet(CreateViewSet):
             'Your confirmation code YaMDb',
             f'Confirmation code:{confirmation_code}',
             'django.test1.mail@gmail.com',
-            [serializer.data['email'], ],
+            [serializer.data['email']],
         )
 
 

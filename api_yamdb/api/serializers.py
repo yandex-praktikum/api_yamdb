@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from django.conf import settings
 
-from .models import User
+from .models import User, Reviews, Comments
 
 
 def check_rights_to_change_role(serializer, changing_role):
@@ -66,3 +66,30 @@ class UserSerializer(serializers.ModelSerializer):
         if data.get('role') == 'admin':
             data['is_staff'] = True
         return data
+
+
+class ReviewsSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+    title = serializers.SlugRelatedField(
+        slug_field='pk',
+        read_only=True
+    )
+    score = serializers.IntegerField(min_value=0, max_value=10)
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        models = Reviews
+
+
+class CommentsSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'pub_date')
+        models = Comments

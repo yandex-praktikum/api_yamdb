@@ -2,23 +2,26 @@ import datetime as dt
 
 import jwt
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.generics import get_object_or_404
+from rest_framework.decorators import permission_classes
 
 from django.conf import settings
 from django.core.mail import send_mail
 
 from .filters import UserFilter
-from .models import User
+from .models import User, Reviews, Comments, Titles
 from .permissions import IsAdmin, IsAuthor, IsModerator, IsReadOnly
 from .serializers import (SendConfirmCodeSerializer, TokenReceiveSerializer,
-                          UserSerializer)
+                          UserSerializer, ReviewsSerializer,
+                          CommentsSerializer)
 from .throttling import NonEmployeeScopedRateThrottle, NonEmployeeRateThrottle
-
 
 MAIL_SUBJECT = 'Код подтверждения'
 
@@ -83,5 +86,33 @@ class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAdmin,)
-    pagination_class = ()
     filterset_class = UserFilter
+
+
+@permission_classes([IsAuthor, IsReadOnly])
+class ReviewsViewSet(ModelViewSet):
+    serializer_class = ReviewsSerializer
+
+    def get_queryset(self):
+        title = get_object_or_404(Titles, id=self.kwargs.get('titles_id'))
+        return Reviews.objects.filter(title=title)
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Titles, id=self.kwargs.get('titles_id'))
+        if Reviews.objects.filter(author=self.request.user,
+                                  title=title).exist():
+            raise ValidationError('Можно оставлять только 1 отзыв')
+        serializer.save(author=self.request.user, title=title)
+
+
+@permission_classes([IsAdmin | IsReadOnly | IsModerator])
+class CommentsViewSet(ModelViewSet):
+    serializer_class = CommentsSerializer
+
+    def get_queryset(self):
+        review = get_object_or_404(Reviews, id=self.kwargs.get('review_id'))
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(Reviews, id=self.kwargs.get('review_id'))
+        serializer.save(author=self.request.user, review=review)

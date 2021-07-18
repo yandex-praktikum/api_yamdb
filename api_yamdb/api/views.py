@@ -7,17 +7,22 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 from rest_framework_simplejwt.views import TokenViewBase
 
 from .filters import ModelFilter
 from .models import Category, Genre, Review, Title, User
-from .permissions import (IsAdminOrDenied, IsAdminOrModeratororAuthor,
-                          IsAdminOrReadOnly)
-from .serializers import (CategorySerializer, CommentSerializer,
-                          EmailSerializer, GenreSerializer, ReviewSerializer,
-                          TitleReadSerializer, TitleWriteSerializer,
-                          TokenObtainPairSerializer, UserSerializer)
+from .permissions import (
+    IsAdminModeratorOrAuthor,
+    IsAdminOrReadOnly, IsMeAction
+)
+from .serializers import (
+  CategorySerializer, CommentSerializer,
+  EmailSerializer, GenreSerializer, ReviewSerializer,
+  TitleReadSerializer, TitleWriteSerializer,
+  TokenObtainPairSerializer, UserSerializer
+)
+
 
 
 class CreateViewSet(
@@ -38,12 +43,11 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
-    permission_classes = (IsAdminOrDenied,)
-    # pagination_class = PageNumberPagination
+    permission_classes = (IsAdminUser,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
-    @action(detail=False, methods=['GET', 'PATCH'])
+    @action(detail=False, methods=['GET', 'PATCH'], permission_classes=(IsMeAction,))
     def me(self, request):
         self.kwargs['username'] = request.user.username
         if request.method == 'GET':
@@ -140,5 +144,3 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class TokenObtainPairView(TokenViewBase):
     serializer_class = TokenObtainPairSerializer
-
-# token_obtain_pair = TokenObtainPairView.as_view()

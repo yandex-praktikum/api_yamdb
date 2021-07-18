@@ -12,5 +12,5 @@ pytest-django
 djangorestframework
 djangorestframework-simplejwt
 djoser
-django-filter
+django-filter==2.4.0
 python-dotenv

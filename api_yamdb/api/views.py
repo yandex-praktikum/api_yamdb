@@ -69,7 +69,7 @@ class EmailViewSet(CreateViewSet):
             'Your confirmation code YaMDb',
             f'Confirmation code:{confirmation_code}',
             'django.test1.mail@gmail.com',
-            [serializer.data['email'], ],
+            [serializer.data['email']],
         )
 
 
@@ -107,7 +107,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminOrModeratororAuthor,)
+                          IsAdminModeratorOrAuthor,)
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -121,7 +121,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminOrModeratororAuthor,)
+                          IsAdminModeratorOrAuthor,)
 
     def get_review_id(self):
         return self.kwargs.get('review_id')

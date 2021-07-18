@@ -1,24 +1,24 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User, Genres, Categories, Titles, Review, Comment
+from .models import User, Genre, Category, Title, Review, Comment
 
 EMPTY_VALUE = '-пусто-'
 
 
-class GenresAdmin(admin.ModelAdmin):
+class GenreAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'slug')
     search_fields = ('name',)
     empty_value_display = EMPTY_VALUE
 
 
-class CategoriesAdmin(admin.ModelAdmin):
+class CategoryAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'slug')
     search_fields = ('name',)
     empty_value_display = EMPTY_VALUE
 
 
-class TitlesAdmin(admin.ModelAdmin):
+class TitleAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'year')
     search_fields = ('name',)
     empty_value_display = EMPTY_VALUE
@@ -43,8 +43,8 @@ class CommentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, UserAdmin)
-admin.site.register(Genres, GenresAdmin)
-admin.site.register(Categories, CategoriesAdmin)
-admin.site.register(Titles, TitlesAdmin)
+admin.site.register(Genre, GenreAdmin)
+admin.site.register(Category, CategoryAdmin)
+admin.site.register(Title, TitleAdmin)
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(Comment, CommentAdmin)

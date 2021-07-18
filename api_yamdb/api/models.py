@@ -17,8 +17,8 @@ class User(AbstractUser):
     email = models.EmailField(_('email address'), blank=True, unique=True)
 
 
-class Genres(models.Model):
-    name = models.CharField('Название', max_length=200)
+class Genre(models.Model):
+    name = models.TextField('Название',)
     slug = models.SlugField('Адрес', unique=True)
 
     class Meta:
@@ -29,8 +29,8 @@ class Genres(models.Model):
         return self.name
 
 
-class Categories(models.Model):
-    name = models.CharField('Название', max_length=200)
+class Category(models.Model):
+    name = models.TextField('Название',)
     slug = models.SlugField('Адрес', unique=True)
 
     class Meta:
@@ -41,13 +41,13 @@ class Categories(models.Model):
         return self.name
 
 
-class Titles(models.Model):
-    name = models.CharField('Название', max_length=200)
-    year = models.IntegerField('Год выпуска')
+class Title(models.Model):
+    name = models.TextField('Название',)
+    year = models.PositiveSmallIntegerField('Год выпуска')
     description = models.TextField('Описание')
-    genre = models.ManyToManyField(Genres, related_name='titles', blank=True,
+    genre = models.ManyToManyField(Genre, related_name='titles',
                                    verbose_name='Жанр')
-    category = models.ForeignKey(Categories, on_delete=models.SET_NULL,
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  related_name='titles', blank=True, null=True,
                                  verbose_name='Категория')
 
@@ -77,14 +77,14 @@ class Review(models.Model):
     )
     text = models.TextField(verbose_name='Текст', max_length=5000)
     title = models.ForeignKey(
-        Titles, on_delete=models.CASCADE, related_name='reviews'
+        Title, on_delete=models.CASCADE, related_name='reviews'
     )
     score = models.IntegerField(verbose_name='Рейтинг', choices=RATING_LEVELS)
 
     class Meta:
         ordering = ['-pub_date']
-        verbose_name = 'Review'
-        verbose_name_plural = 'Reviews'
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
 
     def __str__(self):
         return self.text
@@ -104,8 +104,8 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['-pub_date']
-        verbose_name = 'Comment'
-        verbose_name_plural = 'Comments'
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
         return self.text

@@ -1,9 +1,11 @@
+import datetime as dt
+
 from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import Categories, Comment, Genres, Review, Titles, User
+from .models import Category, Comment, Genre, Review, Title, User
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -46,43 +48,49 @@ class EmailSerializer(serializers.ModelSerializer):
         model = User
 
 
-class GenresSerializer(serializers.ModelSerializer):
+class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
-        model = Genres
+        model = Genre
 
 
-class CategoriesSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')
-        model = Categories
+        model = Category
 
 
-class TitlesPostSerializer(serializers.ModelSerializer):
+class TitleWriteSerializer(serializers.ModelSerializer):
 
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
-        queryset=Genres.objects.all())
+        queryset=Genre.objects.all())
     category = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Categories.objects.all())
+        queryset=Category.objects.all())
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
-        model = Titles
+        model = Title
 
 
-class TitlesGetSerializer(serializers.ModelSerializer):
-    genre = CategoriesSerializer(many=True)
-    category = CategoriesSerializer(read_only=True)
+class TitleReadSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer(read_only=True)
     rating = serializers.FloatField()
 
     class Meta:
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
-        model = Titles
+        model = Title
+
+    def validate_year(self, value):
+        year = dt.date.today().year
+        if not (value <= year):
+            raise serializers.ValidationError('Проверьте год выпуска фильма!')
+        return value
 
 
 class TokenObtainPairSerializer(serializers.ModelSerializer):

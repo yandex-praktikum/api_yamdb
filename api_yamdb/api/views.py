@@ -8,15 +8,14 @@ from rest_framework import filters, mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 from rest_framework_simplejwt.views import TokenViewBase
 
 from .filters import ModelFilter
 from .models import Categories, Genres, Review, Titles, User
 from .permissions import (
-    IsAdminOrMeEndpointOrDenied,
-    IsAdminOrModeratororAuthor,
-    IsAdminOrReadOnly
+    IsAdminModeratorOrAuthor,
+    IsAdminOrReadOnly, IsMeAction
 )
 from .serializers import (
     CategoriesSerializer, CommentSerializer,
@@ -44,11 +43,11 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
-    permission_classes = (IsAdminOrMeEndpointOrDenied,)
+    permission_classes = (IsAdminUser,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
-    @action(detail=False, methods=['GET', 'PATCH'])
+    @action(detail=False, methods=['GET', 'PATCH'], permission_classes=(IsMeAction,))
     def me(self, request):
         self.kwargs['username'] = request.user.username
         if request.method == 'GET':
@@ -111,8 +110,10 @@ class TitlesViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminOrModeratororAuthor,)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAdminModeratorOrAuthor,
+    )
 
     def get_queryset(self):
         title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
@@ -126,8 +127,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminOrModeratororAuthor,)
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAdminModeratorOrAuthor,
+    )
 
     def get_review_id(self):
         return self.kwargs.get('review_id')

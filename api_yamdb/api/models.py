@@ -24,6 +24,12 @@ class User(AbstractUser):
     confirmation_code = models.IntegerField(default=0)
     email = models.EmailField(_('email address'), unique=True)
 
+    class Meta:
+        ordering = ['-username']
+
+    def __str__(self):
+        return self.username
+
     @property
     def is_user(self):
         if self.role == USER_ROLE:

@@ -123,7 +123,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,
                           IsAdminModeratorOrAuthor,)
 
-    def get_review_id(self):
+    def _get_review_id(self):
         return self.kwargs.get('review_id')
 
     def get_title_id(self):
@@ -131,13 +131,13 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         review = get_object_or_404(
-            Review, pk=self.get_review_id(), title__id=self.get_title_id()
+            Review, pk=self._get_review_id(), title__id=self.get_title_id()
         )
         return review.comments.all()
 
     def perform_create(self, serializer):
         review = get_object_or_404(
-            Review, pk=self.get_review_id(), title__id=self.get_title_id()
+            Review, pk=self._get_review_id(), title__id=self.get_title_id()
         )
         serializer.save(author=self.request.user, review=review)
 

@@ -35,6 +35,7 @@ class User(AbstractUser):
     objects = APIUserManager()
 
     class Meta(AbstractUser.Meta):
+        ordering = ('id',)
         constraints = (
             CheckConstraint(
                 name='only-admin-must-be-staff',

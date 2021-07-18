@@ -1,16 +1,16 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import (CategoriesViewSet, CommentViewSet, EmailViewSet,
-                    GenresViewSet, ReviewViewSet, TitlesViewSet,
+from .views import (CategoryViewSet, CommentViewSet, EmailViewSet,
+                    GenreViewSet, ReviewViewSet, TitleViewSet,
                     TokenObtainPairView, UserViewSet)
 
 router = DefaultRouter()
 router.register('auth/email', EmailViewSet, basename='email_post')
 router.register('users', UserViewSet, basename='users')
-router.register('categories', CategoriesViewSet, basename='category')
-router.register('genres', GenresViewSet, basename='genre')
-router.register('titles', TitlesViewSet, basename='title')
+router.register('categories', CategoryViewSet, basename='category')
+router.register('genres', GenreViewSet, basename='genre')
+router.register('titles', TitleViewSet, basename='title')
 router.register(
     r'titles/(?P<title_id>\d+)/reviews',
     ReviewViewSet,

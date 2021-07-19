@@ -2,6 +2,7 @@ import datetime as dt
 
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
+from django.contrib.auth.tokens import default_token_generator
 
 from .models import Category, Comment, Genre, Review, Title, User
 
@@ -93,8 +94,13 @@ class TokenObtainPairSerializer(serializers.Serializer):
 
     def validate(self, data):
         user = get_object_or_404(User, email=self.initial_data['email'])
-        if user.confirmation_code != self.initial_data['confirmation_code']:
-            raise serializers.ValidationError("Confirmation code is not correct")
+        if default_token_generator.check_token(
+                user,
+                self.initial_data['confirmation_code']
+        ):
+            raise serializers.ValidationError(
+                "Confirmation code is not correct"
+            )
         return data
 
 

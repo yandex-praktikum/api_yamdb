@@ -4,10 +4,9 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (CategoryViewSet, CommentViewSet,
                     GenreViewSet, ReviewViewSet, TitleViewSet,
-                    TokenObtainPairView, UserViewSet, EmailSend)
+                    TokenObtainPairView, UserViewSet, CreateNewUser)
 
 router = DefaultRouter()
-#router.register('auth/email/', EmailSend, basename='email_post')
 router.register('users', UserViewSet, basename='users')
 router.register('categories', CategoryViewSet, basename='category')
 router.register('genres', GenreViewSet, basename='genre')
@@ -33,5 +32,5 @@ jwt = [
 urlpatterns = [
     path('v1/', include(router.urls)),
     path('v1/auth/token/', include(jwt)),
-    path('v1/auth/email/', EmailSend),
+    path('v1/auth/email/', CreateNewUser),
 ]

@@ -1,6 +1,6 @@
-from random import randint
 from smtplib import SMTPException
 
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -8,7 +8,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, AllowAny
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly, IsAdminUser, AllowAny
+)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -48,7 +50,11 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
-    @action(detail=False, methods=['GET', 'PATCH'], permission_classes=(IsMeAction,))
+    @action(
+        detail=False,
+        methods=['GET', 'PATCH'],
+        permission_classes=(IsMeAction,)
+    )
     def me(self, request):
         self.kwargs['username'] = request.user.username
         if request.method == 'GET':
@@ -56,27 +62,34 @@ class UserViewSet(viewsets.ModelViewSet):
         return self.partial_update(request)
 
 
+def get_confirmation_code(user):
+    return default_token_generator.make_token(user)
+
+
 @api_view(['POST'], )
 @permission_classes([AllowAny])
-def EmailSend(request):
+def CreateNewUser(request):
     serializer = EmailSerializer(data=request.data)
-    confirmation_code = randint(100000, 999999)
+    username = ('user' + str(User.objects.count()))
     if serializer.is_valid():
         serializer.save(
-            confirmation_code=confirmation_code,
-            username=('user' + str(User.objects.count()))
+            username=username
         )
-        email_send([serializer.data['email']], confirmation_code)
-
+        send_confirmation_code(username, [serializer.data['email']])
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     if serializer.errors['email'][0] == 'user with this email address already exists.':
-        email_send([serializer.data['email']], confirmation_code)
-        return Response('Confirmation code повторно отправлен на ваш email', status=status.HTTP_200_OK)
+        send_confirmation_code(username, [serializer.data['email']])
+        return Response(
+            'Confirmation code повторно отправлен на ваш email',
+            status=status.HTTP_200_OK
+        )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def email_send(email, confirmation_code):
+def send_confirmation_code(username, email):
     try:
+        user = get_object_or_404(User, username=username)
+        confirmation_code = get_confirmation_code(user)
         send_mail(
             'Your confirmation code YaMDb',
             f'Confirmation code:{confirmation_code}',
@@ -85,22 +98,6 @@ def email_send(email, confirmation_code):
         )
     except SMTPException as e:
         print('There was an error sending an email: ', e)
-
-
-# class EmailViewSet(CreateViewSet):
-#     queryset = User.objects.all()
-#     serializer_class = EmailSerializer
-#     permission_classes = (AllowAny,)
-#
-#     def perform_create(self, serializer):
-#         confirmation_code = randint(100000, 999999)
-#         serializer.save(confirmation_code=confirmation_code)
-#         send_mail(
-#             'Your confirmation code YaMDb',
-#             f'Confirmation code:{confirmation_code}',
-#             'django.test1.mail@gmail.com',
-#             [serializer.data['email']],
-#         )
 
 
 class CategoryViewSet(CreateListDestroyViewSet):

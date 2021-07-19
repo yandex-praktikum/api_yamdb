@@ -26,7 +26,7 @@ class User(AbstractUser):
                     'Letters, digits and @/./+/-/_ only.'),
         validators=(AbstractUser.username_validator,),
         error_messages={
-            'unique': _("A user with that username already exists."),
+            'unique': _('A user with that username already exists.'),
         },
     )
     email = EmailField('Email', unique=True)

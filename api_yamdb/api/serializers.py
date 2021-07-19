@@ -1,9 +1,8 @@
 import jwt
+from django.conf import settings
 from rest_framework import serializers
 
-from django.conf import settings
-
-from .models import Categories, Genres, Titles, User
+from .models import Categories, Comments, Genres, Reviews, Titles, User
 
 
 class SendConfirmCodeSerializer(serializers.Serializer):
@@ -74,6 +73,43 @@ class UserSerializer(serializers.ModelSerializer):
             data['is_staff'] = True
 
         return data
+
+
+class ReviewsSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+        default=serializers.CurrentUserDefault()
+    )
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        read_only=True
+    )
+    score = serializers.IntegerField(min_value=1, max_value=10)
+
+    def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+        author = self.context['request'].user
+        title = self.context['view'].kwargs.get('title_id')
+        if Reviews.objects.filter(title=title, author=author).exists():
+            raise serializers.ValidationError('Отзыв уже существует')
+        return data
+
+    class Meta:
+        model = Reviews
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
+
+
+class CommentsSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+    )
+
+    class Meta:
+        model = Comments
+        fields = ('id', 'text', 'author', 'pub_date')
 
 
 class CategoriesSerializer(serializers.ModelSerializer):

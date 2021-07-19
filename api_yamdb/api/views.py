@@ -1,27 +1,30 @@
 import datetime as dt
 
 import jwt
-from rest_framework import mixins, serializers, status, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework_simplejwt.tokens import AccessToken
-
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.db.models.functions import Round
 from django.shortcuts import get_object_or_404
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import permission_classes
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .filters import TitlesFilter
-from .models import Categories, Genres, Titles, User
+from .models import Categories, Genres, Titles, User, Reviews
 from .permissions import (
-    IsAdmin, IsAuthor, HasUsernameForPOST, IsModerator, IsSafeMethod
+    IsAdmin, IsAuthor, IsModerator, IsSafeMethod, HasUsernameForPOST,
+    ReviewAndCommentPermission
 )
 from .serializers import (
     CategoriesSerializer, GenresSerializer, SendConfirmCodeSerializer,
     TitlesSafeMethodSerializer, TitlesUnSafeMethodSerializer,
-    TokenReceiveSerializer, UserSerializer
+    TokenReceiveSerializer, UserSerializer, CommentsSerializer,
+    ReviewsSerializer
 )
 
 MAIL_SUBJECT = 'Код подтверждения'
@@ -97,6 +100,32 @@ class UserMeViewSet(viewsets.ModelViewSet):
     def get_object(self):
         user = get_object_or_404(User, pk=self.request.user.id)
         return user
+
+
+@permission_classes([ReviewAndCommentPermission])
+class ReviewsViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewsSerializer
+
+    def get_queryset(self):
+        title = get_object_or_404(Titles, id=self.kwargs.get('title_id'))
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Titles, id=self.kwargs.get('title_id'))
+        serializer.save(author=self.request.user, title=title)
+
+
+@permission_classes([ReviewAndCommentPermission])
+class CommentsViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentsSerializer
+
+    def get_queryset(self):
+        review = get_object_or_404(Reviews, id=self.kwargs.get('review_id'))
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(Reviews, id=self.kwargs.get('review_id'))
+        serializer.save(author=self.request.user, review=review)
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,

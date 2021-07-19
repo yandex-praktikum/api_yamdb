@@ -289,3 +289,4 @@ class Test05ReviewAPI:
             'без токена авторизации возвращается статус 401'
         )
         self.check_permissions(user, 'обычного пользователя', reviews, titles)
+        print('ошибка')

@@ -14,6 +14,7 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
+from api_yamdb.settings import EMAIL_HOST_USER, EMAIL_HOST_DOMEN
 from .filters import ModelFilter
 from .models import Category, Genre, Review, Title, User
 from .permissions import (
@@ -70,14 +71,18 @@ def get_confirmation_code(user):
 @permission_classes([AllowAny])
 def CreateNewUser(request):
     serializer = EmailSerializer(data=request.data)
-    username = ('user' + str(User.objects.count()))
+    user_max_pk = User.objects.latest('pk')
+    max_pk = user_max_pk.pk
+    username = ('user' + str(max_pk + 1))
     if serializer.is_valid():
         serializer.save(
             username=username
         )
         send_confirmation_code(username, [serializer.data['email']])
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    if serializer.errors['email'][0] == 'user with this email address already exists.':
+    if serializer.errors['email'][0] == (
+            'user with this email address already exists.'
+    ):
         send_confirmation_code(username, [serializer.data['email']])
         return Response(
             'Confirmation code повторно отправлен на ваш email',
@@ -93,7 +98,7 @@ def send_confirmation_code(username, email):
         send_mail(
             'Your confirmation code YaMDb',
             f'Confirmation code:{confirmation_code}',
-            'django.test1.mail@gmail.com',
+            EMAIL_HOST_USER + EMAIL_HOST_DOMEN,
             email,
         )
     except SMTPException as e:

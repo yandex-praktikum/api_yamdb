@@ -1,8 +1,8 @@
 import datetime as dt
 
+from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from django.contrib.auth.tokens import default_token_generator
 
 from .models import Category, Comment, Genre, Review, Title, User
 
@@ -98,10 +98,10 @@ class TokenObtainPairSerializer(serializers.Serializer):
                 user,
                 self.initial_data['confirmation_code']
         ):
-            raise serializers.ValidationError(
-                "Confirmation code is not correct"
-            )
-        return data
+            return data
+        raise serializers.ValidationError(
+            "Некорректный код подтверждения регистрации"
+        )
 
 
 class CommentSerializer(serializers.ModelSerializer):

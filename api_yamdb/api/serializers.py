@@ -86,20 +86,29 @@ class ReviewsSerializer(serializers.ModelSerializer):
     )
     score = serializers.IntegerField(min_value=0, max_value=10)
 
+    def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+        author = self.context['request'].user
+        title = self.context['view'].kwargs.get('title_id')
+        if Reviews.objects.filter(title=title, author=author).exists():
+            raise serializers.ValidationError('Отзыв уже существует')
+        return data
+
     class Meta:
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
-        models = Reviews
+        model = Reviews
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
 
 
 class CommentsSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
-        read_only=True
+        read_only=True,
     )
 
     class Meta:
+        model = Comments
         fields = ('id', 'text', 'author', 'pub_date')
-        models = Comments
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
@@ -114,7 +123,33 @@ class GenresSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitleBaseSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+
     class Meta:
         model = Titles
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre',
+                  'category', 'rating')
+
+    def get_rating(self, obj):
+        if hasattr(obj, 'rating'):
+            return obj.rating
+        return None
+
+
+class TitlesUnSafeMethodSerializer(TitleBaseSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        many=True,
+        queryset=Genres.objects.all(),
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Categories.objects.all(),
+        required=False
+    )
+
+
+class TitlesSafeMethodSerializer(TitleBaseSerializer):
+    genre = GenresSerializer(many=True)
+    category = CategoriesSerializer()

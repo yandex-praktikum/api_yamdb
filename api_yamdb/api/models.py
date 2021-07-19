@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models import (CharField, CheckConstraint, EmailField, Q,
-                              TextField)
+from django.db.models import (
+    CharField, CheckConstraint, EmailField, Q, TextField, UniqueConstraint
+)
 from django.utils.translation import gettext_lazy as _
 
 from .managers import APIUserManager
@@ -153,6 +154,7 @@ class Titles(models.Model):
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name

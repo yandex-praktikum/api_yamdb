@@ -1,13 +1,16 @@
 from random import randint
+from smtplib import SMTPException
 
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets
-from rest_framework.decorators import action
+from rest_framework import filters, mixins, viewsets, status
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, AllowAny
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.views import TokenViewBase
 
 from .filters import ModelFilter
@@ -17,12 +20,11 @@ from .permissions import (
     IsAdminOrReadOnly, IsMeAction
 )
 from .serializers import (
-  CategorySerializer, CommentSerializer,
-  EmailSerializer, GenreSerializer, ReviewSerializer,
-  TitleReadSerializer, TitleWriteSerializer,
-  TokenObtainPairSerializer, UserSerializer
+    CategorySerializer, CommentSerializer,
+    EmailSerializer, GenreSerializer, ReviewSerializer,
+    TitleReadSerializer, TitleWriteSerializer,
+    TokenObtainPairSerializer, UserSerializer
 )
-
 
 
 class CreateViewSet(
@@ -52,25 +54,54 @@ class UserViewSet(viewsets.ModelViewSet):
         self.kwargs['username'] = request.user.username
         if request.method == 'GET':
             return self.retrieve(request)
-        elif request.method == 'PATCH':
-            return self.partial_update(request)
-        else:
-            raise Exception('Not implemented')
+        return self.partial_update(request)
 
 
-class EmailViewSet(CreateViewSet):
-    queryset = User.objects.all()
-    serializer_class = EmailSerializer
+@api_view(['POST'], )
+@permission_classes([AllowAny])
+def EmailSend(request):
+    serializer = EmailSerializer(data=request.data)
+    confirmation_code = randint(100000, 999999)
+    if serializer.is_valid():
+        serializer.save(
+            confirmation_code=confirmation_code,
+            username=('user' + str(User.objects.count()))
+        )
+        email_send([serializer.data['email']], confirmation_code)
 
-    def perform_create(self, serializer):
-        confirmation_code = randint(100000, 999999)
-        serializer.save(confirmation_code=confirmation_code)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    if serializer.errors['email'][0] == 'user with this email address already exists.':
+        email_send([serializer.data['email']], confirmation_code)
+        return Response('Confirmation code повторно отправлен на ваш email', status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def email_send(email, confirmation_code):
+    try:
         send_mail(
             'Your confirmation code YaMDb',
             f'Confirmation code:{confirmation_code}',
             'django.test1.mail@gmail.com',
-            [serializer.data['email']],
+            email,
         )
+    except SMTPException as e:
+        print('There was an error sending an email: ', e)
+
+
+# class EmailViewSet(CreateViewSet):
+#     queryset = User.objects.all()
+#     serializer_class = EmailSerializer
+#     permission_classes = (AllowAny,)
+#
+#     def perform_create(self, serializer):
+#         confirmation_code = randint(100000, 999999)
+#         serializer.save(confirmation_code=confirmation_code)
+#         send_mail(
+#             'Your confirmation code YaMDb',
+#             f'Confirmation code:{confirmation_code}',
+#             'django.test1.mail@gmail.com',
+#             [serializer.data['email']],
+#         )
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
@@ -99,7 +130,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_class = ModelFilter
 
     def get_serializer_class(self):
-        if self.action == 'list' or self.action == 'retrieve':
+        if self.action in ('retrieve', 'list'):
             return TitleReadSerializer
         return TitleWriteSerializer
 
@@ -141,6 +172,16 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
         serializer.save(author=self.request.user, review=review)
 
+def get_token(user):
+    return AccessToken.for_user(user)
 
-class TokenObtainPairView(TokenViewBase):
-    serializer_class = TokenObtainPairSerializer
+@api_view(['POST'], )
+@permission_classes([AllowAny])
+def TokenObtainPairView(request):
+    serializer = TokenObtainPairSerializer(data=request.data)
+    if serializer.is_valid():
+        user = get_object_or_404(User, email=serializer.initial_data['email'])
+        token = get_token(user)
+        data = {'token': str(token)}
+        return Response(data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -2,7 +2,7 @@ import datetime as dt
 
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from .models import Category, Comment, Genre, Review, Title, User
 
@@ -87,21 +87,15 @@ class TitleReadSerializer(serializers.ModelSerializer):
         return value
 
 
-class TokenObtainPairSerializer(serializers.ModelSerializer):
+class TokenObtainPairSerializer(serializers.Serializer):
     class Meta:
         fields = ('email', 'confirmation_code')
         model = User
 
-    @classmethod
-    def get_token(cls, user):
-        return RefreshToken.for_user(user)
-
-    def validate(self, attrs):
-        user = get_object_or_404(User, email=attrs['email'])
-        refresh = self.get_token(user)
-        data = {'token': str(refresh.access_token)}
-        if user.confirmation_code != attrs['confirmation_code']:
-            return "Confirmation code is not correct"
+    def validate(self, data):
+        user = get_object_or_404(User, email=self.initial_data['email'])
+        if user.confirmation_code != self.initial_data['confirmation_code']:
+            raise serializers.ValidationError("Confirmation code is not correct")
         return data
 
 

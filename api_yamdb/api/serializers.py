@@ -88,7 +88,33 @@ class GenresSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitleBaseSerializer(serializers.ModelSerializer):
+    rating = serializers.SerializerMethodField()
+
     class Meta:
         model = Titles
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'description', 'genre',
+                  'category', 'rating')
+
+    def get_rating(self, obj):
+        if hasattr(obj, 'rating'):
+            return obj.rating
+        return None
+
+
+class TitlesUnSafeMethodSerializer(TitleBaseSerializer):
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        many=True,
+        queryset=Genres.objects.all(),
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Categories.objects.all(),
+        required=False
+    )
+
+
+class TitlesSafeMethodSerializer(TitleBaseSerializer):
+    genre = GenresSerializer(many=True)
+    category = CategoriesSerializer()

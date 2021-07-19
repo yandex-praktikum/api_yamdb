@@ -7,17 +7,22 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 
-from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db.models import Avg
+from django.db.models.functions import Round
+from django.shortcuts import get_object_or_404
 
+from .filters import TitlesFilter
 from .models import Categories, Genres, Titles, User
-from .permissions import (IsAdmin, IsAuthor, HasUsernameForPOST,
-                          IsModerator, IsSafeMethod)
-from .serializers import (SendConfirmCodeSerializer, TokenReceiveSerializer,
-                          UserSerializer)
-from .serializers import (CategoriesSerializer, GenresSerializer,
-                          TitlesSerializer)
+from .permissions import (
+    IsAdmin, IsAuthor, HasUsernameForPOST, IsModerator, IsSafeMethod
+)
+from .serializers import (
+    CategoriesSerializer, GenresSerializer, SendConfirmCodeSerializer,
+    TitlesSafeMethodSerializer, TitlesUnSafeMethodSerializer,
+    TokenReceiveSerializer, UserSerializer
+)
 
 MAIL_SUBJECT = 'Код подтверждения'
 
@@ -114,8 +119,16 @@ class GenresViewSet(CreateListDestroyViewSet):
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+    class RoundTo(Round):
+        arity = 2
+
+    queryset = Titles.objects.annotate(
+        rating=RoundTo(Avg('reviews__score'), 2)
+    )
     permission_classes = (IsAdmin | IsSafeMethod,)
-    #ToDo Написать фильтр
-    #ToDo Написать отдельные поля
+    filterset_class = TitlesFilter
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitlesSafeMethodSerializer
+        return TitlesUnSafeMethodSerializer

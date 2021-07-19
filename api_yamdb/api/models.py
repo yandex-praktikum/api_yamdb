@@ -22,7 +22,6 @@ class User(AbstractUser):
         max_length=20, choices=ROLE_CHOICES, default=USER_ROLE
     )
     bio = models.TextField(blank=True)
-    confirmation_code = models.IntegerField(default=0)
     email = models.EmailField(_('email address'), unique=True)
 
     class Meta:
@@ -48,7 +47,7 @@ class User(AbstractUser):
 
 
 class Genre(models.Model):
-    name = models.TextField('Название',)
+    name = models.TextField('Название', )
     slug = models.SlugField('Адрес', unique=True)
 
     class Meta:
@@ -60,7 +59,7 @@ class Genre(models.Model):
 
 
 class Category(models.Model):
-    name = models.TextField('Название',)
+    name = models.TextField('Название', )
     slug = models.SlugField('Адрес', unique=True)
 
     class Meta:
@@ -72,7 +71,7 @@ class Category(models.Model):
 
 
 class Title(models.Model):
-    name = models.TextField('Название',)
+    name = models.TextField('Название', )
     year = models.PositiveSmallIntegerField('Год выпуска')
     description = models.TextField('Описание')
     genre = models.ManyToManyField(Genre, related_name='titles',

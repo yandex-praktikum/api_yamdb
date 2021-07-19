@@ -1,10 +1,9 @@
 from django.urls import include, path
-from rest_framework import views
 from rest_framework.routers import DefaultRouter
 
-from .views import (CategoryViewSet, CommentViewSet,
+from .views import (CategoryViewSet, CommentViewSet, CreateNewUser,
                     GenreViewSet, ReviewViewSet, TitleViewSet,
-                    TokenObtainPairView, UserViewSet, CreateNewUser)
+                    TokenObtainPairView, UserViewSet)
 
 router = DefaultRouter()
 router.register('users', UserViewSet, basename='users')
@@ -21,16 +20,12 @@ router.register(
     CommentViewSet,
     basename='comments',
 )
-jwt = [
-    path(
-        '',
-        TokenObtainPairView,
-        name="jwt-create"
-    ),
+auth = [
+    path('token/', TokenObtainPairView, name="jwt-create"),
+    path('email/', CreateNewUser, name='create-user')
 ]
 
 urlpatterns = [
     path('v1/', include(router.urls)),
-    path('v1/auth/token/', include(jwt)),
-    path('v1/auth/email/', CreateNewUser),
+    path('v1/auth/', include(auth)),
 ]

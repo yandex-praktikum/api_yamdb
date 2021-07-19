@@ -5,28 +5,24 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets, status
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import (
-    IsAuthenticatedOrReadOnly, IsAdminUser, AllowAny
-)
+from rest_framework.permissions import (AllowAny, IsAdminUser,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from api_yamdb.settings import EMAIL_HOST_USER, EMAIL_HOST_DOMEN
+from api_yamdb.settings import EMAIL_HOST_DOMEN, EMAIL_HOST_USER
+
 from .filters import ModelFilter
 from .models import Category, Genre, Review, Title, User
-from .permissions import (
-    IsAdminModeratorOrAuthor,
-    IsAdminOrReadOnly, IsMeAction
-)
-from .serializers import (
-    CategorySerializer, CommentSerializer,
-    EmailSerializer, GenreSerializer, ReviewSerializer,
-    TitleReadSerializer, TitleWriteSerializer,
-    TokenObtainPairSerializer, UserSerializer
-)
+from .permissions import (IsAdminModeratorOrAuthor, IsAdminOrReadOnly,
+                          IsMeAction)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          EmailSerializer, GenreSerializer, ReviewSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
+                          TokenObtainPairSerializer, UserSerializer)
 
 
 class CreateViewSet(
@@ -96,8 +92,8 @@ def send_confirmation_code(username, email):
         user = get_object_or_404(User, username=username)
         confirmation_code = get_confirmation_code(user)
         send_mail(
-            'Your confirmation code YaMDb',
-            f'Confirmation code:{confirmation_code}',
+            'Ваш код подтверждения YaMDb',
+            f'Код подтверждения:{confirmation_code}',
             EMAIL_HOST_USER + EMAIL_HOST_DOMEN,
             email,
         )

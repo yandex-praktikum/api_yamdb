@@ -34,3 +34,15 @@ class IsModerator(BasePermission):
     def has_permission(self, request, view):
         user = request.user.is_authenticated
         return bool(user and request.user.role == 'moderator')
+
+
+class ReviewAndCommentPermission(BasePermission):
+    def has_permission(self, request, view):
+        return (request.method in SAFE_METHODS
+                or request.user.is_authenticated)
+
+    def has_object_permission(self, request, view, obj):
+        return (obj.author == request.user
+                or request.method in SAFE_METHODS
+                or request.user.role == 'moderator'
+                or request.user.role == 'admin')

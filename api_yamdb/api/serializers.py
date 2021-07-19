@@ -78,13 +78,14 @@ class UserSerializer(serializers.ModelSerializer):
 class ReviewsSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
-        read_only=True
+        read_only=True,
+        default=serializers.CurrentUserDefault()
     )
     title = serializers.SlugRelatedField(
-        slug_field='pk',
+        slug_field='name',
         read_only=True
     )
-    score = serializers.IntegerField(min_value=0, max_value=10)
+    score = serializers.IntegerField(min_value=1, max_value=10)
 
     def validate(self, data):
         if self.context['request'].method != 'POST':

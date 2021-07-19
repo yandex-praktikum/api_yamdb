@@ -11,7 +11,6 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser, AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework_simplejwt.views import TokenViewBase
 
 from .filters import ModelFilter
 from .models import Category, Genre, Review, Title, User
@@ -172,8 +171,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
         serializer.save(author=self.request.user, review=review)
 
+
 def get_token(user):
     return AccessToken.for_user(user)
+
 
 @api_view(['POST'], )
 @permission_classes([AllowAny])

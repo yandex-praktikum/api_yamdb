@@ -1,6 +1,7 @@
 import jwt
-from django.conf import settings
 from rest_framework import serializers
+
+from django.conf import settings
 
 from .models import Categories, Comments, Genres, Reviews, Titles, User
 
@@ -8,7 +9,8 @@ from .models import Categories, Comments, Genres, Reviews, Titles, User
 class SendConfirmCodeSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
-
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.views import TokenObtainPairView
 class TokenReceiveSerializer(serializers.Serializer):
     email = serializers.EmailField()
     confirmation_code = serializers.CharField()
@@ -79,7 +81,6 @@ class ReviewsSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
-        default=serializers.CurrentUserDefault()
     )
     title = serializers.SlugRelatedField(
         slug_field='name',

@@ -1,12 +1,12 @@
 from rest_framework.throttling import ScopedRateThrottle
 
-STAFF = ('moderator', 'admin')
+EMPLOYEES = ('moderator', 'admin')
 
 
 class NonEmployeeScopedRateThrottle(ScopedRateThrottle):
 
     def get_cache_key(self, request, view):
-        if request.user.is_authenticated and request.user.role in STAFF:
+        if request.user.is_authenticated and request.user.role in EMPLOYEES:
             return None
 
         if request.user.is_authenticated:

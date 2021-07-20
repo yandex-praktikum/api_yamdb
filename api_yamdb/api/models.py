@@ -45,7 +45,7 @@ class User(AbstractUser):
         )
 
     def __str__(self):
-        return str(self.pk)
+        return str(self.username) if self.username else '~empty~'
 
 
 class Reviews(models.Model):
@@ -71,12 +71,18 @@ class Reviews(models.Model):
     text = models.TextField(verbose_name='Отзыв')
     pub_date = models.DateTimeField(verbose_name='Дата публикации отзыва',
                                     auto_now_add=True)
-    score = models.PositiveSmallIntegerField(choices=CHOOSE_RATING)
+    score = models.PositiveSmallIntegerField(verbose_name='Оценка',
+                                             choices=CHOOSE_RATING)
 
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-        ordering = ('-pub_date',)
+        constraints = (
+            UniqueConstraint(
+                name='reviews-unique-author',
+                fields=('author', 'title')
+            ),
+        )
 
     def __str__(self):
         return self.text[:15]
@@ -95,36 +101,35 @@ class Comments(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.text[:15]
 
 
 class Categories(models.Model):
-    name = models.CharField(verbose_name='Название', max_length=200)
+    name = models.CharField(verbose_name='Название', max_length=200,
+                            unique=True)
     slug = models.SlugField(verbose_name='URL', unique=True)
 
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ('name',)
 
     def __str__(self):
-        return f'{self.name}: {self.slug}'
+        return f'{self.name}'
 
 
 class Genres(models.Model):
-    name = models.CharField(verbose_name='Название', max_length=200)
+    name = models.CharField(verbose_name='Название', max_length=200,
+                            unique=True)
     slug = models.SlugField(verbose_name='URL', unique=True)
 
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-        ordering = ('name',)
 
     def __str__(self):
-        return f'{self.name}: {self.slug}'
+        return f'{self.name}'
 
 
 class Titles(models.Model):
@@ -154,7 +159,6 @@ class Titles(models.Model):
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
-        ordering = ('name',)
 
     def __str__(self):
         return self.name

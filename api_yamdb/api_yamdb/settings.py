@@ -105,6 +105,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'auth-non-employee': '20/hour',
+        'burst-non-employee': '60/min',
     },
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.PageNumberPagination',
@@ -118,10 +119,8 @@ SIMPLE_JWT = {
 
 AUTH_USER_MODEL = 'api.User'
 
-# EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
-# EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp/test-sent-mail')
-
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'tmp/test-sent-mail')
 
 EMAIL_EXPIRATION_TIME = timedelta(hours=100)
 DEFAULT_FROM_EMAIL = 'api@yatube.com'

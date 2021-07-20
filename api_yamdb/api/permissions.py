@@ -13,20 +13,18 @@ class IsAdmin(BasePermission):
         user = request.user
         return bool(user.is_authenticated and user.role == 'admin')
 
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        return bool(user.is_authenticated and user.role == 'admin')
+
 
 class IsSafeMethod(BasePermission):
 
     def has_permission(self, request, view):
         return bool(request.method in SAFE_METHODS)
 
-
-class HasUsernameForPOST(BasePermission):
-    message = ('Вы не можете оставлять отзывы и комментарии без '
-               'предварительной установки параметра username через '
-               'PATCH-запрос на адрес api/v1/users/me/')
-
-    def has_permission(self, request, view):
-        return bool(request.method != 'POST' or request.user.username)
+    def has_object_permission(self, request, view, obj):
+        return bool(request.method in SAFE_METHODS)
 
 
 class IsModerator(BasePermission):
@@ -35,14 +33,18 @@ class IsModerator(BasePermission):
         user = request.user.is_authenticated
         return bool(user and request.user.role == 'moderator')
 
-
-class ReviewAndCommentPermission(BasePermission):
-    def has_permission(self, request, view):
-        return (request.method in SAFE_METHODS
-                or request.user.is_authenticated)
-
     def has_object_permission(self, request, view, obj):
-        return (obj.author == request.user
-                or request.method in SAFE_METHODS
-                or request.user.role == 'moderator'
-                or request.user.role == 'admin')
+        user = request.user.is_authenticated
+        return bool(user and request.user.role == 'moderator')
+
+
+class HasUsernameForPOST(BasePermission):
+    # Since the message has been rewritten, that permission should be placed
+    # last and joined with "&"(AND) or ","(comma) to display the correct
+    # matching answer.
+    message = ('Вы не можете оставлять отзывы и комментарии без '
+               'предварительной установки параметра username через '
+               'PATCH-запрос на адрес api/v1/users/me/')
+
+    def has_permission(self, request, view):
+        return bool(request.method != 'POST' or request.user.username)

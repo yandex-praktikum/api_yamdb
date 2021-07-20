@@ -1,8 +1,4 @@
-import datetime as dt
-
-from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
-from rest_framework.generics import get_object_or_404
 
 from .models import Category, Comment, Genre, Review, Title, User
 
@@ -17,10 +13,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
 
     def validate(self, data):
-        user = self.context['request'].user
-        title = self.context['view'].kwargs.get('title_id')
         if self.context['request'].method != 'POST':
             return data
+        user = self.context['request'].user
+        title = self.context['view'].kwargs.get('title_id')
         if Review.objects.filter(author=user, title=title).exists():
             raise serializers.ValidationError('Ваш отзыв уже был опубликован')
         return data

@@ -1,5 +1,6 @@
 from smtplib import SMTPException
 
+from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -8,18 +9,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import (AllowAny, IsAdminUser,
-                                        IsAuthenticatedOrReadOnly, IsAuthenticated)
+from rest_framework.permissions import (AllowAny, IsAdminUser, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from django.conf import settings
-#from api_yamdb.settings import EMAIL_HOST_DOMEN, EMAIL_HOST_USER
 from .filters import TitleModelFilter
 from .models import Category, Genre, Review, Title, User
-from .permissions import (IsAdminModeratorOrAuthor, IsAdminOrReadOnly,
-    # IsAuthor
-                          )
+from .permissions import IsAdminModeratorOrAuthor, IsAdminOrReadOnly
 from .serializers import (CategorySerializer, CommentSerializer,
                           EmailSerializer, GenreSerializer, ReviewSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -48,9 +45,17 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def me(self, request):
         self.kwargs['username'] = request.user.username
+        user = get_object_or_404(User, email=request.user.email)
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if request.method == 'GET':
             return self.retrieve(request)
-        return self.partial_update(request)
+        if serializer.is_valid():
+            serializer.save(role=request.user.role)
+            return Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
@@ -58,13 +63,18 @@ class UserViewSet(viewsets.ModelViewSet):
 def create_new_user(request):
     serializer = EmailSerializer(data=request.data)
     if serializer.is_valid():
-        if not User.objects.filter(email=serializer.initial_data['email']).exists():
+        if not User.objects.filter(
+                email=serializer.initial_data['email']
+        ).exists():
             User.objects.create_user(
                 username=serializer.initial_data['email'],
                 email=serializer.initial_data['email']
             )
             send_confirmation_code(serializer.initial_data['email'])
-            return Response('Пользователь успешно создан', status=status.HTTP_201_CREATED)
+            return Response(
+                'Пользователь успешно создан',
+                status=status.HTTP_201_CREATED
+            )
         send_confirmation_code(serializer.initial_data['email'])
         return Response(
             'Confirmation code  отправлен на ваш email',
@@ -120,10 +130,10 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminModeratorOrAuthor,
-                          # IsAuthor
-                          )
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAdminModeratorOrAuthor,
+    )
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -136,10 +146,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminModeratorOrAuthor,
-                          # IsAuthor
-                          )
+    permission_classes = (
+        IsAuthenticatedOrReadOnly,
+        IsAdminModeratorOrAuthor,
+    )
 
     def _get_review_id(self):
         return self.kwargs.get('review_id')
@@ -164,9 +174,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def TokenObtainPairView(request):
     serializer = TokenObtainPairSerializer(data=request.data)
-    if serializer.is_valid():
-        user = get_object_or_404(User, email=serializer.initial_data['email'])
-        token = AccessToken.for_user(user)
-        data = {'token': str(token)}
-        return Response(data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    user = get_object_or_404(User, email=serializer.initial_data['email'])
+    token = AccessToken.for_user(user)
+    data = {'token': str(token)}
+    return Response(data)

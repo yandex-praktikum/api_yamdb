@@ -3,24 +3,10 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 class IsAdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
-        if (request.method not in SAFE_METHODS
-                and request.user.is_anonymous):
-            return False
-        return (request.method in SAFE_METHODS
-                or request.user.is_admin
-                or request.user.is_superuser)
-
-
-class IsMeAction(BasePermission):
-    def has_permission(self, request, view):
-        if request.user.is_anonymous:
-            return False
-        if request.method == 'PATCH' and (
-                request.user.is_admin
-                or request.user.is_superuser
-        ):
-            return True
-        return request.method in ('GET', 'PATCH', 'DELETE')
+        return request.method in SAFE_METHODS or (
+                request.user.is_authenticated
+                and (request.user.is_superuser or request.user.is_admin)
+        )
 
 
 class IsAdminModeratorOrAuthor(BasePermission):

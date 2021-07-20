@@ -11,7 +11,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True
     )
-    score = serializers.IntegerField(min_value=1, max_value=10)
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
@@ -37,10 +36,9 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {'email': {'required': True}}
 
 
-class EmailSerializer(serializers.ModelSerializer):
+class EmailSerializer(serializers.Serializer):
     class Meta:
         fields = ('email',)
-        model = User
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -80,28 +78,10 @@ class TitleReadSerializer(serializers.ModelSerializer):
         )
         model = Title
 
-    def validate_year(self, value):
-        year = dt.date.today().year
-        if not (value <= year):
-            raise serializers.ValidationError('Проверьте год выпуска фильма!')
-        return value
-
 
 class TokenObtainPairSerializer(serializers.Serializer):
     class Meta:
         fields = ('email', 'confirmation_code')
-        model = User
-
-    def validate(self, data):
-        user = get_object_or_404(User, email=self.initial_data['email'])
-        if default_token_generator.check_token(
-                user,
-                self.initial_data['confirmation_code']
-        ):
-            return data
-        raise serializers.ValidationError(
-            "Некорректный код подтверждения регистрации"
-        )
 
 
 class CommentSerializer(serializers.ModelSerializer):

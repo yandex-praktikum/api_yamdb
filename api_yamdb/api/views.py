@@ -9,27 +9,21 @@ from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import (AllowAny, IsAdminUser,
-                                        IsAuthenticatedOrReadOnly)
+                                        IsAuthenticatedOrReadOnly, IsAuthenticated)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from api_yamdb.settings import EMAIL_HOST_DOMEN, EMAIL_HOST_USER
-
-from .filters import ModelFilter
+from django.conf import settings
+#from api_yamdb.settings import EMAIL_HOST_DOMEN, EMAIL_HOST_USER
+from .filters import TitleModelFilter
 from .models import Category, Genre, Review, Title, User
 from .permissions import (IsAdminModeratorOrAuthor, IsAdminOrReadOnly,
-                          IsMeAction)
+    # IsAuthor
+                          )
 from .serializers import (CategorySerializer, CommentSerializer,
                           EmailSerializer, GenreSerializer, ReviewSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
                           TokenObtainPairSerializer, UserSerializer)
-
-
-class CreateViewSet(
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,
@@ -50,7 +44,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(
         detail=False,
         methods=['GET', 'PATCH'],
-        permission_classes=(IsMeAction,)
+        permission_classes=(IsAuthenticated,)
     )
     def me(self, request):
         self.kwargs['username'] = request.user.username
@@ -59,46 +53,38 @@ class UserViewSet(viewsets.ModelViewSet):
         return self.partial_update(request)
 
 
-def get_confirmation_code(user):
-    return default_token_generator.make_token(user)
-
-
-@api_view(['POST'], )
+@api_view(['POST'])
 @permission_classes([AllowAny])
-def CreateNewUser(request):
+def create_new_user(request):
     serializer = EmailSerializer(data=request.data)
-    user_max_pk = User.objects.latest('pk')
-    max_pk = user_max_pk.pk
-    username = ('user' + str(max_pk + 1))
     if serializer.is_valid():
-        serializer.save(
-            username=username
-        )
-        send_confirmation_code(username, [serializer.data['email']])
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    if serializer.errors['email'][0] == (
-            'user with this email address already exists.'
-    ):
-        send_confirmation_code(username, [serializer.data['email']])
+        if not User.objects.filter(email=serializer.initial_data['email']).exists():
+            User.objects.create_user(
+                username=serializer.initial_data['email'],
+                email=serializer.initial_data['email']
+            )
+            send_confirmation_code(serializer.initial_data['email'])
+            return Response('Пользователь успешно создан', status=status.HTTP_201_CREATED)
+        send_confirmation_code(serializer.initial_data['email'])
         return Response(
-            'Confirmation code повторно отправлен на ваш email',
+            'Confirmation code  отправлен на ваш email',
             status=status.HTTP_200_OK
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def send_confirmation_code(username, email):
+def send_confirmation_code(email):
     try:
-        user = get_object_or_404(User, username=username)
-        confirmation_code = get_confirmation_code(user)
+        user = get_object_or_404(User, email=email)
+        confirmation_code = default_token_generator.make_token(user)
         send_mail(
             'Ваш код подтверждения YaMDb',
             f'Код подтверждения:{confirmation_code}',
-            EMAIL_HOST_USER + EMAIL_HOST_DOMEN,
-            email,
+            settings.EMAIL_HOST_USER + settings.EMAIL_HOST_DOMEN,
+            (email,),
         )
     except SMTPException as e:
-        print('There was an error sending an email: ', e)
+        Response('There was an error sending an email: ', e)
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
@@ -124,7 +110,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = [DjangoFilterBackend]
-    filter_class = ModelFilter
+    filter_class = TitleModelFilter
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):
@@ -135,7 +121,9 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminModeratorOrAuthor,)
+                          IsAdminModeratorOrAuthor,
+                          # IsAuthor
+                          )
 
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -149,29 +137,27 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,
-                          IsAdminModeratorOrAuthor,)
+                          IsAdminModeratorOrAuthor,
+                          # IsAuthor
+                          )
 
     def _get_review_id(self):
         return self.kwargs.get('review_id')
 
-    def get_title_id(self):
+    def _get_title_id(self):
         return self.kwargs.get('title_id')
 
     def get_queryset(self):
         review = get_object_or_404(
-            Review, pk=self._get_review_id(), title__id=self.get_title_id()
+            Review, pk=self._get_review_id(), title__id=self._get_title_id()
         )
         return review.comments.all()
 
     def perform_create(self, serializer):
         review = get_object_or_404(
-            Review, pk=self._get_review_id(), title__id=self.get_title_id()
+            Review, pk=self._get_review_id(), title__id=self._get_title_id()
         )
         serializer.save(author=self.request.user, review=review)
-
-
-def get_token(user):
-    return AccessToken.for_user(user)
 
 
 @api_view(['POST'], )
@@ -180,7 +166,7 @@ def TokenObtainPairView(request):
     serializer = TokenObtainPairSerializer(data=request.data)
     if serializer.is_valid():
         user = get_object_or_404(User, email=serializer.initial_data['email'])
-        token = get_token(user)
+        token = AccessToken.for_user(user)
         data = {'token': str(token)}
         return Response(data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -3,15 +3,11 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-USER_ROLE = 'user'
-MODERATOR_ROLE = 'moderator'
-ADMIN_ROLE = 'admin'
-
 
 class User(AbstractUser):
-    is_user = False
-    is_moderator = False
-    is_admin = False
+    USER_ROLE = 'user'
+    MODERATOR_ROLE = 'moderator'
+    ADMIN_ROLE = 'admin'
 
     ROLE_CHOICES = (
         (USER_ROLE, 'User'),
@@ -26,28 +22,27 @@ class User(AbstractUser):
 
     class Meta:
         ordering = ['-username']
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self):
         return self.username
 
     @property
     def is_user(self):
-        if self.role == USER_ROLE:
-            return True
+        return self.role == self.USER_ROLE
 
     @property
     def is_moderator(self):
-        if self.role == MODERATOR_ROLE:
-            return True
+        return self.role == self.MODERATOR_ROLE
 
     @property
     def is_admin(self):
-        if self.role == ADMIN_ROLE:
-            return True
+        return self.role == self.ADMIN_ROLE
 
 
 class Genre(models.Model):
-    name = models.TextField('Название', )
+    name = models.TextField('Название')
     slug = models.SlugField('Адрес', unique=True)
 
     class Meta:
@@ -59,7 +54,7 @@ class Genre(models.Model):
 
 
 class Category(models.Model):
-    name = models.TextField('Название', )
+    name = models.TextField('Название')
     slug = models.SlugField('Адрес', unique=True)
 
     class Meta:
@@ -71,7 +66,7 @@ class Category(models.Model):
 
 
 class Title(models.Model):
-    name = models.TextField('Название', )
+    name = models.TextField('Название')
     year = models.PositiveSmallIntegerField('Год выпуска')
     description = models.TextField('Описание')
     genre = models.ManyToManyField(Genre, related_name='titles',
@@ -79,6 +74,10 @@ class Title(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL,
                                  related_name='titles', blank=True, null=True,
                                  verbose_name='Категория')
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
         return self.name

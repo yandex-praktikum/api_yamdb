@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import (CategoryViewSet, CommentViewSet, CreateNewUser,
+from .views import (CategoryViewSet, CommentViewSet, create_new_user,
                     GenreViewSet, ReviewViewSet, TitleViewSet,
                     TokenObtainPairView, UserViewSet)
 
@@ -22,7 +22,7 @@ router.register(
 )
 auth = [
     path('token/', TokenObtainPairView, name="jwt-create"),
-    path('email/', CreateNewUser, name='create-user')
+    path('email/', create_new_user, name='create-user')
 ]
 
 urlpatterns = [

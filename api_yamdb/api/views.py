@@ -1,5 +1,3 @@
-from smtplib import SMTPException
-
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -10,18 +8,20 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import (AllowAny, IsAdminUser, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (
+    AllowAny, IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
+)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from .filters import TitleModelFilter
-from .models import Category, Genre, Review, Title, User
-from .permissions import IsAdminModeratorOrAuthor, IsAdminOrReadOnly
-from .serializers import (CategorySerializer, CommentSerializer,
-                          EmailSerializer, GenreSerializer, ReviewSerializer,
-                          TitleReadSerializer, TitleWriteSerializer,
-                          TokenObtainPairSerializer, UserSerializer)
+from .models import Review, Title, User, Category, Genre
+from .permissions import IsAdminOrReadOnly, IsAdminModeratorOrAuthor
+from .serializers import (
+    EmailSerializer, TitleReadSerializer, TitleWriteSerializer,
+    TokenObtainPairSerializer, UserSerializer, CategorySerializer,
+    GenreSerializer, ReviewSerializer, CommentSerializer
+)
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,
@@ -51,7 +51,11 @@ class UserViewSet(viewsets.ModelViewSet):
         self.kwargs['username'] = request.user.username
         if request.method == 'GET':
             return self.retrieve(request)
-        serializer = self.get_serializer(request.user, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            request.user,
+            data=request.data,
+            partial=True
+        )
         if serializer.is_valid():
             serializer.save(role=request.user.role)
             return Response(
@@ -66,7 +70,14 @@ class UserViewSet(viewsets.ModelViewSet):
 def create_new_user(request):
     serializer = EmailSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    if User.objects.filter(email=serializer.instance['email']).exists():
+    if User.objects.filter(email=serializer.validated_data['email']).exists():
+        try:
+            send_confirmation_code(serializer.validated_data['email'])
+        except RuntimeError:
+            return Response(
+                'Ошибка отправки почты',
+                status=status.HTTP_502_BAD_GATEWAY
+            )
         return Response(
             'Confirmation code  отправлен на ваш email',
             status=status.HTTP_200_OK
@@ -77,31 +88,29 @@ def create_new_user(request):
     )
     try:
         send_confirmation_code(serializer.instance['email'])
-    except:
-        Response('Ошибка отправки почты', status=status.HTTP_502_BAD_GATEWAY)
+    except RuntimeError:
+        Response(
+            'Ошибка отправки почты',
+            status=status.HTTP_502_BAD_GATEWAY
+        )
     return Response(
         'Пользователь успешно создан и отправлен email с confirmation code',
         status=status.HTTP_201_CREATED
     )
-    try:
-        send_confirmation_code(serializer.instance['email'])
-    except:
-        Response('Ошибка отправки почты', status=status.HTTP_502_BAD_GATEWAY)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def send_confirmation_code(email):
+    user = get_object_or_404(User, email=email)
+    confirmation_code = default_token_generator.make_token(user)
     try:
-        user = get_object_or_404(User, email=email)
-        confirmation_code = default_token_generator.make_token(user)
         send_mail(
             'Ваш код подтверждения YaMDb',
             f'Код подтверждения:{confirmation_code}',
             settings.EMAIL_HOST_USER + settings.EMAIL_HOST_DOMEN,
             (email,),
         )
-    except SMTPException as e:
-        raise e
+    except BaseException:
+        raise RuntimeError
 
 
 class CategoryViewSet(CreateListDestroyViewSet):

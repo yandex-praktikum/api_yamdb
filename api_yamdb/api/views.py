@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.core.serializers import get_serializer
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -33,14 +32,11 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = get_serializer
+    serializer_class = UserSerializer
     lookup_field = 'username'
     permission_classes = (IsAdminUser,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-
-    def get_serializer_class(self):
-        return UserSerializer
 
     @action(
         detail=False,
@@ -191,7 +187,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 def token_obtain_pair_view(request):
     serializer = TokenObtainPairSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user = get_object_or_404(User, email=serializer.instance['email'])
+    user = get_object_or_404(User, email=serializer.validated_data['email'])
     token = AccessToken.for_user(user)
     data = {'token': str(token)}
     return Response(data)

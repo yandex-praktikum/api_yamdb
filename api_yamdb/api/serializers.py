@@ -1,4 +1,6 @@
+from django.contrib.auth.tokens import default_token_generator
 from rest_framework import serializers
+from rest_framework.generics import get_object_or_404
 
 from .models import Category, Comment, Genre, Review, Title, User
 
@@ -33,8 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class EmailSerializer(serializers.Serializer):
-    class Meta:
-        fields = ('email',)
+    email = serializers.EmailField()
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -76,8 +77,15 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 
 class TokenObtainPairSerializer(serializers.Serializer):
-    class Meta:
-        fields = ('email', 'confirmation_code')
+    email = serializers.EmailField()
+    confirmation_code = serializers.CharField(max_length=50)
+
+    def validate(self, data):
+        user = get_object_or_404(User, email=self.initial_data['email'])
+        token = self.initial_data['confirmation_code']
+        if default_token_generator.check_token(user, token):
+            return data
+        raise serializers.ValidationError('Ошибка аутентификации')
 
 
 class CommentSerializer(serializers.ModelSerializer):

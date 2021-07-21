@@ -3,6 +3,7 @@ from smtplib import SMTPException
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.core.serializers import get_serializer
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -32,11 +33,14 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = get_serializer
     lookup_field = 'username'
     permission_classes = (IsAdminUser,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+
+    def get_serializer_class(self):
+        return UserSerializer
 
     @action(
         detail=False,
@@ -45,10 +49,9 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def me(self, request):
         self.kwargs['username'] = request.user.username
-        user = get_object_or_404(User, email=request.user.email)
-        serializer = UserSerializer(user, data=request.data, partial=True)
         if request.method == 'GET':
             return self.retrieve(request)
+        serializer = self.get_serializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save(role=request.user.role)
             return Response(
@@ -62,24 +65,28 @@ class UserViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def create_new_user(request):
     serializer = EmailSerializer(data=request.data)
-    if serializer.is_valid():
-        if not User.objects.filter(
-                email=serializer.initial_data['email']
-        ).exists():
-            User.objects.create_user(
-                username=serializer.initial_data['email'],
-                email=serializer.initial_data['email']
-            )
-            send_confirmation_code(serializer.initial_data['email'])
-            return Response(
-                'Пользователь успешно создан',
-                status=status.HTTP_201_CREATED
-            )
-        send_confirmation_code(serializer.initial_data['email'])
+    serializer.is_valid(raise_exception=True)
+    if User.objects.filter(email=serializer.instance['email']).exists():
         return Response(
             'Confirmation code  отправлен на ваш email',
             status=status.HTTP_200_OK
         )
+    User.objects.create_user(
+        username=serializer.instance['email'],
+        email=serializer.instance['email']
+    )
+    try:
+        send_confirmation_code(serializer.instance['email'])
+    except:
+        Response('Ошибка отправки почты', status=status.HTTP_502_BAD_GATEWAY)
+    return Response(
+        'Пользователь успешно создан и отправлен email с confirmation code',
+        status=status.HTTP_201_CREATED
+    )
+    try:
+        send_confirmation_code(serializer.instance['email'])
+    except:
+        Response('Ошибка отправки почты', status=status.HTTP_502_BAD_GATEWAY)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -94,7 +101,7 @@ def send_confirmation_code(email):
             (email,),
         )
     except SMTPException as e:
-        Response('There was an error sending an email: ', e)
+        raise e
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
@@ -172,10 +179,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'], )
 @permission_classes([AllowAny])
-def TokenObtainPairView(request):
+def token_obtain_pair_view(request):
     serializer = TokenObtainPairSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    user = get_object_or_404(User, email=serializer.initial_data['email'])
+    user = get_object_or_404(User, email=serializer.instance['email'])
     token = AccessToken.for_user(user)
     data = {'token': str(token)}
     return Response(data)

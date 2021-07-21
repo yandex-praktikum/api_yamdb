@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (CategoryViewSet, CommentViewSet, GenreViewSet,
-                    ReviewViewSet, TitleViewSet, TokenObtainPairView,
+                    ReviewViewSet, TitleViewSet, token_obtain_pair_view,
                     UserViewSet, create_new_user)
 
 router = DefaultRouter()
@@ -21,7 +21,7 @@ router.register(
     basename='comments',
 )
 auth = [
-    path('token/', TokenObtainPairView, name="jwt-create"),
+    path('token/', token_obtain_pair_view, name="jwt-create"),
     path('email/', create_new_user, name='create-user')
 ]
 

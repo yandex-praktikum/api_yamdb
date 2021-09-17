@@ -45,6 +45,7 @@ class Test01UserAPI:
     @pytest.mark.django_db(transaction=True)
     def test_04_users_get_admin(self, admin_client, admin):
         response = admin_client.get('/api/v1/users/')
+        # breakpoint()
         assert response.status_code != 404, (
             'Страница `/api/v1/users/` не найдена, проверьте этот адрес в *urls.py*'
         )
@@ -76,6 +77,7 @@ class Test01UserAPI:
             'Проверьте, что при GET запросе `/api/v1/users/` возвращаете данные с пагинацией. '
             'Тип параметра `results` должен быть список'
         )
+        # breakpoint()
         assert (
             len(data['results']) == 1
             and data['results'][0].get('username') == admin.username

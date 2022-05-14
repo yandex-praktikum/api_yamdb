@@ -4,7 +4,7 @@ from .serializers import (CategorySerializer,
                           GenreSerializer, TitleSerializer)
 # CommentSerializer, ReviewSerializer)
 from rest_framework import filters
-from rest_framework.pagination import PageNumberPagination
+# from rest_framework.pagination import PageNumberPagination
 from rest_framework import mixins, viewsets
 
 
@@ -22,7 +22,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
 #    permission_classes = (permissions.IsAuthenticated,)
-    pagination_class = PageNumberPagination
+#    pagination_class = PageNumberPagination
     lookup_field = 'slug'
 
 

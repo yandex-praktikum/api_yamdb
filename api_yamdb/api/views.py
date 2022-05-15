@@ -39,7 +39,9 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    pass
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('year', 'name',) # дописать
+    pagination_class = PageNumberPagination
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

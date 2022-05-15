@@ -43,15 +43,14 @@ class Title(models.Model):
                                validators=[validate_even])
 
 # rating = models.IntegerField(null=True, verbose_name='Рейтинг')
-#  нужен ли он тут или его реализуем в serializers?
+#  нужен ли он тут или его реализуем в view?
     description = models.TextField(verbose_name='Описание',
                                    null=True, blank=True)
     genre = models.ManyToManyField(Genre, related_name='titles',
                                    verbose_name='Жанр')
     category = models.ForeignKey(Category, related_name='titles',
-                                 on_delete=models.SET_NULL,
-                                 verbose_name='Категория',
-                                 null=True)
+                                 on_delete=models.DO_NOTHING,
+                                 verbose_name='Категория',)
 
     class Meta:
         verbose_name = 'Название произведения'

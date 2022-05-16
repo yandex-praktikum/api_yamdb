@@ -3,13 +3,26 @@ from users.models import User
 from django.shortcuts import get_object_or_404
 from .serializers import (CategorySerializer,
                           GenreSerializer, TitleSerializer,
-                          CommentSerializer, ReviewSerializer)
-from rest_framework import filters
+                          CommentSerializer, ReviewSerializer,
+                          UserSerializer, MeSerializer, SignUpSerializer,
+                          TokenSerializer)
+from rest_framework import filters, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import mixins, viewsets
 from rest_framework import serializers
-from .permission import ReviewCommentPermission
+from .permission import (ReviewCommentPermission, OwnerOrAdmins,
+                         IsAdminOrReadOnly, AuthorAndStaffOrReadOnly)
 from .validations import check_conformity_title_and_review
+from rest_framework.decorators import action, api_view
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+from django.db import IntegrityError
+from django.core.mail import send_mail
+import uuid
+from rest_framework_simplejwt.tokens import AccessToken
+
+
 
 
 
@@ -19,6 +32,7 @@ class ListCreateDestroyViewSet(mixins.ListModelMixin,
                                mixins.DestroyModelMixin,
                                viewsets.GenericViewSet,
                                ):
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
     pass
 
 
@@ -48,11 +62,14 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('year', 'name',) # дописать
     pagination_class = PageNumberPagination
+    permission_classes = [IsAdminOrReadOnly]
+
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+    permission_classes = [AuthorAndStaffOrReadOnly]
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
@@ -72,7 +89,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (ReviewCommentPermission, )
+    permission_classes = (ReviewCommentPermission, AuthorAndStaffOrReadOnly)
 
     def get_queryset(self):
         check_conformity_title_and_review(self)
@@ -85,3 +102,70 @@ class CommentViewSet(viewsets.ModelViewSet):
         review_id = self.kwargs.get("review_id")
         review = get_object_or_404(Review, id=review_id)
         serializer.save(author=self.request.user, review_id=review)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (OwnerOrAdmins, )
+    filter_backends = (filters.SearchFilter, )
+    filterset_fields = ('username')
+    search_fields = ('username', )
+    lookup_field = 'username'
+
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        url_path='me',
+        permission_classes=(IsAuthenticated, )
+    )
+    def get_patch_me(self, request):
+        user = get_object_or_404(User, username=self.request.user)
+        if request.method == 'GET':
+            serializer = MeSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == 'PATCH':
+            serializer = MeSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def signup_post(request):
+    serializer = SignUpSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.validated_data['email']
+    username = serializer.validated_data['username']
+    try:
+        user, create = User.objects.get_or_create(
+            username=username,
+            email=email
+        )
+    except IntegrityError:
+        return Response(
+            'Такой логин или email уже существуют',
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    confirmation_code = str(uuid.uuid4())
+    user.confirmation_code = confirmation_code
+    user.save()
+    send_mail(
+        'Код подверждения', confirmation_code,
+        ['admin@email.com'], (email, ), fail_silently=False
+    )
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def token_post(request):
+    serializer = TokenSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    username = serializer.validated_data['username']
+    confirmation_code = serializer.validated_data['confirmation_code']
+    user_base = get_object_or_404(User, username=username)
+    if confirmation_code == user_base.confirmation_code:
+        token = str(AccessToken.for_user(user_base))
+        return Response({'token': token}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -34,10 +34,25 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    
-    pass
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field="username"
+    )
+
+    class Meta:
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        model = Review
+
+    def validate_score(self, value):
+        if not (0 < value <= 10):
+            raise serializers.ValidationError('Проверьте свою оценку. Оценка - это целое число от 1 до 10!')
+        return value
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    
-    pass
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field="username"
+    )
+
+    class Meta:
+        fields = ("id", "text", "author", "pub_date")
+        model = Comment

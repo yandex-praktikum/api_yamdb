@@ -12,7 +12,7 @@ from rest_framework import mixins, viewsets
 from rest_framework import serializers
 from .permission import (ReviewCommentPermission, OwnerOrAdmins,
                          IsAdminOrReadOnly, AuthorAndStaffOrReadOnly)
-from .validations import check_conformity_title_and_review
+from api.validators import check_conformity_title_and_review
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)

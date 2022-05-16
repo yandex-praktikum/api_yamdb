@@ -4,11 +4,10 @@ from django.shortcuts import get_object_or_404
 from .serializers import (CategorySerializer,
                           GenreSerializer, TitleSerializer,
                           CommentSerializer, ReviewSerializer)
-from rest_framework import filters
+
 from rest_framework.pagination import PageNumberPagination
-from rest_framework import mixins, viewsets
-from rest_framework import serializers
-from .permission import ReviewCommentPermission
+from rest_framework import mixins, viewsets, serializers, filters
+from .permissions import ReviewCommentPermission, GenreCategoryPermission
 from .validations import check_conformity_title_and_review
 
 
@@ -27,7 +26,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-#    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (GenreCategoryPermission,) 
     pagination_class = PageNumberPagination
     lookup_field = 'slug'
 
@@ -38,7 +37,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-#   permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (GenreCategoryPermission,) 
     lookup_field = 'slug'
 
 
@@ -48,7 +47,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('year', 'name',) # дописать
     pagination_class = PageNumberPagination
-
+#дописать
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from users.validators import UsernameValidator
+
 
 
 class User(AbstractUser):
@@ -12,8 +14,9 @@ class User(AbstractUser):
         (MODERATOR, 'Moderator'),
         (ADMIN, 'Admin'),
     )
-
-    username = models.CharField(max_length=150, unique=True)
+    username_validator = UsernameValidator()
+    username = models.CharField(max_length=150, verbose_name='Имя пользователя',
+                                unique=True, validators=[username_validator])
     first_name = models.CharField(verbose_name='first name',
                                   max_length=150, blank=True)
     email = models.EmailField(max_length=254,
@@ -25,17 +28,27 @@ class User(AbstractUser):
     role = models.CharField(verbose_name='Роль',
                             max_length=20,
                             choices=ROLES_CHOICES, default=USER)
-
-    def is_moderator(self):
-        return self.role in self.MODERATOR
-
-    def is_admin(self):
-        return self.role in self.ADMIN
+    last_name = models.CharField(max_length=150, blank=True)
 
     USERNAME_FIELD = 'email'   # Строка, описывающая имя поля в
     # пользовательской модели, которое используется
     # в качестве уникального идентификатора
     REQUIRED_FIELDS = ['username']
+
+    def __str__(self):
+        return str(self.username)
+
+    @property
+    def is_admin(self):
+        return self.role == "admin" or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == "moderator"
+
+    @property
+    def is_user(self):
+        return self.role == "user"
 
     class Meta:
         ordering = ('username',)

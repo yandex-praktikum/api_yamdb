@@ -6,9 +6,11 @@ from .serializers import (CategorySerializer,
                           CommentSerializer, ReviewSerializer,
                           UserSerializer, MeSerializer, SignUpSerializer,
                           TokenSerializer)
-from rest_framework import filters, status, mixins, viewsets, serializers
+from rest_framework import filters, status
 from rest_framework.pagination import PageNumberPagination
-from .permissions import (ReviewCommentPermission, OwnerOrAdmins, GenreCategoryPermission,
+from rest_framework import mixins, viewsets
+from rest_framework import serializers
+from .permission import (ReviewCommentPermission, OwnerOrAdmins,
                          IsAdminOrReadOnly, AuthorAndStaffOrReadOnly)
 from api.validators import check_conformity_title_and_review
 from rest_framework.decorators import action, api_view
@@ -19,6 +21,10 @@ from django.db import IntegrityError
 from django.core.mail import send_mail
 import uuid
 from rest_framework_simplejwt.tokens import AccessToken
+
+
+
+
 
 
 class ListCreateDestroyViewSet(mixins.ListModelMixin,
@@ -35,7 +41,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (GenreCategoryPermission,)
+#    permission_classes = (permissions.IsAuthenticated,)
     pagination_class = PageNumberPagination
     lookup_field = 'slug'
 
@@ -46,7 +52,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (GenreCategoryPermission,)
+#   permission_classes = (permissions.IsAuthenticated,)
     lookup_field = 'slug'
 
 
@@ -59,14 +65,17 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [AuthorAndStaffOrReadOnly]
+
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
         new_queryset = title.reviews.all()
         return new_queryset
+
     def perform_create(self, serializer):
         title_id = self.kwargs.get("title_id")
         title = get_object_or_404(Title, id=title_id)
@@ -77,16 +86,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
             )
         serializer.save(author=self.request.user, title_id=title)
 
-
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (ReviewCommentPermission, AuthorAndStaffOrReadOnly)
+
     def get_queryset(self):
         check_conformity_title_and_review(self)
         review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
         new_queryset = review.comments.all()
         return new_queryset
+
     def perform_create(self, serializer):
         check_conformity_title_and_review(self)
         review_id = self.kwargs.get("review_id")
@@ -103,6 +113,7 @@ class UserViewSet(viewsets.ModelViewSet):
     filterset_fields = ('username')
     search_fields = ('username', )
     lookup_field = 'username'
+
     @action(
         methods=['get', 'patch'],
         detail=False,
@@ -119,7 +130,8 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-            
+
+
 @api_view(['POST'])
 def signup_post(request):
     serializer = SignUpSerializer(data=request.data)
@@ -144,6 +156,7 @@ def signup_post(request):
         ['admin@email.com'], (email, ), fail_silently=False
     )
     return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 def token_post(request):

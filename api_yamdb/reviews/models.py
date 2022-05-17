@@ -71,13 +71,13 @@ class Review(models.Model):
                                 verbose_name='Оценка')
     pub_date = models.DateTimeField(auto_now_add=True,
                                     verbose_name='Дата публикации',)
-    titles_id = models.ForeignKey(Title,
+    title = models.ForeignKey(Title,
                                   on_delete=models.CASCADE,
                                   related_name='reviews',
                                   verbose_name='Произведение')
 
     class Meta:
-        unique_together = ['author', 'titles_id']
+        unique_together = ['author', 'title']
         # Пользователь может оставить только один отзыв на произведение.
         ordering = ['-pub_date']  # Порядок по умолчанию
         verbose_name = 'Отзыв'

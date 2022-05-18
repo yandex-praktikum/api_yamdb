@@ -42,7 +42,7 @@ class Title(models.Model):
     year = models.IntegerField(verbose_name='Год выпуска',
                                validators=[validate_even])
 
-# rating = models.IntegerField(null=True, verbose_name='Рейтинг')
+    rating = models.IntegerField(null=True, verbose_name='Рейтинг')
 #  нужен ли он тут или его реализуем в view?
     description = models.TextField(verbose_name='Описание',
                                    null=True, blank=True)

@@ -1,12 +1,13 @@
+
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from reviews.models import Review, Title
+from reviews.models import Title
+
 
 # Проверка того, что указанный обзор относится к указанному произведению
 def check_conformity_title_and_review(self):
     title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
-    review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
-    if len(title.review.filter(id=self.kwargs.get("review_id"))) == 0:
+    if len(title.reviews.filter(id=self.kwargs.get("review_id"))) == 0:
         raise serializers.ValidationError(
-            "Указанный обзор существует,"
-            "но не относится к указанному произведению")
+            "Обзор существует, но не относится к указанному произведению"
+        )            

@@ -40,7 +40,7 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating', 'description',
-                  'genre', 'category',                   )
+                  'genre', 'category', )
         model = Title
 
     def get_rating(self, title):
@@ -51,6 +51,11 @@ class TitleGetSerializer(serializers.ModelSerializer):
             return rating
         rating = reviews.all().aggregate(Avg('score'))['score__avg']
         return rating
+
+
+
+
+
 
 
 class ReviewSerializer(serializers.ModelSerializer):

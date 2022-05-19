@@ -6,6 +6,8 @@ from .serializers import (CategorySerializer,
                           CommentSerializer, ReviewSerializer,
                           UserSerializer, MeSerializer, SignUpSerializer,
                           TokenSerializer)
+from django_filters.rest_framework import DjangoFilterBackend
+                      
 from rest_framework import filters, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import mixins, viewsets
@@ -23,8 +25,10 @@ from django.db import IntegrityError
 from django.core.mail import send_mail
 import uuid
 from rest_framework_simplejwt.tokens import AccessToken
-from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg
+
+from .filters import TitletFilter
+
 
 class ListCreateDestroyViewSet(mixins.ListModelMixin,
                                mixins.CreateModelMixin,
@@ -52,12 +56,12 @@ class GenreViewSet(ListCreateDestroyViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
-
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields  = ('genre__slug', 'category__slug',)
+    #filter_backends = (filters.SearchFilter)
+    filter_backends = [DjangoFilterBackend]
+    filterset_class   = TitletFilter
    # search_fields = ('year', 'name', 'genre', 'category') # дописать    
     pagination_class = PageNumberPagination
     permission_classes = [IsAdminOrReadOnly]
@@ -76,6 +80,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
         new_queryset = title.reviews.all()
         return new_queryset
+
     def perform_create(self, serializer):
         title_id = self.kwargs.get("title_id")
         title = get_object_or_404(Title, id=title_id)
@@ -89,6 +94,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             title=title).aggregate(Avg("score"))
         new_rating = rating_dict["score__avg"]
         Title.objects.filter(id=title_id).update(rating=new_rating)
+
     def perform_update(self, serializer):
         title_id = self.kwargs.get("title_id")
         title = get_object_or_404(Title, id=title_id)

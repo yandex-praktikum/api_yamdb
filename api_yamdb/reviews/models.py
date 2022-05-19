@@ -3,7 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from users.models import User
-
+from django_filters import rest_framework as filters 
 
 def validate_even(value):
     if value > timezone.now().year:
@@ -56,6 +56,17 @@ class Title(models.Model):
         verbose_name = 'Название произведения'
         verbose_name_plural = 'Названия произведений'
 
+class TitletFilter(filters.FilterSet):
+    name = filters.CharFilter(field_name="name", lookup_expr='icontains' )
+    genre = filters.CharFilter(field_name="genre__slug", lookup_expr='exact')
+    category = filters.CharFilter(field_name="category__slug", lookup_expr='exact')
+    year = filters.NumberFilter(field_name='year', lookup_expr='icontains')
+    
+ 
+    class Meta:
+
+        model = Title
+        fields = ['name', 'category', 'genre', 'year' ]
 
 class Review(models.Model):
     text = models.TextField(verbose_name='Текст отзыва',

@@ -1,4 +1,4 @@
-from reviews.models import Category, Genre, Title, Comment, Review
+from reviews.models import Category, Genre, Title, Comment, Review, TitletFilter
 from users.models import User
 from django.shortcuts import get_object_or_404
 from .serializers import (CategorySerializer,
@@ -27,7 +27,7 @@ import uuid
 from rest_framework_simplejwt.tokens import AccessToken
 from django.db.models import Avg
 
-from .filters import TitletFilter
+#from .filters import TitletFilter
 
 
 class ListCreateDestroyViewSet(mixins.ListModelMixin,

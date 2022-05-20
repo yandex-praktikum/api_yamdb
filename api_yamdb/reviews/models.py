@@ -69,53 +69,44 @@ class TitletFilter(filters.FilterSet):
         fields = ['name', 'category', 'genre', 'year' ]
 
 class Review(models.Model):
-    text = models.TextField(verbose_name='Текст отзыва',
-                            help_text='Введите текст отзыва')
-    author = models.ForeignKey(User,
-                               on_delete=models.CASCADE,
-                               related_name='reviews',
-                               verbose_name='Автор отзыва')
-    score = models.IntegerField(default=1,
-                                validators=[MaxValueValidator(10),
-                                            MinValueValidator(1)],
-                                help_text='Оценка 1 до 10',
-                                verbose_name='Оценка')
-    pub_date = models.DateTimeField(auto_now_add=True,
-                                    verbose_name='Дата публикации',)
-    title = models.ForeignKey(Title,
-                                  on_delete=models.CASCADE,
-                                  related_name='reviews',
-                                  verbose_name='Произведение')
-
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name="reviews"
+    )
+    text = models.TextField()
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="reviews"
+    )
+    score = models.IntegerField()
+    pub_date = models.DateTimeField(auto_now_add=True)
+   
+    def __str__(self):
+        return str(self.id)
+   
     class Meta:
-        unique_together = ['author', 'title']
-        # Пользователь может оставить только один отзыв на произведение.
-        ordering = ['-pub_date']  # Порядок по умолчанию
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
-
-    def __str__(self) -> str:
-        return self.text[:20]
+        unique_together = ["title", "author"]
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"
 
 
 class Comment(models.Model):
-    review = models.ForeignKey(Review,
-                               verbose_name='Отзыв',
-                               on_delete=models.CASCADE,
-                               related_name='comments')
-    text = models.TextField(verbose_name='Текст комментария',
-                            help_text='Введите текст комментария')
-    author = models.ForeignKey(User,
-                               on_delete=models.CASCADE,
-                               related_name='comments',
-                               verbose_name='Автор комментария')
-    pub_date = models.DateTimeField(auto_now_add=True,
-                                    verbose_name='Дата публикации',)
+    review = models.ForeignKey(
+        Review, on_delete=models.CASCADE, related_name="comments"
+    )
 
+    text = models.TextField()
+    author = models.ForeignKey(
+        User, on_delete=models.ForeignKey, related_name="comments"
+    )
+    pub_date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.text
+    
     class Meta:
-        ordering = ['-pub_date']  # Порядок по умолчанию
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
-
-    def __str__(self) -> str:
-        return f'Комментарий от {self.author} к {self.review}'
+        ordering = ["id"]
+        verbose_name = "Комментарий"
+        verbose_name_plural = "Комментарии"

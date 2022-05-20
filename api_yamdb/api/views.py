@@ -27,8 +27,6 @@ import uuid
 from rest_framework_simplejwt.tokens import AccessToken
 from django.db.models import Avg
 
-#from .filters import TitletFilter
-
 
 class ListCreateDestroyViewSet(mixins.ListModelMixin,
                                mixins.CreateModelMixin,
@@ -106,19 +104,25 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
         
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+   # queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (ReviewCommentPermission, AuthorAndStaffOrReadOnly)
+
+
     def get_queryset(self):
-        check_conformity_title_and_review(self)
-        review = get_object_or_404(Review, id=self.kwargs.get("review_id"))
-        new_queryset = review.comments.all()
-        return new_queryset
+        # Получаем id котика из эндпоинта
+        title_id = self.kwargs.get('title_id')
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id, title=title_id)
+        # И отбираем только нужные комментарии
+        comments = review.comments.all()
+        return comments
+
     def perform_create(self, serializer):
-        check_conformity_title_and_review(self)
-        review_id = self.kwargs.get("review_id")
-        review = get_object_or_404(Review, id=review_id)
-        serializer.save(author=self.request.user, review_id=review)
+        title_id = self.kwargs.get('title_id')
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id, title=title_id)
+        serializer.save(author=self.request.user, review=review)
 
 
 class UserViewSet(viewsets.ModelViewSet):

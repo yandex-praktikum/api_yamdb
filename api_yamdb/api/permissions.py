@@ -21,17 +21,17 @@ class ReviewCommentPermission(BasePermission):
         if request.method == ("PATCH" or "DELETE"):
             return obj.author == request.user
 
+
 class GenreCategoryPermission(BasePermission):
 
     def has_permission(self, request, view):
-        return (
-                request.method in permissions.SAFE_METHODS
+        return (request.method in permissions.SAFE_METHODS
                 or request.user.is_authenticated and request.user.is_admin
-            )
-#вроде норм
+                )
+
 
 class OwnerOrAdmins(permissions.BasePermission):
-   
+
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated

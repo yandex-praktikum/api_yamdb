@@ -1,4 +1,6 @@
-from reviews.models import Category, Genre, Title, Comment, Review, TitletFilter
+from reviews.models import (Category, Genre, Title,
+                            Review,
+                            TitletFilter)
 from users.models import User
 from django.shortcuts import get_object_or_404
 from .serializers import (CategorySerializer,
@@ -7,18 +9,17 @@ from .serializers import (CategorySerializer,
                           UserSerializer, MeSerializer, SignUpSerializer,
                           TokenSerializer)
 from django_filters.rest_framework import DjangoFilterBackend
-                      
 from rest_framework import filters, status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import mixins, viewsets
 from rest_framework import serializers
-from api.validators import check_conformity_title_and_review
+# from api.validators import check_conformity_title_and_review
 from rest_framework.decorators import action, api_view
 from .permissions import (ReviewCommentPermission,
-                            GenreCategoryPermission,
-                            OwnerOrAdmins,
-                            IsAdminOrReadOnly,
-                            AuthorAndStaffOrReadOnly)
+                          GenreCategoryPermission,
+                          OwnerOrAdmins,
+                          IsAdminOrReadOnly,
+                          AuthorAndStaffOrReadOnly)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.db import IntegrityError
@@ -54,13 +55,13 @@ class GenreViewSet(ListCreateDestroyViewSet):
     search_fields = ('name',)
     lookup_field = 'slug'
 
+
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    #filter_backends = (filters.SearchFilter)
+    # filter_backends = (filters.SearchFilter)
     filter_backends = [DjangoFilterBackend]
-    filterset_class   = TitletFilter
-   # search_fields = ('year', 'name', 'genre', 'category') # дописать    
+    filterset_class = TitletFilter
     pagination_class = PageNumberPagination
     permission_classes = [IsAdminOrReadOnly]
 
@@ -74,6 +75,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [AuthorAndStaffOrReadOnly]
+
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
         new_queryset = title.reviews.all()
@@ -102,12 +104,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
         new_rating = rating_dict["score__avg"]
         Title.objects.filter(id=title_id).update(rating=new_rating)
 
-        
+
 class CommentViewSet(viewsets.ModelViewSet):
-   # queryset = Comment.objects.all()
+    # queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = (ReviewCommentPermission, AuthorAndStaffOrReadOnly)
-
 
     def get_queryset(self):
         # Получаем id котика из эндпоинта
@@ -160,7 +161,7 @@ def signup_post(request):
     email = serializer.validated_data['email']
     username = serializer.validated_data['username']
     try:
-        user= User.objects.get_or_create(
+        user = User.objects.get_or_create(
             username=username,
             email=email
         )
@@ -189,4 +190,5 @@ def token_post(request):
     if confirmation_code == user_base.confirmation_code:
         token = str(AccessToken.for_user(user_base))
         return Response({'token': token}, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST)

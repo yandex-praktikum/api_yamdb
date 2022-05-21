@@ -3,15 +3,16 @@ from users.models import User
 from reviews.models import Category, Comment, Genre, Review, Title
 from django.db.models import Avg
 
+
 class CategorySerializer(serializers.ModelSerializer):
-        
+
     class Meta:
         fields = ('name', 'slug')
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         fields = ('name', 'slug')
         model = Genre
@@ -53,11 +54,6 @@ class TitleGetSerializer(serializers.ModelSerializer):
         return rating
 
 
-
-
-
-
-
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field="username"
@@ -69,7 +65,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate_score(self, value):
         if not (0 < value <= 10):
-            raise serializers.ValidationError('Проверьте свою оценку. Оценка - это целое число от 1 до 10!')
+            raise serializers.ValidationError('Оценка-целое число от 1 до 10!')
         return value
 
 

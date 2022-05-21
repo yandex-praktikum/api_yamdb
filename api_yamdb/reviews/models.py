@@ -1,9 +1,10 @@
 from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
+# from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from users.models import User
-from django_filters import rest_framework as filters 
+from django_filters import rest_framework as filters
+
 
 def validate_even(value):
     if value > timezone.now().year:
@@ -56,17 +57,19 @@ class Title(models.Model):
         verbose_name = 'Название произведения'
         verbose_name_plural = 'Названия произведений'
 
+
 class TitletFilter(filters.FilterSet):
-    name = filters.CharFilter(field_name="name", lookup_expr='icontains' )
+    name = filters.CharFilter(field_name="name", lookup_expr='icontains')
     genre = filters.CharFilter(field_name="genre__slug", lookup_expr='exact')
-    category = filters.CharFilter(field_name="category__slug", lookup_expr='exact')
+    category = filters.CharFilter(field_name="category__slug",
+                                  lookup_expr='exact')
     year = filters.NumberFilter(field_name='year', lookup_expr='icontains')
-    
- 
+
     class Meta:
 
         model = Title
-        fields = ['name', 'category', 'genre', 'year' ]
+        fields = ['name', 'category', 'genre', 'year']
+
 
 class Review(models.Model):
     title = models.ForeignKey(
@@ -82,10 +85,10 @@ class Review(models.Model):
     )
     score = models.IntegerField()
     pub_date = models.DateTimeField(auto_now_add=True)
-   
+
     def __str__(self):
         return str(self.id)
-   
+
     class Meta:
         unique_together = ["title", "author"]
         verbose_name = "Отзыв"
@@ -102,10 +105,10 @@ class Comment(models.Model):
         User, on_delete=models.ForeignKey, related_name="comments"
     )
     pub_date = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return self.text
-    
+
     class Meta:
         ordering = ["id"]
         verbose_name = "Комментарий"

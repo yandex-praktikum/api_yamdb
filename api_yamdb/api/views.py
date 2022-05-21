@@ -1,3 +1,4 @@
+
 from reviews.models import (Category, Genre, Title,
                             Review,
                             TitletFilter)
@@ -161,7 +162,7 @@ def signup_post(request):
     email = serializer.validated_data['email']
     username = serializer.validated_data['username']
     try:
-        user = User.objects.get_or_create(
+        (user, result) = User.objects.get_or_create(
             username=username,
             email=email
         )

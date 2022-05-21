@@ -10,4 +10,4 @@ def check_conformity_title_and_review(self):
     if len(title.reviews.filter(id=self.kwargs.get("review_id"))) == 0:
         raise serializers.ValidationError(
             "Обзор существует, но не относится к указанному произведению"
-        )            
+        )

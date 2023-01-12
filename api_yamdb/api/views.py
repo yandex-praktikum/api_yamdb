@@ -6,7 +6,7 @@ from reviews.models import Category, Genre, Title, Review
 from .serializers import (CategorySerializer,
                           GenreSerializer,
                           TitleSerializer,
-                          TitleCreateSerializer
+                          TitleCreateSerializer,
                           ReviewSerializer, 
                           CommentSerializer)
 from .permissions import IsAdminOrReadOnly, ReadOnlyOrAuthorOrAdminOrModerator
@@ -22,7 +22,7 @@ class CategoryViewSet(mixins.ListModelMixin,
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    lookup_field='slug'
+    lookup_field = 'slug'
 
 
 class GenreViewSet(CategoryViewSet):

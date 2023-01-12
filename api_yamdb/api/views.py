@@ -1,11 +1,47 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets, filters, mixins
 
-from .permissions import ReadOnlyOrAuthorOrAdminOrModerator
-from .serializers import ReviewSerializer, CommentSerializer
-from reviews.models import Title, Review
+from reviews.models import Category, Genre, Title, Review
+from .serializers import (CategorySerializer,
+                          GenreSerializer,
+                          TitleSerializer,
+                          TitleCreateSerializer
+                          ReviewSerializer, 
+                          CommentSerializer)
+from .permissions import IsAdminOrReadOnly, ReadOnlyOrAuthorOrAdminOrModerator
+from .filters import TitleFilter
 
 
+class CategoryViewSet(mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field='slug'
+
+
+class GenreViewSet(CategoryViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return TitleSerializer
+        return TitleCreateSerializer
+      
+      
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [ReadOnlyOrAuthorOrAdminOrModerator]
@@ -41,4 +77,4 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(
             author=self.request.user,
             review=self.get_review()
-        )
+        ) 

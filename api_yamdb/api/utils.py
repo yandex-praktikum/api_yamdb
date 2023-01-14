@@ -1,5 +1,3 @@
-# api/utils.py
-
 import secrets
 import string
 

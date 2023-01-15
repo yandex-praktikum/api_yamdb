@@ -3,14 +3,16 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 
-USER_ROLES = (
-    ('user', 'user'),
-    ('moderator', 'moderator'),
-    ('admin', 'admin'),
-)
-
-
 class User(AbstractUser):
+    ADMIN = 'admin'
+    MODERATOR = 'moderator'
+    USER = 'user'
+    USER_ROLES = (
+        (USER, 'user'),
+        (MODERATOR, 'moderator'),
+        (ADMIN, 'admin'),
+    )
+
     username = models.CharField(
         max_length=150,
         unique=True,
@@ -66,12 +68,12 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == 'admin'
+        return self.role == self.ADMIN
 
     @property
     def is_moderator(self):
-        return self.role == 'moderator'
+        return self.role == self.MODERATOR
 
     @property
     def is_user(self):
-        return self.role == 'user'
+        return self.role == self.USER

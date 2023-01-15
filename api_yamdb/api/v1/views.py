@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters, status, permissions
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
@@ -31,19 +31,11 @@ from api.v1.utils import send_confirmation_code, get_confirmation_code
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    # permission_classes = (IsAdminOrReadOnly,)
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('=name',)
-    # lookup_field = 'slug'
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    # permission_classes = (IsAdminOrReadOnly,)
-    # filter_backends = (filters.SearchFilter,)
-    # search_fields = ('=name',)
-    # lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -60,7 +52,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [ReadOnlyOrAuthorOrAdminOrModerator]
+    permission_classes = (ReadOnlyOrAuthorOrAdminOrModerator,)
 
     def get_title(self):
         title_id = self.kwargs.get('title_id')
@@ -79,7 +71,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [ReadOnlyOrAuthorOrAdminOrModerator]
+    permission_classes = (ReadOnlyOrAuthorOrAdminOrModerator,)
 
     def get_review(self):
         review_id = self.kwargs.get('review_id')
@@ -97,7 +89,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class SignUpView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         try:
@@ -125,7 +117,7 @@ class SignUpView(APIView):
 
 
 class GetToken(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         serializer = GetTokenSerializer(data=request.data)
@@ -145,9 +137,9 @@ class GetToken(APIView):
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdmin]
+    permission_classes = (IsAdmin,)
     lookup_field = 'username'
-    filter_backends = [SearchFilter]
+    filter_backends = (SearchFilter,)
     search_fields = ('username',)
 
     @action(
@@ -174,7 +166,7 @@ class UsersViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch'],
         url_path='me',
         url_name='me',
-        permission_classes=[permissions.IsAuthenticated]
+        permission_classes=(permissions.IsAuthenticated,)
     )
     def get_me(self, request):
         serializer = UserRestrictedSerializer(

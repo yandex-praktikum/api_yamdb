@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, filters, mixins, status, permissions
+from rest_framework import viewsets, filters, status, permissions
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
@@ -10,48 +10,50 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title, Review
 from users.models import User
 
-from .serializers import (CategorySerializer,
-                          GenreSerializer,
-                          TitleSerializer,
-                          TitleCreateSerializer,
-                          ReviewSerializer,
-                          CommentSerializer,
-                          SignUpSerializer,
-                          GetTokenSerializer,
-                          UserSerializer,
-                          UserRestrictedSerializer)
-from .permissions import (IsAdminOrReadOnly,
-                          ReadOnlyOrAuthorOrAdminOrModerator,
-                          IsAdmin)
-from .filters import TitleFilter
-from .utils import send_confirmation_code, get_confirmation_code
+from api.v1.mixins import ListCreateDestroyViewSet
+from api.v1.serializers import (CategorySerializer,
+                                GenreSerializer,
+                                TitleSerializer,
+                                TitleCreateSerializer,
+                                ReviewSerializer,
+                                CommentSerializer,
+                                SignUpSerializer,
+                                GetTokenSerializer,
+                                UserSerializer,
+                                UserRestrictedSerializer)
+from api.v1.permissions import (IsAdminOrReadOnly,
+                                ReadOnlyOrAuthorOrAdminOrModerator,
+                                IsAdmin)
+from api.v1.filters import TitleFilter
+from api.v1.utils import send_confirmation_code, get_confirmation_code
 
 
-class CategoryViewSet(mixins.ListModelMixin,
-                      mixins.CreateModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAdminOrReadOnly]
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
+    # permission_classes = (IsAdminOrReadOnly,)
+    # filter_backends = (filters.SearchFilter,)
+    # search_fields = ('=name',)
+    # lookup_field = 'slug'
 
 
-class GenreViewSet(CategoryViewSet):
+class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    # permission_classes = (IsAdminOrReadOnly,)
+    # filter_backends = (filters.SearchFilter,)
+    # search_fields = ('=name',)
+    # lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    permission_classes = [IsAdminOrReadOnly]
-    filter_backends = [DjangoFilterBackend]
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        if self.action == 'list' or self.action == 'retrieve':
+        if self.action in ['list', 'retrieve']:
             return TitleSerializer
         return TitleCreateSerializer
 

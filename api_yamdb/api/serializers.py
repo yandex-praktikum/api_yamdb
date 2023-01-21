@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
 
-from reviews.models import Review
+from reviews.models import Review, Comment
 
 class ReviewSerializer(serializers.ModelSerializer):
     title = serializers.SlugRelatedField(
@@ -23,3 +23,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field="username"
+    )
+    review = serializers.SlugRelatedField(
+        read_only=True, slug_field="text"
+    )
+
+    class Meta:
+        fields = "__all__"
+        model = Comment

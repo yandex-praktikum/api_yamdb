@@ -81,35 +81,71 @@ class ReadOnlyTitleSerializer(serializers.ModelSerializer):
         )
 
 
-class UsersSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        max_length=150,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        required=True,
+    )
+    email = serializers.EmailField(
+        max_length=254,
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ]
+    )
+
     class Meta:
+        fields = ("username", "email", "first_name",
+                  "last_name", "bio", "role")
         model = User
-        fields = '__all__'
 
 
-class NotAdminSerializer(serializers.ModelSerializer):
+class UserEditSerializer(serializers.ModelSerializer):
     class Meta:
+        fields = ("username", "email", "first_name",
+                  "last_name", "bio", "role")
         model = User
-        fields = '__all__'
         read_only_fields = ('role',)
 
 
-class GetTokenSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        required=True)
-    confirmation_code = serializers.CharField(
-        required=True)
+class RegisterDataSerializer(serializers.ModelSerializer):
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        max_length=150,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        required=True,
+    )
+    email = serializers.EmailField(
+        max_length=254,
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ]
+    )
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError("Username 'me' is not valid")
+        return value
+
+    def validate_email(self, email):
+        if (
+            not User.objects.filter(
+                username=self.initial_data.get('username')
+            ).exists()
+            and User.objects.filter(email=email).exists()
+        ):
+            raise serializers.ValidationError('email занят.')
+        return email
 
     class Meta:
+        fields = ("username", "email")
         model = User
-        fields = '__all__'
 
 
-class SignUpSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = User
-        fields = '__all__'
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -125,3 +161,40 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
+
+
+class MeSerializer(serializers.ModelSerializer):
+
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        max_length=150,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        required=True,
+    )
+    email = serializers.EmailField(
+        max_length=254,
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ]
+    )
+    first_name = serializers.CharField(
+        max_length=150,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+    last_name = serializers.CharField(
+        max_length=150,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
+
+    class Meta:
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        )
+        model = User
+        read_only_fields = ('role', )
+        

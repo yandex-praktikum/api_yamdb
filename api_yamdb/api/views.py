@@ -101,19 +101,22 @@ def get_jwt_token(request):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    lookup_field = 'username'
+    lookup_field = "username"
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('username',)
+    search_fields = ("username",)
     permission_classes = [IsAdmin]
+    http_method_names = [
+        "get", "post", "patch", "delete", "head", "options", "trace"
+    ]
 
     @action(
-        methods=['get', 'patch'],
+        methods=["get", "patch"],
         detail=False,
-        url_path='me',
+        url_path="me",
         permission_classes=(permissions.IsAuthenticated, )
     )
     def me(self, request):
-        if request.method == 'GET':
+        if request.method == "GET":
             serializer = MeSerializer(request.user)
             return Response(serializer.data)
         serializer = MeSerializer(request.user,
@@ -122,11 +125,6 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def update(self, request, *args, **kwargs):
-        if request.method == 'PUT':
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().update(request, *args, **kwargs)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -153,7 +151,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return review.comments.all()
 
     def perform_create(self, serializer):
-        title_id = self.kwargs.get('title_id')
-        review_id = self.kwargs.get('review_id')
+        title_id = self.kwargs.get("title_id")
+        review_id = self.kwargs.get("review_id")
         review = get_object_or_404(Review, id=review_id, title=title_id)
         serializer.save(author=self.request.user, review=review)

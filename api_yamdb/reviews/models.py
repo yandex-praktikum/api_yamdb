@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from .utils import generate
+from api.utils import generate
 
 
 class User(AbstractUser):
@@ -48,7 +48,7 @@ class User(AbstractUser):
         return self.is_staff or self.role == self.ADMIN
 
     class Meta:
-        constrains = [
+        constraints = [
             models.UniqueConstraint(
                 fields=['username', 'email'],
                 name='unique username and email'

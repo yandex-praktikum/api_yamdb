@@ -1,38 +1,36 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 from datetime import datetime
 from django.core.exceptions import ValidationError
 
-User = get_user_model()
 
 def validate_year(value):
     dt = datetime.now().year
     dl = len(value)
-    if value > dt or dl>0:
+    if value > dt or dl < 0:
         raise ValidationError(
             ('Проверьте ещё раз год'),
-            params= {value},
-        )    
+            params={value},
+        )
 
 
 class Genre(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True,max_length=50)
+    slug = models.SlugField(unique=True, max_length=50)
 
     class Meta:
         ordering = ['name']
-    
+
     def __str__(self):
         return self.name
 
-    
-class Categorie(models.Model):
+
+class Category(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True,max_length=50)
+    slug = models.SlugField(unique=True, max_length=50)
 
     class Meta:
         ordering = ['name']
-    
+
     def __str__(self):
         return self.name
 
@@ -43,7 +41,7 @@ class Title(models.Model):
     year = models.IntegerField(validators=[validate_year])
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     category = models.ForeignKey(
-        Categorie,
+        Category,
         on_delete=models.SET_NULL,
         related_name='titles',
         blank=False,

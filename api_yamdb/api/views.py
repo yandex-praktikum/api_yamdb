@@ -6,10 +6,12 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import User
+from reviews.models import User, Genre, Category, Title
 from .permissions import IsAdmin
 from .serializers import (RegisterSerializer, TokenSerializer,
-                          UserEditSerializer, UserSerializer)
+                          UserEditSerializer, UserSerializer,
+                          GenreSerializer, CategorySerializer,
+                          TitleSerializer)
 
 
 @api_view(["POST"])
@@ -81,3 +83,18 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer

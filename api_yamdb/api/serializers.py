@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import User
+from reviews.models import User, Genre, Category, Title
 
 
 class TokenSerializer(serializers.Serializer):
@@ -62,3 +62,24 @@ class UserEditSerializer(serializers.ModelSerializer):
                   "role")
         model = User
         read_only_fields = ('role',)
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genre
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'slug')
+        model = Category
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer(many=False)
+
+    class Meta:
+        fields = ('name', 'year', 'description', 'category', 'genre')
+        model = Title

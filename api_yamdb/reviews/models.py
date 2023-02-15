@@ -56,17 +56,23 @@ class User(AbstractUser):
 class Genre(models.Model):
     """Жанр произведения. Содержит название и slug"""
     name = models.CharField(verbose_name='Название жанра', max_length=256)
-    title = models.SlugField(verbose_name='Slug имя жанра',
-                             max_length=50,
-                             unique=True)
+    slug = models.SlugField(verbose_name='Slug имя жанра',
+                            max_length=50,
+                            unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Category(models.Model):
     """Категория (тип) произведения. Например, 'фильм', 'книга' """
     name = models.CharField(verbose_name='Название категории', max_length=256)
-    title = models.SlugField(verbose_name='Slug имя категории',
-                             max_length=50,
-                             unique=True)
+    slug = models.SlugField(verbose_name='Slug имя категории',
+                            max_length=50,
+                            unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Title(models.Model):
@@ -77,6 +83,10 @@ class Title(models.Model):
         verbose_name='Год выпуска произведения')
     description = models.TextField(verbose_name='Описание произведения',
                                    blank=True)
-    category = models.ForeignKey(Genre, on_delete=models.CASCADE,
+    # у категории изменить поведение on_delete, вероятно ставить null
+    category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  related_name='titles')
-    genre = models.ManyToManyField(Category, related_name='titles')
+    genre = models.ManyToManyField(Genre, related_name='titles')
+
+    def __str__(self):
+        return self.name

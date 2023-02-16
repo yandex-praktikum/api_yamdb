@@ -76,10 +76,26 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
 
 
+class TitleCategorySerializer(CategorySerializer):
+    def to_internal_value(self, data):
+        slug = data
+        return {
+            'slug': slug,
+        }
+
+
+class TitleGenreSerializer(GenreSerializer):
+    def to_internal_value(self, data):
+        slug = data
+        return {
+            'slug': slug,
+        }
+
+
 class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True)
-    category = CategorySerializer(many=False)
+    category = TitleCategorySerializer()
 
     class Meta:
-        fields = ('name', 'year', 'description', 'category', 'genre')
+        fields = ('id', 'name', 'year', 'description', 'category', 'genre')
         model = Title

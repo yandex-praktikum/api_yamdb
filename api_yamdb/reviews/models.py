@@ -1,29 +1,60 @@
 from django.db import models
-from .users import User
-from .titles import Title
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth.models import AbstractUser
 
-RATE_CHOICES = [(i) for i in range(11)]
+from api.utils import generate
 
 
-class Rating(models.Model):
-    rating = models.PositiveSmallIntegerField(choices=RATE_CHOICES)
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE)
-    title = models.ForeignKey(
-        Title, on_delete=models.CASCADE)
+class User(AbstractUser):
+    """ Модель пользователя """
+
+    USER = 'User'
+    MODERATOR = 'Moderator'
+    ADMIN = 'Admin'
+
+    ROLES = (
+        ('AD', USER),
+        ('MOD', MODERATOR),
+        ('US', USER)
+    )
+
+    bio = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name='Биография'
+    )
+    role = models.CharField(
+        max_length=9,
+        choices=ROLES,
+        default=USER,
+        verbose_name='Роль'
+    )
+    confirmation_code = models.CharField(
+        max_length=50,
+        default=generate(),
+        verbose_name='Код подтверждения'
+    )
+    email = models.EmailField(
+        max_length=128,
+        unique=True,
+        verbose_name='Email'
+    )
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
+
+    @property
+    def is_admin(self):
+        return self.is_staff or self.role == self.ADMIN
 
     class Meta:
-        unique_together = ('author', 'title')
-        verbose_name = 'Оценка'
-        ordering = ['rating']
-
-    def average_rating(self):
-        all_ratings = list(map(lambda x: x.value, self.reviews.all()))
-        sum_all_ratings = sum(all_ratings)
-        return (round(sum_all_ratings / len(all_ratings), 0))
-
-    def __str__(self):
-        return self.rating
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique username and email'
+            )
+        ]
 
 
 class Review(models.Model):

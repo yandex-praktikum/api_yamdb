@@ -21,7 +21,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class TitleGetSerializer(serializers.ModelSerializer):
     category = SlugRelatedField(read_only=True)
     genre = SlugRelatedField(read_only=True, allow_null=True)
-    reviews = ReviewSerializer()
+    score = ReviewSerializer()
     rating = serializers.SerializerMethodField()
 
     class Meta:

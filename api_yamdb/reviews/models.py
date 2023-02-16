@@ -53,3 +53,38 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name = 'Пользователи'
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(username__iexact="me"),
+                name="me_not_in_username"
+            )
+        ]
+
+
+class Genre(models.Model):
+    """Жанр произведения. Содержит название и slug"""
+    name = models.CharField(verbose_name='Название жанра', max_length=256)
+    title = models.SlugField(verbose_name='Slug имя жанра',
+                             max_length=50,
+                             unique=True)
+
+
+class Category(models.Model):
+    """Категория (тип) произведения. Например, 'фильм', 'книга' """
+    name = models.CharField(verbose_name='Название категории', max_length=256)
+    title = models.SlugField(verbose_name='Slug имя категории',
+                             max_length=50,
+                             unique=True)
+
+
+class Title(models.Model):
+    """Произведение"""
+    name = models.CharField(verbose_name='Название произведения',
+                            max_length=256)
+    year = models.PositiveSmallIntegerField(
+        verbose_name='Год выпуска произведения')
+    description = models.TextField(verbose_name='Описание произведения',
+                                   blank=True)
+    category = models.ForeignKey(Genre, on_delete=models.CASCADE,
+                                 related_name='titles')
+    genre = models.ManyToManyField(Category, related_name='titles')

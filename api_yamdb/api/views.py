@@ -1,13 +1,24 @@
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework import viewsets, pagination
 
-from reviews.models import Title, Review, Comment
-from .models import User
-from .utils import generate
+from reviews.models import User, Title, Review, Comment, Category, Genre
+from .utils import (
+    generate,
+    send_confirmation_code,
+    create_token
+)
 from .serializers import (
+    GenreSerializer,
+    CategorySerializer,
+    TitleGetSerializer,
+    TitlePostSerializer,
     RegisterSerializer,
     UserSerializer,
+    TokenSerializer,
     ReviewSerializer,
     CommentSerializer
 )
@@ -15,6 +26,8 @@ from .permissions import (
     IsAdmin,
     IsModerator,
     IsAuthor,
+    IsAdminOrReadOnly,
+    IsSuperUser,
     IsAuthorOrReadOnly
 )
 
@@ -52,17 +65,42 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=self.get_review())
 
 
+class GenreViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вьюсет для модели Genre."""
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """Вьюсет для модели Category."""
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет для модели Title."""
+    queryset = Title.objects.all()
+    permission_classes = (IsAdminOrReadOnly,)
+    pagination_class = pagination.LimitOffsetPagination
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return TitlePostSerializer
+        return TitleGetSerializer
+
+
 class RegisterAPIView(APIView):
     """ View для регистрации """
+
     register_serializer = RegisterSerializer
     user_serializer = UserSerializer
 
     def post(self, request):
-        data = self.register_serializer(data=request.data)
-        if data.is_valid():
-            username = data.validated_data.get('username')
-            email = data.validated_data.get('email')
-            user = User.objects.filter(email=email).first()
+        serializer = self.register_serializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data.get('username')
+            email = serializer.validated_data.get('email')
+            user = get_object_or_404(User, username=username, email=email)
             if user:
                 code = user.confirmation_code
             else:
@@ -73,3 +111,74 @@ class RegisterAPIView(APIView):
                     'confirmation_code': code
                 }
                 user = self.user_serializer(data=data)
+                if user.is_valid():
+                    user.save()
+                else:
+                    return Response(user.errors)
+            send_confirmation_code(email, code)
+            return Response(dict(serializer.validated_data))
+        return Response(serializer.errors)
+
+
+class TokenAPIView(APIView):
+    """ View для создания и отправки токена """
+
+    serializer_class = TokenSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data.get(
+                'username'
+            )
+            confirmation_code = serializer.validated_data.get(
+                'confirmation_code'
+            )
+            user = get_object_or_404(User, username=username)
+            if user.confirmation_code == confirmation_code:
+                token = create_token(user)
+                data = {
+                    'token': token
+                }
+                return Response(data)
+            return Response({'error': 'Неверный проверочный код'})
+        return Response(serializer.errors)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet для создания пользователя админом,
+    для получчения информации о пользователе по username,
+    для редактирования информации о пользователе по username,
+    для удаления пользователя по username,
+    для получения инофрмации о себе через эндпоинт me/,
+    для редактирования инофрмации о себе через эндпоинт me/,
+    """
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAdmin]
+    lookup_field = 'username'
+
+    @action(
+        detail=False,
+        url_path='me',
+        methods=['get', 'patch'],
+        serializer_class=UserSerializer,
+        permission_classes=[IsAuthenticated]
+    )
+    def self_retrieve_update(self, request):
+        if request.method == "GET":
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
+        if request.method == "PATCH":
+            serializer = self.get_serializer(
+                request.user,
+                data=request.data,
+                partial=True
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response(serializer.errors)

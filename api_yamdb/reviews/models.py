@@ -86,7 +86,20 @@ class Title(models.Model):
     # у категории изменить поведение on_delete, вероятно ставить null
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  related_name='titles')
-    genre = models.ManyToManyField(Genre, related_name='titles')
+    genre = models.ManyToManyField(Genre, related_name='titles',
+                                   through='TitleGenre')
 
     def __str__(self):
         return self.name
+
+
+class TitleGenre(models.Model):
+    title = models.ForeignKey(Title, on_delete=models.CASCADE,
+                              related_name="titles",
+                              verbose_name="Произведение",)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE,
+                              related_name='genres',
+                              verbose_name="Жанр")
+
+    def __str__(self) -> str:
+        return f'{self.title} : {self.genre}'

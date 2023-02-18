@@ -11,7 +11,7 @@ from .permissions import IsAdmin
 from .serializers import (RegisterSerializer, TokenSerializer,
                           UserEditSerializer, UserSerializer,
                           GenreSerializer, CategorySerializer,
-                          TitleSerializer)
+                          TitleReadSerializer, TitleWriteSerializer)
 
 
 @api_view(["POST"])
@@ -99,4 +99,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+
+    def get_serializer_class(self):
+        if self.request.method not in permissions.SAFE_METHODS:
+            return TitleWriteSerializer
+        return TitleReadSerializer

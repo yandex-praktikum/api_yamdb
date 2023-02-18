@@ -8,9 +8,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import User, Genre, Category, Title
 from .permissions import IsAdmin
 from .serializers import (RegisterSerializer, TokenSerializer,
-                          UserEditSerializer, UserSerializer,
-                          GenreSerializer, CategorySerializer,
-                          TitleReadSerializer, TitleWriteSerializer)
+                          UserSerializer, GenreSerializer,
+                          CategorySerializer, TitleReadSerializer,
+                          TitleWriteSerializer)
 from .sendtoken import make_token
 
 

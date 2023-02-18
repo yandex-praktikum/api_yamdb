@@ -37,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
                                               "в качестве имени пользователя")
         return data
 
+
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug')

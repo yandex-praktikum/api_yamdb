@@ -1,15 +1,17 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from api.validators import validate_regex
+
 
 class User(AbstractUser):
     ADMIN = 'admin'
     MODERATOR = 'moderator'
     USER = 'user'
     ROLES = [
-        (ADMIN, 'Administrator'),
-        (MODERATOR, 'Moderator'),
-        (USER, 'User'),
+        (ADMIN, 'Администратор'),
+        (MODERATOR, 'Модератор'),
+        (USER, 'Пользователь'),
     ]
     email = models.EmailField(
         'Электронная почта',
@@ -31,17 +33,23 @@ class User(AbstractUser):
     username = models.CharField(
         'Имя пользователя',
         max_length=150,
-        null=True,
-        unique=True
+        unique=True,
+        validators=[validate_regex]
     )
-
-    @property
-    def is_moderator(self):
-        return self.role == self.MODERATOR
+    confirmation_code = models.CharField(
+        'Код авторизации',
+        max_length=10000000,
+        blank=True,
+        null=True
+    )
 
     @property
     def is_admin(self):
         return self.role == self.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
 
     class Meta:
         verbose_name = 'Пользователи'

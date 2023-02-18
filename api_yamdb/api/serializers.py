@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.shortcuts import get_object_or_404
 
+
 from reviews.models import User, Genre, Category, Title, TitleGenre
 
 
@@ -11,18 +12,10 @@ class TokenSerializer(serializers.Serializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ],
-        max_length=150
-    )
-    email = serializers.EmailField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ],
-        max_length=254
-    )
+
+    class Meta:
+        model = User
+        fields = ("email", "username")
 
     def validate_username(self, data):
         if data == "me":
@@ -30,40 +23,19 @@ class RegisterSerializer(serializers.ModelSerializer):
                                               "в качестве имени пользователя")
         return data
 
-    class Meta:
-        fields = ("username", "email")
-        model = User
-
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ],
-        required=True,
-        max_length=150
-    )
-    email = serializers.EmailField(
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ],
-        required=True,
-        max_length=254
-    )
 
     class Meta:
+        model = User
         fields = ("email", "username", "first_name", "last_name", "bio",
                   "role")
-        model = User
 
-
-class UserEditSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = ("email", "username", "first_name", "last_name", "bio",
-                  "role")
-        model = User
-        read_only_fields = ('role',)
-
+    def validate_username(self, data):
+        if data == "me":
+            raise serializers.ValidationError("me не может быть использовано "
+                                              "в качестве имени пользователя")
+        return data
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -139,3 +111,4 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     #         instance.genres.set(genres_lst)
     #     instance.save()
     #     return instance
+

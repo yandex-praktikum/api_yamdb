@@ -5,10 +5,13 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import User
+from reviews.models import User, Genre, Category, Title
 from .permissions import IsAdmin
+from .serializers import (RegisterSerializer, TokenSerializer,
+                          UserEditSerializer, UserSerializer,
+                          GenreSerializer, CategorySerializer,
+                          TitleReadSerializer, TitleWriteSerializer)
 from .sendtoken import make_token
-from .serializers import RegisterSerializer, TokenSerializer, UserSerializer
 
 
 class RegistrationView(CreateAPIView):
@@ -64,11 +67,25 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == "GET":
             serializer = UserSerializer(request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        serializer = UserSerializer(
-            request.user,
-            data=request.data,
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save(role=request.user.role)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    lookup_field = 'slug'
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method not in permissions.SAFE_METHODS:
+            return TitleWriteSerializer
+        return TitleReadSerializer
+

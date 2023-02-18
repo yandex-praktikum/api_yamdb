@@ -3,6 +3,7 @@
 import api.validators
 import django.contrib.auth.models
 from django.db import migrations, models
+import django.db.models.deletion
 import django.utils.timezone
 
 
@@ -15,6 +16,45 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.CreateModel(
+            name='Category',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=256, verbose_name='Название категории')),
+                ('slug', models.SlugField(unique=True, verbose_name='Slug имя категории')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Genre',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=256, verbose_name='Название жанра')),
+                ('slug', models.SlugField(unique=True, verbose_name='Slug имя жанра')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Title',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=256, verbose_name='Название произведения')),
+                ('year', models.PositiveSmallIntegerField(verbose_name='Год выпуска произведения')),
+                ('description', models.TextField(blank=True, verbose_name='Описание произведения')),
+                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='titles', to='reviews.category')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='TitleGenre',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('genre', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='reviews.genre')),
+                ('title', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='reviews.title')),
+            ],
+        ),
+        migrations.AddField(
+            model_name='title',
+            name='genre',
+            field=models.ManyToManyField(related_name='titles', through='reviews.TitleGenre', to='reviews.Genre'),
+        ),
         migrations.CreateModel(
             name='User',
             fields=[

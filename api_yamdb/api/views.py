@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import User, Genre, Category, Title
-from .permissions import IsAdmin
+from .permissions import IsAdmin, IsAdminOrReadOnly
 from .serializers import (RegisterSerializer, TokenSerializer,
                           UserSerializer, GenreSerializer,
                           CategorySerializer, TitleReadSerializer,
@@ -73,19 +73,27 @@ class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = [IsAdminOrReadOnly, ]
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = [IsAdminOrReadOnly, ]
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
+    permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('genre__slug',)
 
     def get_serializer_class(self):
         if self.request.method not in permissions.SAFE_METHODS:
             return TitleWriteSerializer
         return TitleReadSerializer
-

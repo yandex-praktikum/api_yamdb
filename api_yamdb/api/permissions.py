@@ -24,7 +24,7 @@ class IsAdminUserOrReadOnly(permissions.BasePermission):
         return False
 
 
-class AdminModeratorAuthorPermission(permissions.BasePermission):
+class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
             request.method in permissions.SAFE_METHODS

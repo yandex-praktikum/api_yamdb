@@ -1,8 +1,8 @@
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
-from .views import (APIGetToken, APISignup, CategoryViewSet, CommentViewSet,
-                    GenreViewSet, ReviewViewSet, TitleViewSet, UsersViewSet)
+from .views import (GetTokenView, RegistrationView, CategoryViewSet, CommentViewSet,
+                    GenreViewSet, ReviewViewSet, TitleViewSet, UserViewSet)
 
 app_name = 'api'
 
@@ -19,7 +19,7 @@ router.register(
 )
 router.register(
     'users',
-    UsersViewSet,
+    UserViewSet,
     basename='users'
 )
 router.register(
@@ -39,7 +39,7 @@ router.register(
 )
 
 urlpatterns = [
-    path('v1/auth/token/', APIGetToken.as_view(), name='get_token'),
     path('v1/', include(router.urls)),
-    path('v1/auth/signup/', APISignup.as_view(), name='signup'),
+    path('v1/auth/signup/', RegistrationView, name='register'),
+    path('v1/auth/token/', GetTokenView, name='token'),
 ]

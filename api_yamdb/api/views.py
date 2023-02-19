@@ -18,7 +18,7 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, GetTokenSerializer,
                           NotAdminSerializer, ReviewSerializer,
                           SignUpSerializer, TitleReadSerializer,
-                          TitleWriteSerializer, UsersSerializer)
+                          TitleWriteSerializer)
 
 
 class RegistrationView(CreateAPIView):

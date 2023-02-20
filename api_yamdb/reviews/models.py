@@ -7,16 +7,6 @@ from django.dispatch import receiver
 
 from .validators import validate_regex
 
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
-ROLE_CHOICES = [
-    (USER, USER),
-    (ADMIN, ADMIN),
-    (MODERATOR, MODERATOR),
-]
-
 
 class User(AbstractUser):
     ADMIN = 'admin'
@@ -67,12 +57,6 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name = 'Пользователи'
-        constraints = [
-            models.CheckConstraint(
-                check=~models.Q(username__iexact="me"),
-                name="me_not_in_username"
-            )
-        ]
 
 
 class Genre(models.Model):
@@ -108,8 +92,7 @@ class Title(models.Model):
     # у категории изменить поведение on_delete, вероятно ставить null
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  related_name='titles')
-    genre = models.ManyToManyField(Genre, related_name='titles',
-                                   through='TitleGenre')
+    genre = models.ManyToManyField(Genre, related_name='titles')
 
     def __str__(self):
         return self.name

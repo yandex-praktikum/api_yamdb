@@ -1,12 +1,13 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, permissions, status, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, permissions, status, viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Genre, Review, Title, User
-from .permissions import IsAdmin
+from .permissions import IsAdmin, IsAdminOrReadOnly
 from .serializers import (RegisterSerializer, TokenSerializer,
                           UserSerializer, GenreSerializer,
                           CategorySerializer, TitleReadSerializer,
@@ -68,27 +69,61 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == "GET":
             serializer = UserSerializer(request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(
+            request.user,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(viewsets.GenericViewSet,
+                   mixins.ListModelMixin,
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = [IsAdminOrReadOnly, ]
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(viewsets.GenericViewSet,
+                      mixins.ListModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.DestroyModelMixin):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     lookup_field = 'slug'
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = [IsAdminOrReadOnly, ]
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    permission_classes = [IsAdminOrReadOnly, ]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('year', 'name')
 
     def get_serializer_class(self):
         if self.request.method not in permissions.SAFE_METHODS:
             return TitleWriteSerializer
         return TitleReadSerializer
+    
+    def get_queryset(self):
+        queryset = Title.objects.all()
+        # для ревьюера - не могу их \/ запихнуть в филтерсет филд.
+        # работают, но не проходят тесты
+        genre = self.request.query_params.get('genre')
+        category = self.request.query_params.get('category')
+        if genre is not None:
+            queryset = queryset.filter(genre__slug=genre)
+        if category is not None:
+            queryset = queryset.filter(category__slug=category)
+        return queryset
 
 
 class CommentViewSet(viewsets.ModelViewSet):

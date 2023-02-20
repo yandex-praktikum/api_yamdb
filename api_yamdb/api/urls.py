@@ -13,6 +13,6 @@ router.register(r'titles', TitleViewSet, basename='titles')
 
 urlpatterns = [
     path('v1/', include(router.urls)),
-    path('v1/auth/signup/', RegistrationView, name='register'),
-    path('v1/auth/token/', GetTokenView, name='token'),
+    path('v1/auth/signup/', RegistrationView.as_view(), name='register'),
+    path('v1/auth/token/', GetTokenView.as_view(), name='token'),
 ]

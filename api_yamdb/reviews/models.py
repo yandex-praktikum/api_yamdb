@@ -53,12 +53,6 @@ class User(AbstractUser):
 
     class Meta:
         verbose_name = 'Пользователи'
-        constraints = [
-            models.CheckConstraint(
-                check=~models.Q(username__iexact="me"),
-                name="me_not_in_username"
-            )
-        ]
 
 
 class Genre(models.Model):

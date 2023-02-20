@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
-from reviews.models import User, Genre, Category, Title, TitleGenre, Review, Comment
+from reviews.models import User, Genre, Category, Title, Review, Comment
 
 
 class TokenSerializer(serializers.Serializer):
@@ -35,6 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("me не может быть использовано "
                                               "в качестве имени пользователя")
         return data
+
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -69,6 +70,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Title
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     title = serializers.SlugRelatedField(
@@ -115,4 +117,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Comment
-

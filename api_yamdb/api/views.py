@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Genre, Review, Title, User
-from .permissions import IsAdmin, IsAdminOrReadOnly
+from .permissions import (IsAdmin, IsAdminOrReadOnly,
+                          IsAuthorAdminModeratorOrReadOnly)
 from .serializers import (RegisterSerializer, TokenSerializer,
                           UserSerializer, GenreSerializer,
                           CategorySerializer, TitleReadSerializer,
@@ -112,7 +113,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.request.method not in permissions.SAFE_METHODS:
             return TitleWriteSerializer
         return TitleReadSerializer
-    
+
     def get_queryset(self):
         queryset = Title.objects.all()
         # для ревьюера - не могу их \/ запихнуть в филтерсет филд.
@@ -128,7 +129,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsAuthorAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -145,7 +146,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAdmin,)
+    permission_classes = (IsAuthorAdminModeratorOrReadOnly,)
 
     def get_queryset(self):
         title = get_object_or_404(

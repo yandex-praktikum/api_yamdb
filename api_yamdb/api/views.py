@@ -1,6 +1,7 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets, mixins
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
@@ -9,12 +10,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Review, Title, User
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
                           IsAuthorAdminModeratorOrReadOnly)
-from .serializers import (RegisterSerializer, TokenSerializer,
-                          UserSerializer, GenreSerializer,
-                          CategorySerializer, TitleReadSerializer,
-                          TitleWriteSerializer, CommentSerializer,
-                          ReviewSerializer)
 from .sendtoken import make_token
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, RegisterSerializer,
+                          ReviewSerializer, TitleReadSerializer,
+                          TitleWriteSerializer, TokenSerializer,
+                          UserSerializer)
 
 
 class RegistrationView(CreateAPIView):
@@ -115,9 +116,8 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleReadSerializer
 
     def get_queryset(self):
-        queryset = Title.objects.all()
-        # для ревьюера - не могу их \/ запихнуть в филтерсет филд.
-        # работают, но не проходят тесты
+        queryset = Title.objects.all().annotate(
+            Avg('reviews__score'))
         genre = self.request.query_params.get('genre')
         category = self.request.query_params.get('category')
         if genre is not None:

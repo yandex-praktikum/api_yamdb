@@ -126,14 +126,6 @@ class TitleViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(category__slug=category)
         return queryset
 
-    def get_object(self):
-        pk = self.kwargs.get('pk')
-        title = Title.objects.get(id=pk)
-        rating = 5
-        title.rating = rating
-        # return super().get_object()
-        return title
-
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer

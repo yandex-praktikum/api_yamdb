@@ -54,12 +54,13 @@ class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+        read_only_fields = ('rating',)
         model = Title
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
-
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(), slug_field="slug"
     )

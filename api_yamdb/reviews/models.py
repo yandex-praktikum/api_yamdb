@@ -90,6 +90,7 @@ class Title(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  related_name='titles')
     genre = models.ManyToManyField(Genre, related_name='titles')
+    rating = models.IntegerField(verbose_name='Рейтинг', null=True)
 
     def __str__(self):
         return self.name
@@ -117,7 +118,7 @@ class Review(models.Model):
             MinValueValidator(1),
             MaxValueValidator(10)
         ),
-        error_messages={'validators': 'Оценка от 1 до 10!'}
+        error_messages={'validators': 'Оценка от 1 до 10!'},
     )
     pub_date = models.DateTimeField(
         'дата публикации',

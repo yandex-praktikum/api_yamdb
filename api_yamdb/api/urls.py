@@ -8,6 +8,8 @@ from .views import (CategoryViewSet,
                     TitleViewSet,
                     UserViewSet)
 
+app_name = 'api'
+
 router = DefaultRouter()
 
 router.register(r'categories', CategoryViewSet)  # Все поинты от Варвары

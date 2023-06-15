@@ -6,45 +6,73 @@ User = get_user_model()
 Titles = get_user_model()
 
 
-class Review(models.Model):
+class Reviews(models.Model):
     author = models.ForeignKey(
-        'Автор',
         User,
+        verbose_name='Автор',
         on_delete=models.CASCADE,
-        related_name='reviews')
+        related_name='reviews',
+        null=True,
+        blank=False)
     title = models.ForeignKey(
-        'Произведение',
         Titles,
+        verbose_name='Произведение',
         on_delete=models.CASCADE,
-        related_name='reviews')
+        related_name='reviews',
+        null=True,
+        blank=False)
     text = models.TextField()
     created = models.DateTimeField(
-        'Дата добавления',
+        verbose_name='Дата добавления',
         auto_now_add=True,
-        db_index=True)
+        db_index=True,
+        null=True,
+        blank=False)
     rating = models.IntegerField(
-        'Рейтинг',
+        verbose_name='Рейтинг',
         validators=(
             MaxValueValidator(10),
             MinValueValidator(1)
             ),
-        error_messages={'validators': 'Оценка от 1 до 10!'}
+        error_messages={'validators': 'Оценка от 1 до 10!'},
+        null=True,
+        blank=False
         )
 
+    class Meta:
+        verbose_name = 'Отзывы',
+        ordering = ('created')
 
-class Comment(models.Model):
+    def __str__(self):
+        return self.name
+
+
+class Comments(models.Model):
     author = models.ForeignKey(
-        'Автор',
         User,
+        verbose_name='Автор',
         on_delete=models.CASCADE,
-        related_name='reviews')
+        related_name='reviews',
+        null=True,
+        blank=False)
     review = models.ForeignKey(
-        'Отзыв',
-        Review,
+        Reviews,
+        verbose_name='Отзыв',
         on_delete=models.CASCADE,
-        related_name='reviews')
+        related_name='reviews',
+        null=True,
+        blank=False)
     text = models.TextField()
     created = models.DateTimeField(
         'Дата добавления',
         auto_now_add=True,
-        db_index=True)
+        db_index=True,
+        null=True,
+        blank=False)
+
+    class Meta:
+        verbose_name = 'Комментарии',
+        ordering = ('created')
+
+    def __str__(self):
+        return self.name

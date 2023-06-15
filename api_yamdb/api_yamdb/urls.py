@@ -16,27 +16,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
-from rest_framework.routers import DefaultRouter
-
-from .views import (CategoryViewSet,
-                    CommentViewSet,
-                    GenreViewSet,
-                    ReviewViewSet,
-                    TitleViewSet,
-                    UserViewSet)
-
-router = DefaultRouter()
-
-router.register(r'categories', CategoryViewSet)  # Все поинты от Варвары
-router.register(r'genres', GenreViewSet)
-router.register(r'titles', TitleViewSet)
-router.register(
-    r'titles/(?P<title_id>\d+)/reviews/',
-    ReviewViewSet, basename='reviews')  # кроме этого,это мой
-router.register(
-    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
-    CommentViewSet, basename='comments')  # и этого
-router.register(r"users", UserViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -45,5 +24,5 @@ urlpatterns = [
         TemplateView.as_view(template_name='redoc.html'),
         name='redoc'
     ),
-    path('v1/', include(router.urls))
+    path(path('api/', include('api.urls')))
 ]

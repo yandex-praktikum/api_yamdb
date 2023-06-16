@@ -5,52 +5,56 @@ from django.db import models
 USER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
-SUPERUSER = 'superuser'
 
 CHOICES_ROLE = [
     (USER, USER),
     (MODERATOR, MODERATOR),
-    (ADMIN, ADMIN),
-    (SUPERUSER, SUPERUSER),
+    (ADMIN, ADMIN)
 ]
 
 
 class User(AbstractUser):
     username = models.CharField(
-        max_length=30,
+        verbose_name='Никнейм'
+        max_length=150,
         unique=True,
         blank=False,
         null=False
     )
     email = models.EmailField(
+        verbose_name='Адрес e-mail'
         max_length=254,
         unique=True,
         blank=False,
         null=False
     )
-    userrole = models.CharField(
-        'роль пользователя',
-        max_length=10,
-        choices=CHOICES_ROLE,
-        default=USER,
-        blank=True
-    )
     first_name = models.CharField(
-        'имя',
+        verbose_name='Имя',
         max_length=150,
         blank=True
     )
     last_name = models.CharField(
-        'фамилия',
+        verbose_name='Фамилия',
         max_length=150,
         blank=True
     )
+    userrole = models.CharField(
+        verbose_name='Роль пользователя',
+        choices=CHOICES_ROLE,
+        default=USER,
+        blank=True
+    )
+    bio = models.CharField(
+        verbose_name='Краткая биография',
+        max_length=254,
+        blank=True,
+    )
     confirmation_code = models.CharField(
-        'код подтверждения',
-        max_length=255,
+        verbose_name='Код подтверждения',
+        max_length=254,
         null=True,
         blank=False,
-        default='XXXX'
+        default='1234567890'
     )
 
     @property
@@ -63,7 +67,7 @@ class User(AbstractUser):
     
     @property
     def is_admin(self):
-        return self.userrole == ADMIN or self.userrole ==SUPERUSER
+        return self.userrole == ADMIN
 
 
 

@@ -15,14 +15,14 @@ CHOICES_ROLE = [
 
 class User(AbstractUser):
     username = models.CharField(
-        verbose_name='Никнейм'
+        verbose_name='Никнейм',
         max_length=150,
         unique=True,
         blank=False,
         null=False
     )
     email = models.EmailField(
-        verbose_name='Адрес e-mail'
+        verbose_name='Адрес e-mail',
         max_length=254,
         unique=True,
         blank=False,

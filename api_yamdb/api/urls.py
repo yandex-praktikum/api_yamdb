@@ -21,9 +21,10 @@ router.register(
 router.register(
     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
     CommentViewSet, basename='comments')  # и этого
-router.register(r"users", UserViewSet)
+# router.register(r"users", UserViewSet)
 
 
 urlpatterns = [
     path('v1/', include(router.urls)),
+    path('v1/auth/', include('users.urls')),
 ]

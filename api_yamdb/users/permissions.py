@@ -1,7 +1,7 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class IsOwnerOrAdminsElseReadOnly(BasePermission):
+class IsOwnerOrAdminsOrReadOnly(BasePermission):
     """Разрешения для роли хозяина"""
     def has_permission(self, request, view):
         return (request.user.is_authenticated
@@ -12,7 +12,7 @@ class IsOwnerOrAdminsElseReadOnly(BasePermission):
                 or request.user.is_superuser)
 
 
-class IsAdminElseReadOnly(BasePermission):
+class IsAdminOrReadOnly(BasePermission):
     """Разрешение для роли админ."""
 
     def has_permission(self, request, view):
@@ -25,7 +25,7 @@ class IsAdminElseReadOnly(BasePermission):
         )
 
 
-class IsAuthorOrStaffElseReadOnly(BasePermission):
+class IsAuthorOrStaffOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         return (
             request.method in SAFE_METHODS

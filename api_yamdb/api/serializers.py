@@ -1,5 +1,55 @@
 from rest_framework import serializers
-from reviews.models import Reviews, Comments
+from reviews.models import (Categories,
+                            Genres,
+                            Titles,
+                            Reviews,
+                            Comments)
+
+class CategoriesSerializer(serializers.ModelSerializer):
+    """Сериализатор для категорий произведений."""
+    class Meta:
+        exclude = ('id',)
+        model = Categories
+        lookup_field = 'slug'
+
+
+class GenresSerializer(serializers.ModelSerializer):
+    """Сериализатор для жанров произведений."""
+    class Meta:
+        exclude = ('id',)
+        model = Genres
+        lookup_field = 'slug'
+
+
+class TitlesSerializer(serializers.ModelSerializer):
+    """Сериализатор для POST-запросов к произведениям."""
+    category = serializers.SlugRelatedField(
+        queryset=Categories.objects.all(),
+        slug_field='slug'
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genres.objects.all(),
+        slug_field='slug',
+        many=True
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Titles
+
+
+class TitleGenreSerializer(serializers.ModelSerializer):
+    """Сериализатор для GET-запросов к произведениям."""
+    category = CategoriesSerializer(read_only=True)
+    genre = GenresSerializer(
+        read_only=True,
+        many=True
+    )
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Titles
 
 
 class ReviewSerializer(serializers.ModelSerializer):

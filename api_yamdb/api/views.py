@@ -1,7 +1,48 @@
 from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
-from reviews.models import Comments, Reviews, Title
-from serializers import CommentSerializer, ReviewSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from reviews.models import (Categories,
+                            Genres,
+                            Titles,
+                            Reviews,
+                            Comments)
+from reviews.filter import TitleFilter
+from .mixins import DestroyCreateListMixins
+from api.serializers import (CategoriesSerializer,
+                          GenresSerializer,
+                          TitleGenreSerializer,
+                          ReviewSerializer,
+                          TitlesSerializer,
+                          CommentSerializer)
+from users.permissions import (IsAdminOrReadOnly)
+
+
+class CategoryViewSet(DestroyCreateListMixins):
+    """Вьюсет для модели Category."""
+    queryset = Categories.objects.all()
+    serializer_class = CategoriesSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class GenreViewSet(DestroyCreateListMixins):
+    """Вьюсет для модели Genre."""
+    queryset = Genres.objects.all()
+    serializer_class = GenresSerializer
+    permission_classes = [IsAdminOrReadOnly]
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет для модели Title."""
+    queryset = Titles.objects.all()
+    serializer_class = TitleFilter
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleGenreSerializer
+        return TitlesSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -12,7 +53,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(
-            Title,
+            Titles,
             pk=title_id)
         return title.reviews.all()
 

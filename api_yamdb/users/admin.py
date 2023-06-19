@@ -7,7 +7,6 @@ from reviews.models import (Categories,
                             Reviews,
                             Comments)
 
-User = get_user_model()
 
 class CategoriesAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug',)

@@ -6,7 +6,7 @@ from reviews.models import (Categories,
                             Titles,
                             Reviews,
                             Comments)
-from api.filter import TitleFilter
+from reviews.filter import TitleFilter
 from api.mixins import DestroyCreateListMixins
 from api.serializers import (CategoriesSerializer,
                           GenresSerializer,

@@ -5,6 +5,7 @@ from reviews.models import (Categories,
                             Reviews,
                             Comments)
 
+
 class CategoriesSerializer(serializers.ModelSerializer):
     """Сериализатор для категорий произведений."""
     class Meta:

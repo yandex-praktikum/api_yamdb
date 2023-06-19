@@ -1,6 +1,5 @@
 from rest_framework import viewsets, permissions
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from reviews.models import (Categories,
                             Genres,
                             Titles,
@@ -9,34 +8,30 @@ from reviews.models import (Categories,
 from reviews.filter import TitleFilter
 from api.mixins import DestroyCreateListMixins
 from api.serializers import (CategoriesSerializer,
-                          GenresSerializer,
-                          TitleGenreSerializer,
-                          ReviewSerializer,
-                          TitlesSerializer,
-                          CommentSerializer)
+                             GenresSerializer,
+                             TitleGenreSerializer,
+                             ReviewSerializer,
+                             TitlesSerializer,
+                             CommentSerializer)
 from users.permissions import (IsAdminOrReadOnly)
 
 
 class CategoryViewSet(DestroyCreateListMixins):
-    """Вьюсет для модели Category."""
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
     permission_classes = [IsAdminOrReadOnly]
 
 
 class GenreViewSet(DestroyCreateListMixins):
-    """Вьюсет для модели Genre."""
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
     permission_classes = [IsAdminOrReadOnly]
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """Вьюсет для модели Title."""
     queryset = Titles.objects.all()
     serializer_class = TitleFilter
     permission_classes = [IsAdminOrReadOnly]
-    filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):

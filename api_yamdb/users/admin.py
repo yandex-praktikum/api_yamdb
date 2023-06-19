@@ -7,7 +7,6 @@ from reviews.models import (Categories,
                             Comments)
 
 
-
 class CategoriesAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug',)
     list_display_links = ('name',)

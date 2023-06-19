@@ -5,7 +5,6 @@ from users.models import User
 
 # User = get_user_model()
 
-    
 
 class Categories(models.Model):
     name = models.CharField(
@@ -19,7 +18,7 @@ class Categories(models.Model):
     )
 
     class Meta:
-        # ordering = (-'name',)
+        ordering = ('name',)
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
@@ -39,7 +38,7 @@ class Genres(models.Model):
     )
 
     class Meta:
-        # ordering = (-'name',)
+        ordering = ('name',)
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -54,7 +53,7 @@ class Titles(models.Model):
         verbose_name='Название произведения'
     )
     year = models.PositiveSmallIntegerField(
-        # max_length=4,
+        max_length=4,
         blank=False,
         verbose_name='Год создания произведения'
     )
@@ -79,7 +78,7 @@ class Titles(models.Model):
     )
 
     class Meta:
-        # ordering = (-'year',)
+        ordering = ('year',)
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
@@ -98,26 +97,27 @@ class TitleGenre(models.Model):
     )
 
     class Meta:
-        # ordering = (-'genre',)
+        ordering = ('genre',)
         verbose_name = 'Произведение и жанр'
         verbose_name_plural = 'Произведения и жанры'
 
     def __str__(self):
         return f'{self.title}, жанр - {self.genre}'
 
+
 class Reviews(models.Model):
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
         on_delete=models.CASCADE,
-        related_name='reviews',
+        related_name='reviews_title',
         null=True,
         blank=False)
     title = models.ForeignKey(
         Titles,
         verbose_name='Произведение',
         on_delete=models.CASCADE,
-        related_name='reviews',
+        related_name='reviews_title',
         null=True,
         blank=False)
     text = models.TextField()
@@ -132,15 +132,14 @@ class Reviews(models.Model):
         validators=(
             MaxValueValidator(10),
             MinValueValidator(1)
-            ),
+        ),
         error_messages={'validators': 'Оценка от 1 до 10!'},
         null=True,
-        blank=False
-        )
+        blank=False)
 
     class Meta:
         verbose_name = 'Отзывы',
-        ordering = ('created')
+        ordering = ('created',)
 
     def __str__(self):
         return self.name
@@ -151,14 +150,14 @@ class Comments(models.Model):
         User,
         verbose_name='Автор',
         on_delete=models.CASCADE,
-        related_name='reviews',
+        related_name='reviews_comment',
         null=True,
         blank=False)
     review = models.ForeignKey(
         Reviews,
         verbose_name='Отзыв',
         on_delete=models.CASCADE,
-        related_name='reviews',
+        related_name='reviews_comment',
         null=True,
         blank=False)
     text = models.TextField()
@@ -171,7 +170,7 @@ class Comments(models.Model):
 
     class Meta:
         verbose_name = 'Комментарии',
-        ordering = ('created')
+        ordering = ('created',)
 
     def __str__(self):
         return self.name

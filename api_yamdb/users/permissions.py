@@ -24,6 +24,8 @@ class IsAdminOrReadOnly(BasePermission):
             )
         )
 
+class IsAdminOrSuperUser(BasePermission):
+    pass
 
 class IsAuthorOrStaffOrReadOnly(BasePermission):
     def has_permission(self, request, view):

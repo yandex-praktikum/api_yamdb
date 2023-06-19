@@ -53,7 +53,7 @@ class Titles(models.Model):
         verbose_name='Название произведения'
     )
     year = models.PositiveSmallIntegerField(
-        max_length=4,
+        # max_length=4,
         blank=False,
         verbose_name='Год создания произведения'
     )
@@ -138,7 +138,8 @@ class Reviews(models.Model):
         blank=False)
 
     class Meta:
-        verbose_name = 'Отзывы',
+        verbose_name = 'Отзыв',
+        verbose_name_plural = 'Отзывы',
         ordering = ('created',)
 
     def __str__(self):
@@ -169,7 +170,8 @@ class Comments(models.Model):
         blank=False)
 
     class Meta:
-        verbose_name = 'Комментарии',
+        verbose_name = 'Комментарий',
+        verbose_name_plural = 'Комментарии'
         ordering = ('created',)
 
     def __str__(self):

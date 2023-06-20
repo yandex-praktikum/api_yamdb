@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(max_length=254, unique=True, verbose_name='Адрес e-mail')),
                 ('first_name', models.CharField(blank=True, max_length=150, verbose_name='Имя')),
                 ('last_name', models.CharField(blank=True, max_length=150, verbose_name='Фамилия')),
-                ('userrole', models.CharField(blank=True, choices=[('user', 'user'), ('moderator', 'moderator'), ('admin', 'admin')], default='user', max_length=15, verbose_name='Роль пользователя')),
+                ('role', models.CharField(blank=True, choices=[('user', 'user'), ('moderator', 'moderator'), ('admin', 'admin')], default='user', max_length=15, verbose_name='Роль пользователя')),
                 ('bio', models.CharField(blank=True, max_length=254, verbose_name='Краткая биография')),
                 ('confirmation_code', models.CharField(default='1234567890', max_length=254, null=True, verbose_name='Код подтверждения')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),

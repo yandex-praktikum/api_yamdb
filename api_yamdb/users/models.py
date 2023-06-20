@@ -38,7 +38,7 @@ class User(AbstractUser):
         max_length=150,
         blank=True
     )
-    userrole = models.CharField(
+    role = models.CharField(
         verbose_name='Роль пользователя',
         max_length=15,
         choices=CHOICES_ROLE,
@@ -60,15 +60,15 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.userrole == USER
+        return self.role == USER
 
     @property
     def is_moderator(self):
-        return self.userrole == MODERATOR
+        return self.role == MODERATOR
 
     @property
     def is_admin(self):
-        return self.userrole == ADMIN
+        return self.role == ADMIN
 
     class Meta:
         ordering = ('id',)

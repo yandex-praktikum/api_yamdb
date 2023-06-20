@@ -50,7 +50,6 @@ class Titles(models.Model):
         verbose_name='Название произведения'
     )
     year = models.PositiveSmallIntegerField(
-        # max_length=4,
         blank=False,
         verbose_name='Год создания произведения'
     )

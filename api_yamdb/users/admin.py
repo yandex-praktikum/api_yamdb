@@ -50,13 +50,13 @@ class CommentsAdmin(admin.ModelAdmin):
 
 class UsersAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'email', 'first_name',
-                    'last_name', 'userrole',)
+                    'last_name', 'role',)
     search_fields = ('username', 'email', 'first_name', 'last_name',
-                     'userrole',)
-    list_filter = ('first_name', 'last_name', 'userrole',)
+                     'role',)
+    list_filter = ('first_name', 'last_name', 'role',)
     empty_value_display = '-пусто-'
     list_editable = ('username', 'email', 'first_name', 'last_name',
-                     'userrole',)
+                     'role',)
 
 
 admin.site.register(Categories, CategoriesAdmin)

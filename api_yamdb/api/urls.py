@@ -6,6 +6,7 @@ from api.views import (CategoryViewSet,
                        GenreViewSet,
                        ReviewViewSet,
                        TitleViewSet)
+from users.views import UserViewSet
 
 app_name = 'api'
 
@@ -20,7 +21,7 @@ router.register(
 router.register(
     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
     CommentViewSet, basename='comments')
-# router.register(r"users", UserViewSet)
+router.register(r"users", UserViewSet)
 
 
 urlpatterns = [

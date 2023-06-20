@@ -38,7 +38,7 @@ def signup_post(request):
     user.save()
     send_mail(
         'Код подверждения', confirmation_code,
-        ['admin@email.com'], (email, ), fail_silently=False
+        ['admin@email.com'], (email,), fail_silently=False
     )
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -70,7 +70,7 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch'],
         detail=False,
         url_path='me',
-        permission_classes=(IsAuthorOrStaffOrReadOnly, )
+        permission_classes=(IsAuthorOrAdmins,)
     )
     def get_patch_me(self, request):
         user = get_object_or_404(User, username=self.request.user)

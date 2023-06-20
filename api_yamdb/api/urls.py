@@ -11,15 +11,15 @@ app_name = 'api'
 
 router = DefaultRouter()
 
-router.register(r'categories', CategoryViewSet)  # Все поинты от Варвары
+router.register(r'categories', CategoryViewSet)
 router.register(r'genres', GenreViewSet)
 router.register(r'titles', TitleViewSet)
 router.register(
     r'titles/(?P<title_id>\d+)/reviews/',
-    ReviewViewSet, basename='reviews')  # кроме этого,это мой
+    ReviewViewSet, basename='reviews')
 router.register(
     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
-    CommentViewSet, basename='comments')  # и этого
+    CommentViewSet, basename='comments')
 # router.register(r"users", UserViewSet)
 
 

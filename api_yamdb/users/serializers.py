@@ -3,10 +3,12 @@ from django.core.validators import RegexValidator
 
 from users.models import User
 
+
 class UsernameValidator(RegexValidator):
     regex = r'^[\w.@+-]+$'
     flags = 0
-    
+
+
 class SignUpSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=254, required=True)
     username = serializers.CharField(max_length=150, required=True)
@@ -36,7 +38,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class MeSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(read_only=True)
+    userrole = serializers.CharField(read_only=True)
 
     class Meta:
         model = User

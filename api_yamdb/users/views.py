@@ -3,19 +3,18 @@ import uuid
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import api_view, action
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+# from rest_framework.permissions import (IsAuthenticated,
+#                                           IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from users.models import User
-from users.permissions import (AuthorAndStaffOrReadOnly,
-                             IsAdminOrReadOnly, IsOwnerOrAdmins)
+from users.permissions import (IsAuthorOrStaffOrReadOnly, IsAuthorOrAdmins)
 from users.serializers import (SignUpSerializer,
-                             TokenSerializer, UserSerializer, MeSerializer)
+                               TokenSerializer, UserSerializer, MeSerializer)
 
 
 @api_view(['POST'])
@@ -61,7 +60,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (OwnerOrAdmins, )
+    permission_classes = (IsAuthorOrAdmins, )
     filter_backends = (filters.SearchFilter, )
     filterset_fields = ('username')
     search_fields = ('username', )
@@ -71,7 +70,7 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch'],
         detail=False,
         url_path='me',
-        permission_classes=(IsAuthenticated, )
+        permission_classes=(IsAuthorOrStaffOrReadOnly, )
     )
     def get_patch_me(self, request):
         user = get_object_or_404(User, username=self.request.user)

@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from reviews.models import (Categories,
                             Genres,
@@ -13,7 +13,8 @@ from api.serializers import (CategoriesSerializer,
                              ReviewSerializer,
                              TitlesSerializer,
                              CommentSerializer)
-from users.permissions import (IsAdminOrReadOnly)
+from users.permissions import (IsAdminOrReadOnly,
+                               IsAuthorOrStaffOrReadOnly)
 
 
 class CategoryViewSet(DestroyCreateListMixins):
@@ -43,7 +44,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Reviews.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthorOrStaffOrReadOnly,)
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -63,7 +64,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthorOrStaffOrReadOnly,)
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')

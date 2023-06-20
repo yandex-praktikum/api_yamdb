@@ -1,6 +1,5 @@
 from django.contrib import admin
 from users.models import User
-from django.contrib.auth import get_user_model
 from reviews.models import (Categories,
                             Genres,
                             Titles,
@@ -58,7 +57,6 @@ class UsersAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
     list_editable = ('username', 'email', 'first_name', 'last_name',
                      'userrole',)
-    
 
 
 admin.site.register(Categories, CategoriesAdmin)

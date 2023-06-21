@@ -66,13 +66,27 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ('username', )
     lookup_field = 'username'
 
+    # def get(self, request):
+    #     user = get_object_or_404(User, username=self.request.user)
+    #     if request.method == 'GET':
+    #         if request.user.role == 'admin':
+    #             serializer = UserSerializer(user)
+    #             return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(request.user.role, status=status.HTTP_403_FORBIDDEN)
+
+    # def put(self, request):
+    #     if request.method == 'PUT':
+    #         serializer = UserSerializer(user)
+    #         return Response(serializer.data,
+    #                         status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
     @action(
-        methods=['get', 'patch', 'put'],
+        methods=['get', 'patch', ],
         detail=False,
         url_path='me',
         permission_classes=(IsAuthorOrAdmins, IsAdminOrReadOnly)
     )
-    def get_patch_put(self, request):
+    def get_patch_me(self, request):
         user = get_object_or_404(User, username=self.request.user)
         if request.method == 'GET':
             serializer = MeSerializer(user)
@@ -82,7 +96,7 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        if request.method == 'PUT':
-            serializer = UserSerializer(user)
-            return Response(serializer.data,
-                            status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        # if request.method == 'PUT':
+        #     serializer = UserSerializer(user)
+        #     return Response(serializer.data,
+        #                     status=status.HTTP_405_METHOD_NOT_ALLOWED)

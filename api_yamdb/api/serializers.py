@@ -6,6 +6,8 @@ from reviews.models import (Categories,
                             Titles,
                             Reviews,
                             Comments)
+from rest_framework.validators import UniqueTogetherValidator
+
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
@@ -104,6 +106,14 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Reviews
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Reviews.objects.all(),
+                fields=('title', 'author'),
+                message=('Вы можете оставить только один отзыв')
+            )
+        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):

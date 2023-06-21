@@ -39,8 +39,12 @@ INSTALLED_APPS = [
     'reviews.apps.ReviewsConfig',
     'users.apps.UsersConfig',
     'import_export',
+<<<<<<< HEAD
     'dotenv',
 
+=======
+    # 'dotenv',
+>>>>>>> origin/devop
 ]
 
 MIDDLEWARE = [

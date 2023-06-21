@@ -1,10 +1,13 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 from users.models import User
 from reviews.models import (Categories,
                             Genres,
                             Titles,
                             Reviews,
                             Comments)
+
+User = get_user_model()
 
 
 class CategoriesAdmin(admin.ModelAdmin):

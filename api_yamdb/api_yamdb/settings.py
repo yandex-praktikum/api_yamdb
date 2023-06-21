@@ -16,8 +16,10 @@ DEBUG = os.getenv('DEBUG')
 REGEX_STR = r'^[\w.@+-]+\Z$'
 REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
 
+REGEX_STR = r'^[\w.@+-]+\Z$'
+REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
+
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS')
 
 YAMDB = 'mail@yamdb.debug'
 # YAMDB = os.getenv('YAMDB')
@@ -39,12 +41,8 @@ INSTALLED_APPS = [
     'reviews.apps.ReviewsConfig',
     'users.apps.UsersConfig',
     'import_export',
-<<<<<<< HEAD
     'dotenv',
 
-=======
-    # 'dotenv',
->>>>>>> origin/devop
 ]
 
 MIDDLEWARE = [

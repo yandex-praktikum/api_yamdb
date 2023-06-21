@@ -11,10 +11,10 @@ from rest_framework.validators import UniqueTogetherValidator
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
-    name = serializers.RegexField(regex=REGEX_SLUG,
-                                  max_length=256,
-                                  required=True)
-    slug = serializers.CharField(max_length=50, required=True)
+    # name = serializers.RegexField(regex=REGEX_SLUG,
+    #                               max_length=256,
+    #                               required=True)
+    # slug = serializers.CharField(max_length=50, required=True)
 
     class Meta:
         exclude = ('id',)
@@ -23,10 +23,10 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class GenresSerializer(serializers.ModelSerializer):
-    name = serializers.RegexField(regex=REGEX_SLUG,
-                                  max_length=256,
-                                  required=True)
-    slug = serializers.CharField(max_length=50, required=True)
+    # name = serializers.RegexField(regex=REGEX_SLUG,
+    #                               max_length=256,
+    #                               required=True)
+    # slug = serializers.CharField(max_length=50, required=True)
 
     class Meta:
         exclude = ('id',)

@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from users.models import User
-from users.permissions import (IsAuthorOrStaffOrReadOnly, IsAuthorOrAdmins)
+from users.permissions import (IsAuthorOrAdmins, IsAdminOrReadOnly)
 from users.serializers import (SignUpSerializer,
                                TokenSerializer, UserSerializer, MeSerializer)
 
@@ -60,19 +60,19 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAuthorOrAdmins, )
+    permission_classes = (IsAuthorOrAdmins, IsAdminOrReadOnly)
     filter_backends = (filters.SearchFilter, )
     filterset_fields = ('username')
     search_fields = ('username', )
     lookup_field = 'username'
 
     @action(
-        methods=['get', 'patch'],
+        methods=['get', 'patch', 'put'],
         detail=False,
         url_path='me',
-        permission_classes=(IsAuthorOrAdmins,)
+        permission_classes=(IsAuthorOrAdmins, IsAdminOrReadOnly)
     )
-    def get_patch_me(self, request):
+    def get_patch_put(self, request):
         user = get_object_or_404(User, username=self.request.user)
         if request.method == 'GET':
             serializer = MeSerializer(user)
@@ -82,3 +82,7 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == 'PUT':
+            serializer = UserSerializer(user)
+            return Response(serializer.data,
+                            status=status.HTTP_405_METHOD_NOT_ALLOWED)

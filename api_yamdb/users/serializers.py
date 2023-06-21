@@ -1,12 +1,6 @@
 from rest_framework import serializers
-# from django.core.validators import RegexValidator
 
 from users.models import User
-
-
-# class UsernameValidator(RegexValidator):
-#     regex = r'^[\w.@+-]+$'
-#     flags = 0
 
 
 class SignUpSerializer(serializers.Serializer):

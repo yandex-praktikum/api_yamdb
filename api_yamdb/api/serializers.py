@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from api_yamdb.settings import REGEX_SLUG
 from reviews.models import (Categories,
                             Genres,
                             Titles,
@@ -7,6 +9,11 @@ from reviews.models import (Categories,
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
+    name = serializers.RegexField(regex=REGEX_SLUG,
+                                  max_length=256,
+                                  required=True)
+    slug = serializers.CharField(max_length=50, required=True)
+
     class Meta:
         exclude = ('id',)
         model = Categories
@@ -14,10 +21,35 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class GenresSerializer(serializers.ModelSerializer):
+    name = serializers.RegexField(regex=REGEX_SLUG,
+                                  max_length=256,
+                                  required=True)
+    slug = serializers.CharField(max_length=50, required=True)
+
     class Meta:
         exclude = ('id',)
         model = Genres
         lookup_field = 'slug'
+
+
+class TitlesGetSerializer(serializers.ModelSerializer):
+    """Сериализатор объектов класса Title при GET запросах."""
+
+    genre = GenresSerializer(many=True, read_only=True)
+    category = CategoriesSerializer(read_only=True)
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Titles
+        fields = (
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genre',
+            'category'
+        )
 
 
 class TitlesSerializer(serializers.ModelSerializer):
@@ -34,6 +66,11 @@ class TitlesSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Titles
+
+    def to_representation(self, title):
+        """Определяет какой сериализатор будет использоваться для чтения."""
+        serializer = TitlesGetSerializer(title)
+        return serializer.data
 
 
 class TitleGenreSerializer(serializers.ModelSerializer):

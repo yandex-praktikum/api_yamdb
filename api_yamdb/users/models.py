@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import RegexValidator
 
+from api_yamdb.settings import REGEX_STR
 
 USER = 'user'
 MODERATOR = 'moderator'
@@ -15,7 +16,7 @@ CHOICES_ROLE = [
 
 
 class UsernameValidator(RegexValidator):
-    regex = r'^[\w.@+-]+$'
+    regex = REGEX_STR
 
 
 class User(AbstractUser):

@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from reviews.models import (Categories,
                             Genres,
                             Titles,
@@ -9,42 +10,43 @@ from reviews.filter import TitleFilter
 from api.mixins import DestroyCreateListMixins
 from api.serializers import (CategoriesSerializer,
                              GenresSerializer,
-                             TitleGenreSerializer,
+                             TitlesGetSerializer,
                              ReviewSerializer,
                              TitlesSerializer,
                              CommentSerializer)
-from users.permissions import (IsAdminOrReadOnly,
-                               IsAuthorOrStaffOrReadOnly)
+from users.permissions import (IsAdminOnly, GuestReadOnly,
+                               IsAuthorOrStaff)
 
 
 class CategoryViewSet(DestroyCreateListMixins):
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = (GuestReadOnly, IsAdminOnly, )
 
 
 class GenreViewSet(DestroyCreateListMixins):
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = (GuestReadOnly, IsAdminOnly, )
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
-    serializer_class = TitleFilter
-    permission_classes = [IsAdminOrReadOnly]
+    serializer_class = TitlesSerializer
+    permission_classes = (GuestReadOnly, IsAdminOnly, )
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return TitleGenreSerializer
+            return TitlesGetSerializer
         return TitlesSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Reviews.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrStaffOrReadOnly,)
+    permission_classes = (GuestReadOnly, IsAuthorOrStaff, )
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -64,7 +66,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comments.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthorOrStaffOrReadOnly,)
+    permission_classes = (GuestReadOnly, IsAuthorOrStaff,)
 
     def get_queryset(self):
         review_id = self.kwargs.get('review_id')

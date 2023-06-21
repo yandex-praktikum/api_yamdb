@@ -1,21 +1,28 @@
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
 from pathlib import Path
+from django.conf.global_settings import DATETIME_INPUT_FORMATS
+DATETIME_INPUT_FORMATS += ('%Y-%m-%dT%H:%M:%S.%f%z',)
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = ['*']
+REGEX_STR = r'^[\w.@+-]+\Z$'
+REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS')
+
+YAMDB = 'mail@yamdb.debug'
+# YAMDB = os.getenv('YAMDB')
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,7 +31,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'django.core.urlresolvers',
     'django_filters',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -32,7 +38,9 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
     'users.apps.UsersConfig',
-#    'dotenv',
+    'import_export',
+    'dotenv',
+
 ]
 
 MIDDLEWARE = [

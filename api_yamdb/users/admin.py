@@ -62,9 +62,9 @@ class UsersAdmin(admin.ModelAdmin):
                      'role',)
 
 
-admin.site.register(Categories, CategoriesAdmin)
-admin.site.register(Genres, GenresAdmin)
-admin.site.register(Titles, TitlesAdmin)
-admin.site.register(Reviews, ReviewsAdmin)
-admin.site.register(Comments, CommentsAdmin)
-admin.site.register(User, UsersAdmin)
+# admin.site.register(Categories, CategoriesAdmin)
+# admin.site.register(Genres, GenresAdmin)
+# admin.site.register(Titles, TitlesAdmin)
+# admin.site.register(Reviews, ReviewsAdmin)
+# admin.site.register(Comments, CommentsAdmin)
+# admin.site.register(User, UsersAdmin)

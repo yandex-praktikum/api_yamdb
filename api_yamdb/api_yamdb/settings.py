@@ -10,7 +10,10 @@ SECRET_KEY = 'p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+REGEX_STR = r'^[\w.@+-]+\Z$'
+REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
@@ -32,7 +35,9 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'reviews.apps.ReviewsConfig',
     'users.apps.UsersConfig',
-#    'dotenv',
+    'import_export',
+    'dotenv',
+
 ]
 
 MIDDLEWARE = [

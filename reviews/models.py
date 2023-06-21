@@ -42,6 +42,12 @@ class Reviews(models.Model):
     class Meta:
         verbose_name = 'Отзывы',
         ordering = ('created')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            )
+        ]
 
     def __str__(self):
         return self.name

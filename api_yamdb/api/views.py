@@ -1,21 +1,14 @@
-from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from reviews.models import (Categories,
-                            Genres,
-                            Titles,
-                            Reviews,
-                            Comments)
-from reviews.filter import TitleFilter
+from rest_framework import viewsets
+
 from api.mixins import DestroyCreateListMixins
-from api.serializers import (CategoriesSerializer,
-                             GenresSerializer,
-                             TitlesGetSerializer,
-                             ReviewSerializer,
-                             TitlesSerializer,
-                             CommentSerializer)
-from users.permissions import (IsAdminOnly, GuestReadOnly,
-                               IsAuthorOrStaff)
+from api.serializers import (CategoriesSerializer, CommentSerializer,
+                             GenresSerializer, ReviewSerializer,
+                             TitlesGetSerializer, TitlesSerializer)
+from reviews.filter import TitleFilter
+from reviews.models import Categories, Comments, Genres, Reviews, Titles
+from users.permissions import GuestReadOnly, IsAdminOnly, IsAuthorOrStaff
 
 
 class CategoryViewSet(DestroyCreateListMixins):

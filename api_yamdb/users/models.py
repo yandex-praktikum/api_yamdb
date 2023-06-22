@@ -1,22 +1,15 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.core.validators import RegexValidator
 
-from api_yamdb.settings import REGEX_STR
+from users.validators import UsernameValidator
 
 USER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
 
-CHOICES_ROLE = [
-    (USER, USER),
-    (MODERATOR, MODERATOR),
-    (ADMIN, ADMIN)
-]
-
-
-class UsernameValidator(RegexValidator):
-    regex = REGEX_STR
+CHOICES_ROLE = [(USER, USER),
+                (MODERATOR, MODERATOR),
+                (ADMIN, ADMIN)]
 
 
 class User(AbstractUser):

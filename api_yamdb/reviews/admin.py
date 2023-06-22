@@ -3,12 +3,8 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.fields import Field
 
-from reviews.models import (Categories,
-                            Genres,
-                            Titles,
-                            TitleGenre,
-                            Reviews,
-                            Comments)
+from reviews.models import (Categories, Comments, Genres, Reviews, TitleGenre,
+                            Titles)
 from users.models import User
 
 

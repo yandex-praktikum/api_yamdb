@@ -1,8 +1,10 @@
 import os
 from datetime import timedelta
-from dotenv import load_dotenv
 from pathlib import Path
+
 from django.conf.global_settings import DATETIME_INPUT_FORMATS
+from dotenv import load_dotenv
+
 DATETIME_INPUT_FORMATS += ('%Y-%m-%dT%H:%M:%S.%f%z',)
 
 load_dotenv()
@@ -16,13 +18,9 @@ DEBUG = os.getenv('DEBUG')
 REGEX_STR = r'^[\w.@+-]+\Z$'
 REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
 
-REGEX_STR = r'^[\w.@+-]+\Z$'
-REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
-
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-YAMDB = 'mail@yamdb.debug'
-# YAMDB = os.getenv('YAMDB')
+YAMDB = os.getenv('YAMDB')
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
@@ -76,18 +74,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
-
-# Database
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
-# Password validation
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -104,9 +96,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -117,8 +106,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
 
 STATIC_URL = '/static/'
 
@@ -136,7 +123,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 5,
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-
 }
 
 SIMPLE_JWT = {

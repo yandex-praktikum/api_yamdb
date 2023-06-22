@@ -1,10 +1,7 @@
-<<<<<<< HEAD
-# api_yamdb
-Тут будет описание проекта api_yamdb, мы обязательно его сделаем, но не сейчас, а после пайтеста.
-=======
-api_yamdb
 
-Проект был выполнен совместно:
+# api_yamdb
+
+Проект был выполнен командой из:
 https://github.com/Inko-py
 https://github.com/GorlovaEA
 https://github.com/Mozgova

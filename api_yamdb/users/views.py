@@ -1,5 +1,3 @@
-# import uuid
-
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
@@ -22,31 +20,25 @@ class UserCreateViewSet(mixins.CreateModelMixin,
     """Вьюсет для создания пользователей."""
     queryset = User.objects.all()
     serializer_class = SignUpSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.AllowAny, )
 
     def create(self, request):
         """Создает объект класса User и
         отправляет на почту пользователя код подтверждения."""
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # email = serializer.validated_data['email']
-        # username = serializer.validated_data['username']
         try:
-#             user, _ = User.objects.get_or_create(username=username,
-#                                                  email=email)
-           user, _ = User.objects.get_or_create(**serializer.validated_data)
+            user, _ = User.objects.get_or_create(**serializer.validated_data)
         except IntegrityError:
             return Response('Такой логин или email уже существуют',
                             status=status.HTTP_400_BAD_REQUEST)
         confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            subject='Код подтверждения Yamdb',
-            message=f'Код подтверждения: {confirmation_code}',
-            from_email=YAMDB,
-            email=user.email,
-            confirmation_code=confirmation_code
-        )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        email = user.email
+        send_mail(subject='Код подтверждения Yamdb',
+                  message=f'Код подтверждения: {confirmation_code}',
+                  from_email=YAMDB,
+                  recipient_list=(email,),)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TokenViewSet(mixins.CreateModelMixin,
@@ -74,13 +66,13 @@ class UserViewSet(viewsets.ModelViewSet):
     """Вьюсет для работы с пользователями."""
     queryset = User.objects.all()
     serializer_class = UserSerializer
-#    pagination_class = PageNumberPagination
+    pagination_class = PageNumberPagination
     permission_classes = (IsAdminOnly, )
     filter_backends = (filters.SearchFilter, )
     filterset_fields = ('username')
     search_fields = ('username', )
     lookup_field = 'username'
-    http_method_names = ['get', 'patch', 'delete']
+    http_method_names = ['get', 'patch', 'delete', 'post']
 
     @action(
         detail=False,
@@ -101,8 +93,6 @@ class UserViewSet(viewsets.ModelViewSet):
         elif request.method == 'DELETE':
             user.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        # elif request.method == 'PUT':
-        #     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

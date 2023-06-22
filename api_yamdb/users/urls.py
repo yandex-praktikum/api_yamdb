@@ -6,6 +6,6 @@ from users.views import UserCreateViewSet, TokenViewSet
 app_name = 'users'
 
 urlpatterns = [
-    path('signup/', UserCreateViewSet),
-    path('token/', TokenViewSet),
+    path('signup/', UserCreateViewSet.as_view({'post': 'create'})),
+    path('token/', TokenViewSet.as_view({'post': 'create'})),
 ]

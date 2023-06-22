@@ -3,20 +3,24 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from reviews.validators import SlugValidator
 from users.models import User
 
 Titles = get_user_model()
 
 
 class Categories(models.Model):
+    validator_slug = SlugValidator()
     name = models.CharField(
         max_length=256,
         blank=False,
-        verbose_name='Наименование категории'
+        verbose_name='Наименование категории',
     )
     slug = models.SlugField(
+        max_length=50,
         unique=True,
-        blank=False
+        blank=False,
+        validators=[validator_slug],
     )
 
     class Meta:
@@ -29,14 +33,17 @@ class Categories(models.Model):
 
 
 class Genres(models.Model):
+    validator_slug = SlugValidator()
     name = models.CharField(
         max_length=256,
         blank=False,
         verbose_name='Название жанра'
     )
     slug = models.SlugField(
+        max_length=50,
         unique=True,
-        blank=False
+        blank=False,
+        validators=[validator_slug],
     )
 
     class Meta:

@@ -42,18 +42,8 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.RegexField(regex=REGEX_STR,
-                                      max_length=150,
-                                      required=True)
 
     class Meta:
         model = User
         fields = ('username', 'email', 'first_name', 'last_name', 'bio',
                   'role')
-
-    # def validate_username(self, username):
-    #     if username == 'me':
-    #         raise serializers.ValidationError(
-    #             'Использовать имя "me" запрещено'
-    #         )
-    #     return username

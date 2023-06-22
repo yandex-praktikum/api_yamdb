@@ -1,7 +1,11 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from users.models import User
+
+Titles = get_user_model()
 
 
 class Categories(models.Model):
@@ -138,6 +142,12 @@ class Reviews(models.Model):
         verbose_name = 'Отзыв',
         verbose_name_plural = 'Отзывы',
         ordering = ('created',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            )
+        ]
 
     def __str__(self):
         return self.name

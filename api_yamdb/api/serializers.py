@@ -1,14 +1,19 @@
 from rest_framework import serializers
 
+from rest_framework.validators import UniqueTogetherValidator
+
+from api_yamdb.settings import REGEX_SLUG
 from reviews.models import (Categories,
                             Genres,
                             Titles,
                             Reviews,
                             Comments)
-from rest_framework.validators import UniqueTogetherValidator
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=256, )
+    slug = serializers.RegexField(regex=REGEX_SLUG,
+                                  max_length=50, )
 
     class Meta:
         exclude = ('id',)
@@ -17,6 +22,9 @@ class CategoriesSerializer(serializers.ModelSerializer):
 
 
 class GenresSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=256, )
+    slug = serializers.RegexField(regex=REGEX_SLUG,
+                                  max_length=50, )
 
     class Meta:
         exclude = ('id',)

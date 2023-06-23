@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
+from rest_framework.decorators import action
 
 from api.mixins import DestroyCreateListMixins
 from api.serializers import (CategoriesSerializer, CommentSerializer,
@@ -16,7 +17,7 @@ class CategoryViewSet(DestroyCreateListMixins):
     serializer_class = CategoriesSerializer
     permission_classes = (GuestReadOnly, )
 
-    """когда будете писать тут функции нужно будет в них
+    """когда будете писать тут функции обработки запросов нужно будет в них
     определять permission_classes=(IsAdminOnly, )"""
 
 
@@ -24,7 +25,7 @@ class GenreViewSet(DestroyCreateListMixins):
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
     permission_classes = (GuestReadOnly, )
-    """когда будете писать тут функции нужно будет в них
+    """когда будете писать тут функции обработки запросов нужно будет в них
     определять permission_classes=(IsAdminOnly, )"""
 
 
@@ -34,6 +35,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (GuestReadOnly, )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+"""когда будете писать тут функции обработки запросов нужно будет в них
+    определять permission_classes=(IsAdminOnly, )"""
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -45,9 +48,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Reviews.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = (GuestReadOnly, )
-    """когда будете писать тут функции нужно будет в них
+    """когда будете писать тут функции обработки запросов нужно будет в них
     определять permission_classes=(IsAuthorOrStaff, )"""
 
+    # @action(detail=False,
+    #         permission_classes=(IsAuthorOrStaff, ),
+    #         methods=['put'])
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(
@@ -55,6 +61,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
             pk=title_id)
         return title.reviews.all()
 
+    # @action(detail=False,
+    #         permission_classes=(IsAuthorOrStaff, ),
+    #         methods=['put'])
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(
@@ -68,7 +77,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (GuestReadOnly, )
 
-    """когда будете писать тут функции нужно будет в них
+    """когда будете писать тут функции обработки запросов нужно будет в них
     определять permission_classes=(IsAuthorOrStaff, )"""
 
     def get_queryset(self):

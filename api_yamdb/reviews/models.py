@@ -28,7 +28,7 @@ class Category(models.Model):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
-    def str(self) -> str:
+    def __str__(self) -> str:
         return self.name
 
 
@@ -157,7 +157,7 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.name
+        return self.text
 
 
 class Comment(models.Model):
@@ -189,4 +189,4 @@ class Comment(models.Model):
         ordering = ('created',)
 
     def __str__(self):
-        return self.name
+        return self.text

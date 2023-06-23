@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from django.core.validators import MaxLengthValidator
 
 from api_yamdb.settings import REGEX_SLUG
 from reviews.models import (Category,
@@ -12,8 +13,17 @@ from reviews.models import (Category,
 
 class CategorySerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=256, )
-    slug = serializers.RegexField(regex=REGEX_SLUG,
-                                  max_length=50, )
+    # slug = serializers.RegexField(regex=REGEX_SLUG,
+    #                               max_length=50, )
+    slug = serializers.SlugField(
+        validators=(
+            UniqueValidator(
+                queryset=Category.objects.all(),
+                message='Поле slug должно быть уникальным!'
+            ),
+            MaxLengthValidator(50),
+        )
+    )
 
     class Meta:
         exclude = ('id',)
@@ -23,8 +33,8 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=256, )
-    slug = serializers.RegexField(regex=REGEX_SLUG,
-                                  max_length=50, )
+    # slug = serializers.RegexField(regex=REGEX_SLUG,
+    #                               max_length=50, )
 
     class Meta:
         exclude = ('id',)
@@ -123,7 +133,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 message=('Вы можете оставить только один отзыв')
             )
         ]
-    
 
 
 class CommentSerializer(serializers.ModelSerializer):

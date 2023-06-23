@@ -90,7 +90,7 @@ class Title(models.Model):
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
-    def str(self):
+    def __str__(self):
         return self.name
 
 
@@ -157,7 +157,7 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.name
+        return self.text
 
 
 class Comment(models.Model):
@@ -189,4 +189,4 @@ class Comment(models.Model):
         ordering = ('created',)
 
     def __str__(self):
-        return self.name
+        return self.text

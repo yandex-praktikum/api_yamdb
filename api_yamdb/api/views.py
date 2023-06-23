@@ -11,13 +11,13 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              TitleGetSerializer, TitleSerializer)
 from reviews.filter import TitleFilter
 from reviews.models import Category, Comment, Genre, Review, Title
-from users.permissions import GuestReadOnly, IsAdminOnly, IsAuthorOrStaff
+from users.permissions import GuestReadOnly, IsAdminOnly, IsAuthorOrStaff, IsAdminOrReadOnly
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (GuestReadOnly, permissions.AllowAny)
+    permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -28,7 +28,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (GuestReadOnly, )
+    permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -39,7 +39,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (GuestReadOnly, )
+    permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 """когда будете писать тут функции обработки запросов нужно будет в них
@@ -58,7 +58,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (GuestReadOnly, )
+    permission_classes = (IsAuthorOrStaff, )
     """когда будете писать тут функции обработки запросов нужно будет в них
     определять permission_classes=(IsAuthorOrStaff, )"""
 
@@ -86,7 +86,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (GuestReadOnly, )
+    permission_classes = (IsAuthorOrStaff, )
 
     """когда будете писать тут функции обработки запросов нужно будет в них
     определять permission_classes=(IsAuthorOrStaff, )"""

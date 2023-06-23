@@ -1,46 +1,46 @@
 from rest_framework import serializers
-
+from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueTogetherValidator
 
 from api_yamdb.settings import REGEX_SLUG
-from reviews.models import (Categories,
-                            Genres,
-                            Titles,
-                            Reviews,
-                            Comments)
+from reviews.models import (Category,
+                            Genre,
+                            Title,
+                            Review,
+                            Comment)
 
 
-class CategoriesSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=256, )
     slug = serializers.RegexField(regex=REGEX_SLUG,
                                   max_length=50, )
 
     class Meta:
         exclude = ('id',)
-        model = Categories
+        model = Category
         lookup_field = 'slug'
 
 
-class GenresSerializer(serializers.ModelSerializer):
+class GenreSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=256, )
     slug = serializers.RegexField(regex=REGEX_SLUG,
                                   max_length=50, )
 
     class Meta:
         exclude = ('id',)
-        model = Genres
+        model = Genre
         lookup_field = 'slug'
 
 
-class TitlesGetSerializer(serializers.ModelSerializer):
+class TitleGetSerializer(serializers.ModelSerializer):
     """Сериализатор объектов класса Title при GET запросах."""
 
-    genre = GenresSerializer(many=True, read_only=True)
-    category = CategoriesSerializer(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
     rating = serializers.IntegerField(read_only=True)
 
     class Meta:
-        model = Titles
+        model = Title
         fields = (
             'id',
             'name',
@@ -52,30 +52,30 @@ class TitlesGetSerializer(serializers.ModelSerializer):
         )
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
-        queryset=Categories.objects.all(),
+        queryset=Category.objects.all(),
         slug_field='slug'
     )
     genre = serializers.SlugRelatedField(
-        queryset=Genres.objects.all(),
+        queryset=Genre.objects.all(),
         slug_field='slug',
         many=True
     )
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title
 
     def to_representation(self, title):
         """Определяет какой сериализатор будет использоваться для чтения."""
-        serializer = TitlesGetSerializer(title)
+        serializer = TitleGetSerializer(title)
         return serializer.data
 
 
 class TitleGenreSerializer(serializers.ModelSerializer):
-    category = CategoriesSerializer(read_only=True)
-    genre = GenresSerializer(
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(
         read_only=True,
         many=True
     )
@@ -83,7 +83,7 @@ class TitleGenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -101,17 +101,29 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Оценка по шкале от 1 до 10')
         return value
 
+    def create(self, validated_data):
+        request = self.context['request']
+        author = request.user
+        title_id = self.context['view'].kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title_id)
+        if Review.objects.filter(
+                title=title,
+                author=author).exists():
+            raise serializers.ValidationError('Нельзя дважды оставить ревью')
+        return Review.objects.create(**validated_data)
+
     class Meta:
         fields = '__all__'
-        model = Reviews
+        model = Review
 
         validators = [
             UniqueTogetherValidator(
-                queryset=Reviews.objects.all(),
+                queryset=Review.objects.all(),
                 fields=('title', 'author'),
                 message=('Вы можете оставить только один отзыв')
             )
         ]
+    
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -126,4 +138,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Comments
+        model = Comment

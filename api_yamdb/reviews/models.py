@@ -6,10 +6,10 @@ from django.db import models
 from reviews.validators import SlugValidator
 from users.models import User
 
-Titles = get_user_model()
+Title = get_user_model()
 
 
-class Categories(models.Model):
+class Category(models.Model):
     validator_slug = SlugValidator()
     name = models.CharField(
         max_length=256,
@@ -32,7 +32,7 @@ class Categories(models.Model):
         return self.name
 
 
-class Genres(models.Model):
+class Genre(models.Model):
     validator_slug = SlugValidator()
     name = models.CharField(
         max_length=256,
@@ -55,7 +55,7 @@ class Genres(models.Model):
         return self.name
 
 
-class Titles(models.Model):
+class Title(models.Model):
     name = models.CharField(
         max_length=256,
         blank=False,
@@ -66,7 +66,7 @@ class Titles(models.Model):
         verbose_name='Год создания произведения'
     )
     category = models.ForeignKey(
-        Categories,
+        Category,
         blank=False,
         null=True,
         related_name='titles',
@@ -75,7 +75,7 @@ class Titles(models.Model):
 
     )
     genre = models.ManyToManyField(
-        Genres,
+        Genre,
         through='TitleGenre',
         blank=False,
         verbose_name='Описание жанра'
@@ -96,11 +96,11 @@ class Titles(models.Model):
 
 class TitleGenre(models.Model):
     title = models.ForeignKey(
-        Titles,
+        Title,
         on_delete=models.CASCADE
     )
     genre = models.ForeignKey(
-        Genres,
+        Genre,
         on_delete=models.CASCADE
     )
 
@@ -113,7 +113,7 @@ class TitleGenre(models.Model):
         return f'{self.title}, жанр - {self.genre}'
 
 
-class Reviews(models.Model):
+class Review(models.Model):
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
@@ -122,7 +122,7 @@ class Reviews(models.Model):
         null=True,
         blank=False)
     title = models.ForeignKey(
-        Titles,
+        Title,
         verbose_name='Произведение',
         on_delete=models.CASCADE,
         related_name='reviews_title',
@@ -160,7 +160,7 @@ class Reviews(models.Model):
         return self.name
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
@@ -169,7 +169,7 @@ class Comments(models.Model):
         null=True,
         blank=False)
     review = models.ForeignKey(
-        Reviews,
+        Review,
         verbose_name='Отзыв',
         on_delete=models.CASCADE,
         related_name='reviews_comment',

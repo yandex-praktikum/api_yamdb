@@ -4,7 +4,7 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 class IsAuthorOrStaff(BasePermission):
     """Разрешение для автора и сотрудников
     (сурерюзеры, админы и модераторы) к объекту класса.
-    Использовать для вьюшек Reviews и Comments"""
+    Использовать для вьюшек Review и Comment"""
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS
                 or (request.user.is_authenticated

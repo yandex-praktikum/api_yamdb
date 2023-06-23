@@ -1,14 +1,14 @@
 from django.contrib import admin
 
-from reviews.models import (Categories,
-                            Genres,
-                            Titles,
-                            Reviews,
-                            Comments)
+from reviews.models import (Category,
+                            Genre,
+                            Title,
+                            Review,
+                            Comment)
 from users.models import User
 
 
-class CategoriesAdmin(admin.ModelAdmin):
+class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug',)
     list_display_links = ('name',)
     search_fields = ('name', 'slug',)
@@ -17,7 +17,7 @@ class CategoriesAdmin(admin.ModelAdmin):
     list_editable = ('slug',)
 
 
-class GenresAdmin(admin.ModelAdmin):
+class GenreAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug',)
     list_display_links = ('name',)
     search_fields = ('name', 'slug',)
@@ -26,7 +26,7 @@ class GenresAdmin(admin.ModelAdmin):
     list_editable = ('slug',)
 
 
-class TitlesAdmin(admin.ModelAdmin):
+class TitleAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'year', 'category', 'description',)
     search_fields = ('name', 'year', 'category', 'genre',)
     list_filter = ('year',)
@@ -34,7 +34,7 @@ class TitlesAdmin(admin.ModelAdmin):
     list_editable = ('name', 'year', 'category', 'description',)
 
 
-class ReviewsAdmin(admin.ModelAdmin):
+class ReviewAdmin(admin.ModelAdmin):
     list_display = ('pk', 'title', 'text', 'author', 'created', 'rating',)
     search_fields = ('text', 'author', 'title',)
     list_filter = ('created',)
@@ -42,7 +42,7 @@ class ReviewsAdmin(admin.ModelAdmin):
     list_editable = ('author', 'title', 'text',)
 
 
-class CommentsAdmin(admin.ModelAdmin):
+class CommentAdmin(admin.ModelAdmin):
     list_display = ('pk', 'text', 'review', 'author', 'created',)
     search_fields = ('text', 'author',)
     empty_value_display = '-пусто-'
@@ -60,9 +60,9 @@ class UsersAdmin(admin.ModelAdmin):
                      'role',)
 
 
-# admin.site.register(Categories, CategoriesAdmin)
-# admin.site.register(Genres, GenresAdmin)
-# admin.site.register(Titles, TitlesAdmin)
-# admin.site.register(Reviews, ReviewsAdmin)
-# admin.site.register(Comments, CommentsAdmin)
+# admin.site.register(Category, CategoryAdmin)
+# admin.site.register(Genre, GenreAdmin)
+# admin.site.register(Title, TitleAdmin)
+# admin.site.register(Review, ReviewAdmin)
+# admin.site.register(Comment, CommentAdmin)
 # admin.site.register(User, UsersAdmin)

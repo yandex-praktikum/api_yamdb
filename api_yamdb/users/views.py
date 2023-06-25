@@ -14,12 +14,12 @@ from users.permissions import IsAdminOnly
 from users.serializers import SignUpSerializer, TokenSerializer, UserSerializer
 
 
-class UserCreateViewSet(mixins.CreateModelMixin,
-                        viewsets.GenericViewSet):
+class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """Вьюсет для создания пользователей."""
+
     queryset = User.objects.all()
     serializer_class = SignUpSerializer
-    permission_classes = (permissions.AllowAny, )
+    permission_classes = (permissions.AllowAny,)
 
     def create(self, request):
         """Создает объект класса User и
@@ -29,20 +29,24 @@ class UserCreateViewSet(mixins.CreateModelMixin,
         try:
             user, _ = User.objects.get_or_create(**serializer.validated_data)
         except IntegrityError:
-            return Response('Такой логин или email уже существуют',
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                'Такой логин или email уже существуют',
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         confirmation_code = default_token_generator.make_token(user)
         email = user.email
-        send_mail(subject='Код подтверждения Yamdb',
-                  message=f'Код подтверждения: {confirmation_code}',
-                  from_email=YAMDB,
-                  recipient_list=(email,),)
+        send_mail(
+            subject='Код подтверждения Yamdb',
+            message=f'Код подтверждения: {confirmation_code}',
+            from_email=YAMDB,
+            recipient_list=(email,),
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class TokenViewSet(mixins.CreateModelMixin,
-                   viewsets.GenericViewSet):
+class TokenViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """Вьюсет для получения токена."""
+
     queryset = User.objects.all()
     serializer_class = TokenSerializer
     permission_classes = (permissions.AllowAny,)
@@ -63,13 +67,14 @@ class TokenViewSet(mixins.CreateModelMixin,
 
 class UserViewSet(viewsets.ModelViewSet):
     """Вьюсет для работы с пользователями."""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAdminOnly, )
-    filter_backends = (filters.SearchFilter, )
-    filterset_fields = ('username')
-    search_fields = ('username', )
+    permission_classes = (IsAdminOnly,)
+    filter_backends = (filters.SearchFilter,)
+    filterset_fields = 'username'
+    search_fields = ('username',)
     lookup_field = 'username'
     http_method_names = ['get', 'patch', 'delete', 'post']
 
@@ -78,7 +83,7 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch', 'delete'],
         url_path=r'(?P<username>[\w.@+-]+\Z$)',
         url_name='get_user',
-        permission_classes=(IsAdminOnly, )
+        permission_classes=(IsAdminOnly,),
     )
     def get_change_user_by_username(self, request, username):
         """Обеспечивает получание данных пользователя по его username и
@@ -100,13 +105,16 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch'],
         url_path='me',
         url_name='me',
-        permission_classes=(permissions.IsAuthenticated,)
+        permission_classes=(permissions.IsAuthenticated,),
     )
     def get_patch_me(self, request):
         if request.method == 'PATCH':
             serializer = UserSerializer(
-                request.user, data=request.data,
-                partial=True, context={'request': request})
+                request.user,
+                data=request.data,
+                partial=True,
+                context={'request': request},
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save(role=request.user.role)
             return Response(serializer.data, status=status.HTTP_200_OK)

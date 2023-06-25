@@ -5,23 +5,25 @@ from users.models import User
 
 
 class SignUpSerializer(serializers.Serializer):
-    username = serializers.RegexField(regex=REGEX_STR,
-                                      max_length=150,
-                                      required=True)
-    email = serializers.EmailField(max_length=254,
-                                   required=True)
+    username = serializers.RegexField(
+        regex=REGEX_STR, max_length=150, required=True
+    )
+    email = serializers.EmailField(max_length=254, required=True)
 
     def validate(self, data):
         if data['username'] == 'me':
             raise serializers.ValidationError('Никнейм "me" запрещен.')
-        if not User.objects.filter(username=data['username'],
-                                   email=data['email']).exists:
+        if not User.objects.filter(
+            username=data['username'], email=data['email']
+        ).exists:
             if User.objects.filter(username=data.get('username')):
                 raise serializers.ValidationError(
-                    'Пользователь с таким никмом уже существует.')
+                    'Пользователь с таким никмом уже существует.'
+                )
             if User.objects.filter(email=data.get('email')):
                 raise serializers.ValidationError(
-                    'Пользователь с таким e-mail уже существует.')
+                    'Пользователь с таким e-mail уже существует.'
+                )
         return data
 
     class Meta:
@@ -30,11 +32,10 @@ class SignUpSerializer(serializers.Serializer):
 
 
 class TokenSerializer(serializers.Serializer):
-    username = serializers.RegexField(regex=REGEX_STR,
-                                      max_length=150,
-                                      required=True)
-    confirmation_code = serializers.CharField(max_length=254,
-                                              required=True)
+    username = serializers.RegexField(
+        regex=REGEX_STR, max_length=150, required=True
+    )
+    confirmation_code = serializers.CharField(max_length=254, required=True)
 
     class Meta:
         model = User
@@ -42,8 +43,13 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio',
-                  'role')
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )

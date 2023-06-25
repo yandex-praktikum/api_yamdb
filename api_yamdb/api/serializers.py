@@ -4,22 +4,20 @@ from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 from django.core.validators import MaxLengthValidator
 
 from api_yamdb.settings import REGEX_SLUG
-from reviews.models import (Category,
-                            Genre,
-                            Title,
-                            Review,
-                            Comment)
+from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=256, )
+    name = serializers.CharField(
+        max_length=256,
+    )
     # slug = serializers.RegexField(regex=REGEX_SLUG,
     #                               max_length=50, )
     slug = serializers.SlugField(
         validators=(
             UniqueValidator(
                 queryset=Category.objects.all(),
-                message='Поле slug должно быть уникальным!'
+                message='Поле slug должно быть уникальным!',
             ),
             MaxLengthValidator(50),
         )
@@ -32,16 +30,18 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=256, )
+    name = serializers.CharField(
+        max_length=256,
+    )
     # slug = serializers.RegexField(regex=REGEX_SLUG,
     #                               max_length=50, )
     slug = serializers.SlugField(
         validators=(
             UniqueValidator(
                 queryset=Genre.objects.all(),
-                message='Поле slug должно быть уникальным!'
+                message='Поле slug должно быть уникальным!',
             ),
-            MaxLengthValidator(50)
+            MaxLengthValidator(50),
         )
     )
 
@@ -67,19 +67,16 @@ class TitleGetSerializer(serializers.ModelSerializer):
             'rating',
             'description',
             'genre',
-            'category'
+            'category',
         )
 
 
 class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(),
-        slug_field='slug'
+        queryset=Category.objects.all(), slug_field='slug'
     )
     genre = serializers.SlugRelatedField(
-        queryset=Genre.objects.all(),
-        slug_field='slug',
-        many=True
+        queryset=Genre.objects.all(), slug_field='slug', many=True
     )
 
     class Meta:
@@ -94,10 +91,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
 class TitleGenreSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
-    genre = GenreSerializer(
-        read_only=True,
-        many=True
-    )
+    genre = GenreSerializer(read_only=True, many=True)
     rating = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -106,13 +100,10 @@ class TitleGenreSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    title = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='name'
-    )
+    # title = serializers.SlugRelatedField(read_only=True, slug_field='name')
     author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username'
+        read_only=True, slug_field='username',
+        default=serializers.CurrentUserDefault()
     )
 
     def validate_rating(self, value):
@@ -125,9 +116,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         author = request.user
         title_id = self.context['view'].kwargs.get('title_id')
         title = get_object_or_404(Title, pk=title_id)
-        if Review.objects.filter(
-                title=title,
-                author=author).exists():
+        if Review.objects.filter(title=title, author=author).exists():
             raise serializers.ValidationError('Нельзя дважды оставить ревью')
         return Review.objects.create(**validated_data)
 
@@ -135,24 +124,19 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Review
 
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('title', 'author'),
-                message=('Вы можете оставить только один отзыв')
-            )
-        ]
-    
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=Review.objects.all(),
+        #         fields=('title', 'author'),
+        #         message=('Вы можете оставить только один отзыв'),
+        #     )
+        # ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    review = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='text'
-    )
+    # review = serializers.SlugRelatedField(read_only=True, slug_field='text')
     author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username'
+        read_only=True, slug_field='username'
     )
 
     class Meta:

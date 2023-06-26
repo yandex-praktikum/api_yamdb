@@ -7,9 +7,7 @@ USER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
 
-CHOICES_ROLE = [(USER, USER),
-                (MODERATOR, MODERATOR),
-                (ADMIN, ADMIN)]
+CHOICES_ROLE = [(USER, USER), (MODERATOR, MODERATOR), (ADMIN, ADMIN)]
 
 
 class User(AbstractUser):
@@ -27,24 +25,20 @@ class User(AbstractUser):
         max_length=254,
         unique=True,
         blank=False,
-        null=False
+        null=False,
     )
     first_name = models.CharField(
-        verbose_name='Имя',
-        max_length=150,
-        blank=True
+        verbose_name='Имя', max_length=150, blank=True
     )
     last_name = models.CharField(
-        verbose_name='Фамилия',
-        max_length=150,
-        blank=True
+        verbose_name='Фамилия', max_length=150, blank=True
     )
     role = models.CharField(
         verbose_name='Роль пользователя',
         max_length=15,
         choices=CHOICES_ROLE,
         default=USER,
-        blank=True
+        blank=True,
     )
     bio = models.CharField(
         verbose_name='Краткая биография',
@@ -56,7 +50,7 @@ class User(AbstractUser):
         max_length=254,
         null=True,
         blank=False,
-        default='1234567890'
+        default='1234567890',
     )
 
     @property

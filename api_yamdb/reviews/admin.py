@@ -3,13 +3,11 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.fields import Field
 
-from reviews.models import (Category, Comment, Genre, Review, TitleGenre,
-                            Title)
+from reviews.models import Category, Comment, Genre, Review, TitleGenre, Title
 from users.models import User
 
 
 class UserResource(resources.ModelResource):
-
     class Meta:
         model = User
 
@@ -22,7 +20,6 @@ admin.site.register(User, UserAdmin)
 
 
 class CategoryResource(resources.ModelResource):
-
     class Meta:
         model = Category
 
@@ -35,7 +32,6 @@ admin.site.register(Category, CategoryAdmin)
 
 
 class GenreResource(resources.ModelResource):
-
     class Meta:
         model = Genre
 
@@ -48,7 +44,6 @@ admin.site.register(Genre, GenreAdmin)
 
 
 class TitleResource(resources.ModelResource):
-
     class Meta:
         model = Title
 
@@ -61,8 +56,8 @@ admin.site.register(Title, TitleAdmin)
 
 
 class TitleGenreResource(resources.ModelResource):
-    title = Field(attribute='title_id', column_name="title_id")
-    genre = Field(attribute='genre_id', column_name="genre_id")
+    title = Field(attribute='title_id', column_name='title_id')
+    genre = Field(attribute='genre_id', column_name='genre_id')
 
     class Meta:
         model = TitleGenre
@@ -76,7 +71,7 @@ admin.site.register(TitleGenre, TitleGenreAdmin)
 
 
 class ReviewResource(resources.ModelResource):
-    title = Field(attribute='title_id', column_name="title_id")
+    title = Field(attribute='title_id', column_name='title_id')
 
     class Meta:
         model = Review
@@ -90,8 +85,8 @@ admin.site.register(Review, ReviewAdmin)
 
 
 class CommentResource(resources.ModelResource):
-    review = Field(attribute='review_id', column_name="review_id")
-    created = Field(attribute='created_id', column_name="pub_date")
+    review = Field(attribute='review_id', column_name='review_id')
+    created = Field(attribute='created_id', column_name='pub_date')
 
     class Meta:
         model = Comment

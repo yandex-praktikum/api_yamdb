@@ -14,15 +14,16 @@ from api.serializers import (
     TitleGetSerializer,
     TitleSerializer,
 )
-from api.filters import TitleFilter
+#from api.filters import TitleFilter
 from reviews.models import Category, Genre, Review, Title  # Comment,
-from users.permissions import GuestReadOnly, IsAdminOnly, IsAuthorOrStaff, IsAdminModerOwnerOrReadOnly
+from users.permissions import IsAdminOnly, IsAdminModerOwnerOrReadOnly, IsAdminOrReadOnly
+# GuestReadOnly, IsAuthorOrStaff,
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -31,7 +32,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -40,7 +41,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (IsAdminOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
@@ -57,7 +58,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     # queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (IsAdminModerOwnerOrReadOnly, )
+    permission_classes = (IsAdminModerOwnerOrReadOnly,)
 
     # @action(detail=False,
     #         permission_classes=(IsAuthorOrStaff, ),
@@ -78,10 +79,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     # queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (IsAdminModerOwnerOrReadOnly, )
+    permission_classes = (IsAdminModerOwnerOrReadOnly,)
 
-    """когда будете писать тут функции обработки запросов нужно будет в них
-    определять permission_classes=(IsAuthorOrStaff, )"""
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))

@@ -35,26 +35,19 @@ class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         """Создает объект класса User и
         отправляет на почту пользователя код подтверждения."""
         serializer = SignUpSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
-        username = serializer.validated_data['username']
-        user, _ = User.objects.get_or_create(username=username, email=email)
-        # try:
-        # user, _ = User.objects.get_or_create(**serializer.validated_data)
-        # except IntegrityError:
-        #     return Response(
-        #         'Такой логин или email уже существуют',
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
-        confirmation_code = default_token_generator.make_token(user)
-        email = user.email
-        send_mail(
-            subject='Код подтверждения Yamdb',
-            message=f'Код подтверждения: {confirmation_code}',
-            from_email=YAMDB,
-            recipient_list=(email,),
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if serializer.is_valid(raise_exception=True):
+            user, _ = User.objects.get_or_create(**serializer.validated_data)
+            confirmation_code = default_token_generator.make_token(user)
+            email = user.email
+            send_mail(
+                subject='Код подтверждения Yamdb',
+                message=f'Код подтверждения: {confirmation_code}',
+                from_email=YAMDB,
+                recipient_list=(email,),)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class TokenViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):

@@ -1,6 +1,6 @@
 from rest_framework import filters, mixins, viewsets
 
-from users.permissions import GuestReadOnly, IsAdminOnly
+from api.permissions import GuestReadOnly, IsAdminOnly
 
 
 class ListCreateDestroyViewSet(

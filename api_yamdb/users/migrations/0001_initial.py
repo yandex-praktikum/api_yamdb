@@ -3,7 +3,7 @@
 import django.contrib.auth.models
 from django.db import migrations, models
 import django.utils.timezone
-import users.validators
+from users.validators import UsernameValidator
 
 
 class Migration(migrations.Migration):
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         max_length=150,
                         unique=True,
-                        validators=[users.validators.UsernameValidator()],
+                        validators=[UsernameValidator()],
                         verbose_name='Никнейм',
                     ),
                 ),

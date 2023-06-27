@@ -16,7 +16,7 @@ from api.serializers import (
 )
 from api.filters import TitleFilter
 from reviews.models import Category, Genre, Review, Title  # Comment,
-from users.permissions import GuestReadOnly, IsAdminOnly, IsAuthorOrStaff
+from users.permissions import GuestReadOnly, IsAdminOnly, IsAuthorOrStaff, IsAdminModerOwnerOrReadOnly
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
@@ -57,7 +57,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     # queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrStaff, )
+    permission_classes = (IsAdminModerOwnerOrReadOnly, )
 
     # @action(detail=False,
     #         permission_classes=(IsAuthorOrStaff, ),
@@ -78,7 +78,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     # queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (GuestReadOnly, )
+    permission_classes = (IsAdminModerOwnerOrReadOnly, )
 
     """когда будете писать тут функции обработки запросов нужно будет в них
     определять permission_classes=(IsAuthorOrStaff, )"""

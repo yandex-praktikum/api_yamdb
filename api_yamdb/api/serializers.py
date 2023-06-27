@@ -18,7 +18,8 @@ class SignUpSerializer(serializers.Serializer):
     def validate(self, data):
         if data['username'] == 'me':
             raise serializers.ValidationError('Никнейм "me" запрещен.')
-        if not User.objects.filter(username=data['username'], email=data['email']):
+        if not User.objects.filter(username=data['username'],
+                                   email=data['email']):
             if User.objects.filter(username=data['username']):
                 raise serializers.ValidationError(
                     'Пользователь с таким никмом уже существует.')

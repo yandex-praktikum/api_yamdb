@@ -7,7 +7,9 @@ USER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
 
-CHOICES_ROLE = [(USER, USER), (MODERATOR, MODERATOR), (ADMIN, ADMIN)]
+CHOICES_ROLE = [(USER, USER),
+                (MODERATOR, MODERATOR),
+                (ADMIN, ADMIN)]
 
 
 class User(AbstractUser):

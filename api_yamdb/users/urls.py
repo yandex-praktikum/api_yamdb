@@ -1,7 +1,6 @@
 from django.urls import path
 
-from users.views import UserCreateViewSet, TokenViewSet
-
+from users.views import TokenViewSet, UserCreateViewSet
 
 app_name = 'users'
 

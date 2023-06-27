@@ -18,11 +18,11 @@ DEBUG = os.getenv('DEBUG')
 REGEX_STR = r'^[\w.@+-]+\Z$'
 REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
 YAMDB = os.getenv('YAMDB')
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', ]
 
 INSTALLED_APPS = [
     'django.contrib.admin',

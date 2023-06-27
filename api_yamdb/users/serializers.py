@@ -18,12 +18,10 @@ class SignUpSerializer(serializers.Serializer):
         ).exists:
             if User.objects.filter(username=data.get('username')):
                 raise serializers.ValidationError(
-                    'Пользователь с таким никмом уже существует.'
-                )
+                    'Пользователь с таким никмом уже существует.')
             if User.objects.filter(email=data.get('email')):
                 raise serializers.ValidationError(
-                    'Пользователь с таким e-mail уже существует.'
-                )
+                    'Пользователь с таким e-mail уже существует.')
         return data
 
     class Meta:

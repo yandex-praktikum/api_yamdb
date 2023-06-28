@@ -1,22 +1,21 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from api_yamdb.const import MAX_USER_NAMES
 from users.validators import UsernameValidator
-
-USER = 'user'
-MODERATOR = 'moderator'
-ADMIN = 'admin'
-
-CHOICES_ROLE = [(USER, USER),
-                (MODERATOR, MODERATOR),
-                (ADMIN, ADMIN)]
 
 
 class User(AbstractUser):
+
+    class UserRoles(models.TextChoices):
+        USER = 'user'
+        MODERATOR = 'moderator'
+        ADMIN = 'admin'
+
     validator_username = UsernameValidator()
     username = models.CharField(
         verbose_name='Никнейм',
-        max_length=150,
+        max_length=MAX_USER_NAMES,
         unique=True,
         blank=False,
         null=False,
@@ -30,16 +29,16 @@ class User(AbstractUser):
         null=False,
     )
     first_name = models.CharField(
-        verbose_name='Имя', max_length=150, blank=True
+        verbose_name='Имя', max_length=MAX_USER_NAMES, blank=True
     )
     last_name = models.CharField(
-        verbose_name='Фамилия', max_length=150, blank=True
+        verbose_name='Фамилия', max_length=MAX_USER_NAMES, blank=True
     )
     role = models.CharField(
         verbose_name='Роль пользователя',
         max_length=15,
-        choices=CHOICES_ROLE,
-        default=USER,
+        choices=UserRoles.choices,
+        default=UserRoles.USER,
         blank=True,
     )
     bio = models.CharField(
@@ -57,15 +56,15 @@ class User(AbstractUser):
 
     @property
     def is_user(self):
-        return self.role == USER
+        return self.role == self.UserRoles.USER
 
     @property
     def is_moderator(self):
-        return self.role == MODERATOR
+        return self.role == self.UserRoles.MODERATOR
 
     @property
     def is_admin(self):
-        return self.role == ADMIN
+        return self.role == self.UserRoles.ADMIN
 
     class Meta:
         ordering = ('id',)

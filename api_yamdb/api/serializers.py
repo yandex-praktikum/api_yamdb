@@ -4,12 +4,61 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 
-from api_yamdb.settings import REGEX_SLUG
+from api_yamdb.const import MAX_LENGHT_NAME, MAX_USER_NAMES
+from api_yamdb.settings import REGEX_SLUG, REGEX_STR
 from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
+
+class SignUpSerializer(serializers.Serializer):
+    username = serializers.RegexField(
+        regex=REGEX_STR, max_length=MAX_USER_NAMES, required=True
+    )
+    email = serializers.EmailField(max_length=254, required=True)
+
+    def validate(self, data):
+        if data['username'] == 'me':
+            raise serializers.ValidationError('Никнейм "me" запрещен.')
+        if not User.objects.filter(username=data['username'],
+                                   email=data['email']):
+            if User.objects.filter(username=data['username']):
+                raise serializers.ValidationError(
+                    'Пользователь с таким никмом уже существует.')
+            if User.objects.filter(email=data['email']):
+                raise serializers.ValidationError(
+                    'Пользователь с таким e-mail уже существует.')
+        return data
+
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+
+class TokenSerializer(serializers.Serializer):
+    username = serializers.RegexField(
+        regex=REGEX_STR, max_length=MAX_USER_NAMES, required=True
+    )
+    confirmation_code = serializers.CharField(max_length=254, required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=256,)
+    name = serializers.CharField(max_length=MAX_LENGHT_NAME,)
     slug = serializers.RegexField(
         regex=REGEX_SLUG,
         validators=(
@@ -28,7 +77,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=256, )
+    name = serializers.CharField(max_length=MAX_LENGHT_NAME, )
     slug = serializers.RegexField(
         regex=REGEX_SLUG,
         validators=(
@@ -50,7 +99,8 @@ class TitleGetSerializer(serializers.ModelSerializer):
     """Сериализатор объектов класса Title при GET запросах."""
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
+    # rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title

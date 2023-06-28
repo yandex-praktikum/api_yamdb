@@ -13,7 +13,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = os.getenv('DEBUG')
+if os.getenv('DEBUG').lower() == 'true':
+    DEBUG = True
+else:
+    DEBUG = False
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS')[2:-2].replace(',', '').split("' '")
 
 REGEX_STR = r'^[\w.@+-]+\Z$'
 REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
@@ -21,8 +26,6 @@ REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
 YAMDB = os.getenv('YAMDB')
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', ]
 
 INSTALLED_APPS = [
     'django.contrib.admin',

@@ -9,6 +9,7 @@ from api_yamdb.settings import REGEX_SLUG, REGEX_STR
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
+
 class SignUpSerializer(serializers.Serializer):
     username = serializers.RegexField(
         regex=REGEX_STR, max_length=MAX_USER_NAMES, required=True

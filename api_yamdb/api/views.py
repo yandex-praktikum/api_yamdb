@@ -87,7 +87,7 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch', ],
         url_path=r'(?P<username>[\w.@+-]+\Z$)',
         url_name='get_user',
-        permission_classes=(permissions.IsAuthenticatedOrReadOnly,),
+        permission_classes=(permissions.IsAuthenticated,),
     )
     def get_change_user_by_username(self, request, username):
         """Обеспечивает получание данных пользователя по его username и
@@ -114,8 +114,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 request.user,
                 data=request.data,
                 partial=True,
-                context={'request': request},
-            )
+                context={'request': request},)
             serializer.is_valid(raise_exception=True)
             serializer.save(role=request.user.role)
             return Response(serializer.data, status=status.HTTP_200_OK)

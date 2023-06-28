@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -69,7 +70,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (IsAdminOnly,)
+    permission_classes = (IsAuthenticated, IsAdminOnly,)
     filter_backends = (filters.SearchFilter,)
     filterset_fields = 'username'
     search_fields = ('username',)
@@ -97,7 +98,7 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch'],
         url_path='me',
         url_name='me',
-        permission_classes=(permissions.IsAuthenticated,),)
+        permission_classes=(IsAuthenticated,),)
     def get_patch_me(self, request):
         if request.method == 'PATCH':
             serializer = UserSerializer(

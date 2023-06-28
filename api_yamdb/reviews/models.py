@@ -58,7 +58,6 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        through='TitleGenre',
         verbose_name='Описание жанра',
     )
     description = models.TextField(
@@ -73,33 +72,6 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class TitleGenre(models.Model):
-    title = models.ForeignKey(
-        Title,
-        null=True,
-        on_delete=models.CASCADE,
-    )
-    genre = models.ForeignKey(
-        Genre,
-        null=True,
-        on_delete=models.CASCADE,
-    )
-
-    class Meta:
-        ordering = ('genre',)
-        verbose_name = 'Произведение и жанр'
-        verbose_name_plural = 'Произведения и жанры'
-        constraints = (
-            models.UniqueConstraint(
-                fields=('genre', 'title'),
-                name='unique_genre_title',
-            ),
-        )
-
-    def __str__(self):
-        return f'Название: {self.title}, жанр: {self.genre}'
 
 
 class Review(models.Model):

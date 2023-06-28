@@ -1,18 +1,16 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from api_yamdb.const import MAX_LENGHT_NAME
+from api_yamdb.settings import MAX_LENGTH_NAME
 from users.models import User
 
 
 class Category(models.Model):
     name = models.CharField(
-        max_length=MAX_LENGHT_NAME,
-        verbose_name='Наименование категории',
-    )
+        max_length=MAX_LENGTH_NAME,
+        verbose_name='Наименование категории',)
     slug = models.SlugField(
-        unique=True,
-    )
+        unique=True,)
 
     class Meta:
         ordering = ('name',)
@@ -25,12 +23,10 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=MAX_LENGHT_NAME,
-        verbose_name='Название жанра',
-    )
+        max_length=MAX_LENGTH_NAME,
+        verbose_name='Название жанра',)
     slug = models.SlugField(
-        unique=True,
-    )
+        unique=True,)
 
     class Meta:
         ordering = ('name',)
@@ -43,27 +39,22 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(
-        max_length=MAX_LENGHT_NAME,
-        verbose_name='Название произведения',
-    )
+        max_length=MAX_LENGTH_NAME,
+        verbose_name='Название произведения',)
     year = models.IntegerField(
-        verbose_name='Год создания произведения',
-    )
+        verbose_name='Год создания произведения',)
     category = models.ForeignKey(
         Category,
         null=True,
         related_name='titles',
         verbose_name='Категория произведения',
-        on_delete=models.SET_NULL,
-    )
+        on_delete=models.SET_NULL,)
     genre = models.ManyToManyField(
         Genre,
-        verbose_name='Описание жанра',
-    )
+        verbose_name='Описание жанра',)
     description = models.TextField(
         blank=True,
-        verbose_name='Описание произведения',
-    )
+        verbose_name='Описание произведения',)
 
     class Meta:
         ordering = ('-year',)

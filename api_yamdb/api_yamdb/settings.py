@@ -19,6 +19,8 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').replace(',', '').split()
 
 REGEX_STR = r'^[\w.@+-]+\Z$'
 REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'
+MAX_LENGTH_NAME = 256
+MAX_LENGTH_USER_NAMES = 150
 
 YAMDB = os.getenv('YAMDB')
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'

@@ -4,15 +4,15 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 
-from api_yamdb.const import MAX_LENGHT_NAME, MAX_USER_NAMES
-from api_yamdb.settings import REGEX_SLUG, REGEX_STR
+from api_yamdb.settings import (MAX_LENGTH_NAME, MAX_LENGTH_USER_NAMES,
+                                REGEX_SLUG, REGEX_STR)
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
 class SignUpSerializer(serializers.Serializer):
     username = serializers.RegexField(
-        regex=REGEX_STR, max_length=MAX_USER_NAMES, required=True
+        regex=REGEX_STR, max_length=MAX_LENGTH_USER_NAMES, required=True
     )
     email = serializers.EmailField(max_length=254, required=True)
 
@@ -36,7 +36,7 @@ class SignUpSerializer(serializers.Serializer):
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.RegexField(
-        regex=REGEX_STR, max_length=MAX_USER_NAMES, required=True
+        regex=REGEX_STR, max_length=MAX_LENGTH_USER_NAMES, required=True
     )
     confirmation_code = serializers.CharField(max_length=254, required=True)
 
@@ -59,7 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=MAX_LENGHT_NAME,)
+    name = serializers.CharField(max_length=MAX_LENGTH_NAME,)
     slug = serializers.RegexField(
         regex=REGEX_SLUG,
         validators=(
@@ -78,7 +78,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=MAX_LENGHT_NAME, )
+    name = serializers.CharField(max_length=MAX_LENGTH_NAME, )
     slug = serializers.RegexField(
         regex=REGEX_SLUG,
         validators=(
@@ -97,10 +97,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleGetSerializer(serializers.ModelSerializer):
-    """Сериализатор объектов класса Title при GET запросах."""
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    # rating = serializers.SerializerMethodField()
     rating = serializers.IntegerField(read_only=True)
 
     class Meta:
@@ -118,11 +116,9 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(), slug_field='slug'
-    )
+        queryset=Category.objects.all(), slug_field='slug')
     genre = serializers.SlugRelatedField(
-        queryset=Genre.objects.all(), slug_field='slug', many=True
-    )
+        queryset=Genre.objects.all(), slug_field='slug', many=True)
 
     class Meta:
         model = Title
@@ -136,7 +132,6 @@ class TitleSerializer(serializers.ModelSerializer):
         )
 
     def to_representation(self, title):
-        """Определяет какой сериализатор будет использоваться для чтения."""
         serializer = TitleGetSerializer(title)
         return serializer.data
 
@@ -145,8 +140,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username',
-        default=serializers.CurrentUserDefault(),
-    )
+        default=serializers.CurrentUserDefault(),)
 
     class Meta:
         model = Review
@@ -173,8 +167,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
-        slug_field='username'
-    )
+        slug_field='username')
 
     class Meta:
         model = Comment

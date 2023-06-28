@@ -23,15 +23,12 @@ from users.models import User
 
 
 class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    """Вьюсет для создания пользователей."""
 
     queryset = User.objects.all()
     serializer_class = SignUpSerializer
     permission_classes = (permissions.AllowAny,)
 
     def create(self, request):
-        """Создает объект класса User и
-        отправляет на почту пользователя код подтверждения."""
         serializer = SignUpSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user, _ = User.objects.get_or_create(**serializer.validated_data)
@@ -49,14 +46,12 @@ class UserCreateViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 class TokenViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
-    """Вьюсет для получения токена."""
 
     queryset = User.objects.all()
     serializer_class = TokenSerializer
     permission_classes = (permissions.AllowAny,)
 
     def create(self, request, *args, **kwargs):
-        """Предоставляет пользователю JWT токен по коду подтверждения."""
         serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data.get('username')
@@ -70,7 +65,6 @@ class TokenViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """Вьюсет для работы с пользователями."""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -87,11 +81,8 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch', ],
         url_path=r'(?P<username>[\w.@+-]+\Z$)',
         url_name='get_user',
-        permission_classes=(permissions.IsAuthenticated,),
-    )
+        permission_classes=(permissions.IsAuthenticated,),)
     def get_change_user_by_username(self, request, username):
-        """Обеспечивает получание данных пользователя по его username и
-        управление ими."""
         user = get_object_or_404(User, username=username)
         if request.method == 'PATCH':
             serializer = UserSerializer(user, data=request.data, partial=True)
@@ -106,8 +97,7 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch'],
         url_path='me',
         url_name='me',
-        permission_classes=(permissions.IsAuthenticated,),
-    )
+        permission_classes=(permissions.IsAuthenticated,),)
     def get_patch_me(self, request):
         if request.method == 'PATCH':
             serializer = UserSerializer(

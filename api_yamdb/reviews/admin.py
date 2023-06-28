@@ -3,7 +3,7 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.fields import Field
 
-from reviews.models import Category, Comment, Genre, Review, Title  # , TitleGenre
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
@@ -53,21 +53,6 @@ class TitleAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(Title, TitleAdmin)
-
-
-# class TitleGenreResource(resources.ModelResource):
-#     title = Field(attribute='title_id', column_name='title_id')
-#     genre = Field(attribute='genre_id', column_name='genre_id')
-
-#     class Meta:
-#         model = TitleGenre
-
-
-# class TitleGenreAdmin(ImportExportModelAdmin):
-#     resource_classes = [TitleGenreResource]
-
-
-# admin.site.register(TitleGenre, TitleGenreAdmin)
 
 
 class ReviewResource(resources.ModelResource):

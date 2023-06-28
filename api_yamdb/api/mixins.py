@@ -1,6 +1,6 @@
 from rest_framework import filters, mixins, viewsets
 
-from api.permissions import GuestReadOnly, IsAdminOnly
+from api.permissions import IsAdminOnly
 
 
 class ListCreateDestroyViewSet(
@@ -10,8 +10,7 @@ class ListCreateDestroyViewSet(
     viewsets.GenericViewSet,
 ):
     permission_classes = (
-        IsAdminOnly,
-        GuestReadOnly,)
+        IsAdminOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'

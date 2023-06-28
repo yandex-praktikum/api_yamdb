@@ -1,12 +1,13 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from api_yamdb.const import MAX_LENGHT_NAME
 from users.models import User
 
 
 class Category(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_LENGHT_NAME,
         verbose_name='Наименование категории',
     )
     slug = models.SlugField(
@@ -24,7 +25,7 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_LENGHT_NAME,
         verbose_name='Название жанра',
     )
     slug = models.SlugField(
@@ -42,7 +43,7 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(
-        max_length=256,
+        max_length=MAX_LENGHT_NAME,
         verbose_name='Название произведения',
     )
     year = models.IntegerField(

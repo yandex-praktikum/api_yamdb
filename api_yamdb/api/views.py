@@ -1,7 +1,5 @@
-
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-# from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -11,15 +9,15 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
+from api_yamdb.settings import YAMDB
 from api.filters import TitleFilter
 from api.mixins import ListCreateDestroyViewSet
+from api.permissions import (IsAdminModerOwnerOrReadOnly, IsAdminOnly,
+                             IsAdminOrReadOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitleGetSerializer,
                              TitleSerializer, TokenSerializer, UserSerializer)
-from api.permissions import (IsAdminModerOwnerOrReadOnly,
-                             IsAdminOnly, IsAdminOrReadOnly)
-from api_yamdb.settings import YAMDB
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
 

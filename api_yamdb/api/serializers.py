@@ -4,14 +4,14 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.validators import UniqueValidator
 
+from api_yamdb.const import MAX_LENGHT_NAME, MAX_USER_NAMES
 from api_yamdb.settings import REGEX_SLUG, REGEX_STR
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
-
 class SignUpSerializer(serializers.Serializer):
     username = serializers.RegexField(
-        regex=REGEX_STR, max_length=150, required=True
+        regex=REGEX_STR, max_length=MAX_USER_NAMES, required=True
     )
     email = serializers.EmailField(max_length=254, required=True)
 
@@ -35,7 +35,7 @@ class SignUpSerializer(serializers.Serializer):
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.RegexField(
-        regex=REGEX_STR, max_length=150, required=True
+        regex=REGEX_STR, max_length=MAX_USER_NAMES, required=True
     )
     confirmation_code = serializers.CharField(max_length=254, required=True)
 
@@ -58,7 +58,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=256,)
+    name = serializers.CharField(max_length=MAX_LENGHT_NAME,)
     slug = serializers.RegexField(
         regex=REGEX_SLUG,
         validators=(
@@ -77,7 +77,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=256, )
+    name = serializers.CharField(max_length=MAX_LENGHT_NAME, )
     slug = serializers.RegexField(
         regex=REGEX_SLUG,
         validators=(

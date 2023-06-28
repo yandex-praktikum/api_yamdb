@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from api_yamdb.const import MAX_USER_NAMES
 from users.validators import UsernameValidator
 
 
@@ -14,7 +15,7 @@ class User(AbstractUser):
     validator_username = UsernameValidator()
     username = models.CharField(
         verbose_name='Никнейм',
-        max_length=150,
+        max_length=MAX_USER_NAMES,
         unique=True,
         blank=False,
         null=False,
@@ -28,10 +29,10 @@ class User(AbstractUser):
         null=False,
     )
     first_name = models.CharField(
-        verbose_name='Имя', max_length=150, blank=True
+        verbose_name='Имя', max_length=MAX_USER_NAMES, blank=True
     )
     last_name = models.CharField(
-        verbose_name='Фамилия', max_length=150, blank=True
+        verbose_name='Фамилия', max_length=MAX_USER_NAMES, blank=True
     )
     role = models.CharField(
         verbose_name='Роль пользователя',

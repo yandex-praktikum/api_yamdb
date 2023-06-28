@@ -87,7 +87,7 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['get', 'patch', ],
         url_path=r'(?P<username>[\w.@+-]+\Z$)',
         url_name='get_user',
-        permission_classes=(IsAdminOnly,),
+        permission_classes=(permissions.IsAuthenticatedOrReadOnly,),
     )
     def get_change_user_by_username(self, request, username):
         """Обеспечивает получание данных пользователя по его username и
@@ -98,9 +98,6 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save(role=request.user.role)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        elif request.method == 'DELETE':
-            user.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -145,7 +142,8 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score'),).order_by('id')
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
@@ -155,10 +153,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.request.method == 'GET':
             return TitleGetSerializer
         return TitleSerializer
-
-    def get_queryset(self):
-        return Title.objects.annotate(
-            rating=Avg('reviews__score'),).order_by('id')
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

@@ -13,12 +13,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-if os.getenv('DEBUG').lower() == 'true':
-    DEBUG = True
-else:
-    DEBUG = False
+DEBUG = (os.getenv('DEBUG', 'False') == 'True')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS')[2:-2].replace(',', '').split("' '")
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').replace(',', '').split()
 
 REGEX_STR = r'^[\w.@+-]+\Z$'
 REGEX_SLUG = r'^[-a-zA-Z0-9_]+$'

@@ -1,7 +1,9 @@
-from django.contrib.auth import get_user_model
+import datetime as dt
+
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-User = get_user_model()
+from users.models import User
 
 
 class Category(models.Model):
@@ -42,16 +44,22 @@ class Title(models.Model):
         max_length=256,
         verbose_name='Название произведения'
     )
-    year = models.IntegerField(
-        verbose_name='Год выпуска'
+    year = models.SmallIntegerField(
+        verbose_name='Год выпуска',
+        validators=[MinValueValidator(
+            limit_value=1,
+            message='Год не может быть меньше или равен нулю'),
+            MaxValueValidator(
+                limit_value=dt.date.today().year,
+                message='Год не может быть больше текущего года')],
     )
     description = models.TextField(
         verbose_name='Описание произведения'
     )
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genre,
-        on_delete=models.CASCADE,
-        related_name='titles'
+        blank=True,
+        db_index=True
     )
     category = models.ForeignKey(
         Category,
@@ -76,7 +84,14 @@ class Review(models.Model):
         on_delete=models.CASCADE,
         related_name='reviews'
     )
-    score = models.SmallIntegerField(verbose_name='Рейтинг')
+    score = models.SmallIntegerField(
+        verbose_name='Рейтинг',
+        default=0,
+        validators=[
+            MaxValueValidator(10),
+            MinValueValidator(1)
+        ],
+    )
 
     class Meta:
         constraints = [

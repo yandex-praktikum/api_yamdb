@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'djoser',
     'api',
     'reviews',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -127,3 +128,9 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+ROLES = (
+    ('admin', 'admin'),
+    ('moderator', 'moderator'),
+    ('user', 'user'),
+)

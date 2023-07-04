@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'api',
-    'posts',
+    'reviews',
 ]
 
 MIDDLEWARE = [

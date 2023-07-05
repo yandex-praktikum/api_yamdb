@@ -1,13 +1,11 @@
 from django.urls import include, path
-from .email import signup
-from django.urls import include, path
+from api.emails import signup, obtain_token
 from rest_framework import routers
 
 from .views import (
     CategoryViewSet, CommentViewSet, GenreViewSet,
     ReviewViewSet, TitleViewSet
 )
-
 router = routers.DefaultRouter()
 router.register('categories', CategoryViewSet, basename='categories')
 router.register('genres', GenreViewSet, basename='genres')
@@ -21,8 +19,9 @@ router.register(
     basename='comments'
 )
 urlpatterns = [
+    path('v1/', include(router.urls)),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
-    path('api/v1/auth/signup/', signup, name='signup'),
-    path('', include(router.urls))
+    path('v1/auth/signup/', signup, name='signup'),
+    path('v1/auth/token/', obtain_token, name='token')
 ]

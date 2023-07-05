@@ -5,7 +5,6 @@ from .serializers import CategoriesSerializer, GenresSerializer
 
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         fields = (
@@ -33,7 +32,6 @@ class SendCodeSerializer(serializers.Serializer):
     username = serializers.RegexField(regex=r'^[\w.@+-]+$', required=True)
 
     def validate(self, attrs):
-        """Проверка данных сериализатора."""
         username = attrs.get('username')
         if username == 'me':
             raise serializers.ValidationError("This name cannot be used")

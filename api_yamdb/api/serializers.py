@@ -1,8 +1,11 @@
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
+<<<<<<< HEAD
 from .serializers import CategoriesSerializer, GenresSerializer
 
+=======
+>>>>>>> origin/vetka_1
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -11,7 +14,12 @@ class UserSerializer(serializers.ModelSerializer):
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
         model = User
+<<<<<<< HEAD
         
+=======
+
+
+>>>>>>> origin/vetka_1
 class CategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         exclude = ('id',)
@@ -26,12 +34,19 @@ class GenresSerializer(serializers.ModelSerializer):
         lookup_field = 'slug'
 
 
+<<<<<<< HEAD
   
+=======
+>>>>>>> origin/vetka_1
 class SendCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     username = serializers.RegexField(regex=r'^[\w.@+-]+$', required=True)
 
     def validate(self, attrs):
+<<<<<<< HEAD
+=======
+        """Проверка данных сериализатора."""
+>>>>>>> origin/vetka_1
         username = attrs.get('username')
         if username == 'me':
             raise serializers.ValidationError("This name cannot be used")
@@ -115,4 +130,8 @@ class GetJWTSerializer(serializers.Serializer):
         if username == 'admin':
             raise serializers.ValidationError("Недопустимое имя пользователя")
 
+<<<<<<< HEAD
         return data
+=======
+        return data
+>>>>>>> origin/vetka_1

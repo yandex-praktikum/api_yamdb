@@ -20,14 +20,15 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    genres = GenreSerializer(many=True, read_only=True)
-    category = serializers.StringRelatedField(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         fields = '__all__'
         model = Title
 
     def validate_year(self, value):
-        if value > dt.datetime.now().year:
-            raise serializers.ValidationError("Произведение ещё не создано")
+        year = dt.date.today().year
+        if value > year:
+            raise serializers.ValidationError('Произведение еще не создано.')
         return value

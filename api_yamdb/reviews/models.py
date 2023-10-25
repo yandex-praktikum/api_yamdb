@@ -8,25 +8,23 @@ TEXT_LIM = 15
 
 class Title(models.Model):
     name = models.CharField('Название', max_length=256)
-    year = models.IntegerField('Год выпуска')
-    description = models.TextField('Описание')
+    year = models.PositiveSmallIntegerField('Год выпуска')
+    description = models.TextField('Описание', blank=True)
     genre = models.ManyToManyField('Genre',
-                                   through='Partnership',
-                                   through_fields=('name', 'genre'),
                                    related_name='titles',
                                    verbose_name='Slug жанра'
                                    )
-    category = models.OneToOneField('Category',
-                                    on_delete=models.SET_NULL,
-                                    null=True,
-                                    related_name='titles',
-                                    verbose_name='Slug категории'
-                                    )
+    category = models.ForeignKey('Category',
+                                 on_delete=models.SET_NULL,
+                                 null=True,
+                                 related_name='titles',
+                                 verbose_name='Slug категории'
+                                 )
 
     class Meta:
         ordering = ('name',)
-        verbose_name = 'Название'
-        verbose_name_plural = 'Названия'
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
         return self.name[:TEXT_LIM]
@@ -62,8 +60,3 @@ class Category(BaseModel):
     class Meta:
         verbose_name = 'Slug категории'
         verbose_name_plural = 'Slug категорий'
-
-
-class Partnership(models.Model):
-    name = models.ForeignKey(Title, on_delete=models.DO_NOTHING)
-    genre = models.ForeignKey(Genre, on_delete=models.DO_NOTHING)

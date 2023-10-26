@@ -2,6 +2,7 @@ import datetime as dt
 
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
+from django.contrib.auth import get_user_model
 from django.db import models
 
 User = get_user_model()

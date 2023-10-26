@@ -1,3 +1,7 @@
+import datetime as dt
+
+from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -25,6 +29,13 @@ class Title(models.Model):
         ordering = ('name',)
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(year__gte=1000)
+                & models.Q(year__lte=dt.date.today().year),
+                name='A year value is valid between 1000 and year_now',
+            )
+        ]
 
     def __str__(self):
         return self.name[:TEXT_LIM]
@@ -37,7 +48,15 @@ class BaseModel(models.Model):
                             help_text='Идентификатор страницы для URL; '
                                       'разрешены символы латиницы, '
                                       'цифры, дефис и подчёркивание.',
-                            verbose_name='Slug'
+                            verbose_name='Slug',
+                            validators=[RegexValidator(
+                                regex=r'^[-a-zA-Z0-9_]+$',
+                                message='Идентификатор страницы для URL '
+                                        'должен содержать только символы '
+                                        'латиницы, цифры, дефис '
+                                        'и подчёркивание.'
+                            ),
+                            ]
                             )
 
     class Meta:

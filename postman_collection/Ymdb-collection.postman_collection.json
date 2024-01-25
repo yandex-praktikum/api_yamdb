@@ -8489,7 +8489,7 @@
 													"pm.test(\"Статус-код ответа должен быть 400\", function () {",
 													"    pm.expect(",
 													"        pm.response.status,",
-													"        \"POST-запрос администратора на создание произведения без данных для поля `genre` должен вернуть ответ с кодом 400\"",
+													"        \"POST-запрос администратора на создание произведения без поля `genre` должен вернуть ответ с кодом 400\"",
 													"    ).to.be.eql(\"Bad Request\");",
 													"});",
 													""
@@ -8504,6 +8504,108 @@
 										"body": {
 											"mode": "raw",
 											"raw": "{\n    \"name\": \"No genre\",\n    \"year\": 2020,\n    \"description\": \"Test title by admin\",\n    \"category\": \"{{adminCategory}}\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://127.0.0.1:8000/api/v1/titles/",
+											"protocol": "http",
+											"host": [
+												"127",
+												"0",
+												"0",
+												"1"
+											],
+											"port": "8000",
+											"path": [
+												"api",
+												"v1",
+												"titles",
+												""
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create_title_with_empty_genre // Admin",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Статус-код ответа должен быть 400\", function () {",
+													"    pm.expect(",
+													"        pm.response.status,",
+													"        \"POST-запрос администратора на создание произведения с пустым списком для поля `genre` должен вернуть ответ с кодом 400\"",
+													"    ).to.be.eql(\"Bad Request\");",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"genre\": [],\n    \"name\": \"Empty genre\",\n    \"year\": 2020,\n    \"description\": \"Test title with empty genre by admin\",\n    \"category\": \"{{adminCategory}}\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://127.0.0.1:8000/api/v1/titles/",
+											"protocol": "http",
+											"host": [
+												"127",
+												"0",
+												"0",
+												"1"
+											],
+											"port": "8000",
+											"path": [
+												"api",
+												"v1",
+												"titles",
+												""
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "create_title_with_null_genre // Admin",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Статус-код ответа должен быть 400\", function () {",
+													"    pm.expect(",
+													"        pm.response.status,",
+													"        \"POST-запрос администратора на создание произведения с `null` в качестве значения поля `genre` должен вернуть ответ с кодом 400\"",
+													"    ).to.be.eql(\"Bad Request\");",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"genre\": null,\n    \"name\": \"Null genre\",\n    \"year\": 2020,\n    \"description\": \"Test title with null genre by admin\",\n    \"category\": \"{{adminCategory}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"

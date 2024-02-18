@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 from django.db import models
 from django.utils import timezone
@@ -8,8 +7,6 @@ def get_current_year():
     return timezone.now().year
 
 
-User = get_user_model()
-
 class Category(models.Model):
     name = models.CharField(
         'Название категории',
@@ -18,7 +15,6 @@ class Category(models.Model):
     slug = models.SlugField(
         'Слаг категории',
         unique=True,
-        db_index=True
     )
 
     class Meta:
@@ -27,7 +23,7 @@ class Category(models.Model):
         ordering = ('slug',)
 
     def __str__(self):
-        return f'{self.name} {self.slug}'
+        return {self.name}
 
 
 class Genre(models.Model):
@@ -37,8 +33,7 @@ class Genre(models.Model):
     )
     slug = models.SlugField(
         'Слаг жанра',
-        unique=True,
-        db_index=True
+        unique=True
     )
 
     class Meta:
@@ -47,18 +42,18 @@ class Genre(models.Model):
         ordering = ('slug',)
 
     def __str__(self):
-        return f'{self.name} {self.slug}'
+        return {self.name}
 
 
 class Title(models.Model):
     name = models.CharField(
         'Название произведения',
-        max_length=256,
-        db_index=True
+        max_length=256
     )
     year = models.IntegerField(
         'Год издания',
-        validators=[MaxValueValidator(get_current_year)]
+        validators=[MaxValueValidator(get_current_year)],
+        db_index=True
     )
     category = models.ForeignKey(
         Category,
@@ -66,7 +61,7 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='категория',
         null=True,
-        blank=True
+        db_index=True
     )
     description = models.TextField(
         'Описание произведения',
@@ -76,30 +71,38 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        related_name='genres',
-        verbose_name='жанр'
+        through='GenreTitle',
+        verbose_name='жанр',
+        db_index=True
     )
-    pub_date = models.DateTimeField(auto_now_add=True)
-
-    rating = models.FloatField(default=None, editable=False, null=True)
-
-    def save(self, *args, **kwargs):
-        if self.pk:
-            self.rating = self.reviews.all().aggregate(models.Avg('score'))['score__avg']
-        super().save(*args, **kwargs)
+    rating = models.FloatField(
+        default=None,
+        null=True,
+        db_index=True
+    )
 
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
-        ordering = ('year',)
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    genre = models.ForeignKey(
+        'Genre', on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name='Жанр'
+    )
+    title = models.ForeignKey(
+        'Title', on_delete=models.CASCADE, verbose_name='Произведение'
+    )
+
+    class Meta:
+        ordering = ('title',)
+        verbose_name = 'Жанр произведения'
+        verbose_name_plural = 'Жанры произведений'
 
     def __str__(self):
         return f"{self.genre} {self.title}"

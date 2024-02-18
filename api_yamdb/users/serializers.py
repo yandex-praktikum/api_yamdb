@@ -8,7 +8,6 @@ from .models import User
 
 class ValidateUsername:
     """Валидаторы для username."""
-
     def validate_username(self, username):
         pattern = re.compile(r'^[\w.@+-]+')
 
@@ -21,7 +20,6 @@ class ValidateUsername:
 
 class UserSerializer(serializers.ModelSerializer, ValidateUsername):
     """Сериализатор модели User"""
-
     class Meta:
         model = User
         fields = ('username', 'email', 'first_name',
@@ -39,7 +37,6 @@ class UserSerializer(serializers.ModelSerializer, ValidateUsername):
 
 class SignUpSerializer(serializers.Serializer, ValidateUsername):
     """Сериализатор регистрации User"""
-
     username = serializers.CharField(required=True, max_length=50)
     email = serializers.EmailField(required=True, max_length=50)
 

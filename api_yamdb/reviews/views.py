@@ -19,14 +19,13 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         review = Review.objects.get(id=self.kwargs.get('review_id'))
-        title = Title.objects.get(id=self.kwargs.get('title_id'))
-        return Comment.objects.filter(review=review, title=title)
+        return Comment.objects.filter(review=review)
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         review = Review.objects.get(title=title,
                                     id=self.kwargs.get('review_id'))
-        serializer.save(title=title, review=review, author=self.request.user)
+        serializer.save(review=review, author=self.request.user)
 
     def update(self, request, *args, **kwargs):
         return Response({"detail": "PUT method is not allowed."},

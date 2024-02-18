@@ -26,7 +26,6 @@ class Review(models.Model):
 
 class Comment(models.Model):
     """Модель комментария к ревью."""
-
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name='comments')
     text = models.TextField(verbose_name='Текст комментария')

@@ -31,7 +31,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         return Response({"detail": "PUT method is not allowed."},
                         status=status.HTTP_405_METHOD_NOT_ALLOWED)
-    
+
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
         if instance.author != request.user and request.user.role == 'user':
@@ -75,7 +75,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         except IntegrityError:
             return Response({"detail": "Score must be between 1 and 10"},
                             status=status.HTTP_400_BAD_REQUEST)
-
 
     def update(self, request, *args, **kwargs):
         return Response({"detail": "PUT method is not allowed."},

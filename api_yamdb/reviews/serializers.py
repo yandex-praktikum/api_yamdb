@@ -5,8 +5,8 @@ from .models import Comment, Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField( 
-        read_only=True, slug_field='username' 
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
     )
     title = TitleSerializer(read_only=True)
     pub_date = serializers.DateTimeField(read_only=True)
@@ -17,13 +17,14 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate_score(self, value):
         if value > 10 or value < 1:
-            raise serializers.ValidationError("Score must be between 1 and 10.")
+            raise serializers.ValidationError(
+                "Score must be between 1 and 10."
+            )
         return value
 
 
-
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField( 
+    author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
     title = TitleSerializer(read_only=True)

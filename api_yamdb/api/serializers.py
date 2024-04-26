@@ -10,14 +10,14 @@ class TitleSerializer(serializers.ModelSerializer):
     category = SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all(),
-        validators=[UniqueValidator(queryset=Title.objects.all())]
+        # validators=[UniqueValidator(queryset=Category.objects.all())]
     )
 
     genre = SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
         many=True,
-        validators=[UniqueValidator(queryset=Title.objects.all())]
+        # validators=[UniqueValidator(queryset=Title.objects.all())]
     )
 
     class Meta:

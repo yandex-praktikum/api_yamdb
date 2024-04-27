@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.forms import ValidationError
 
 USER_ROLES = (
     ('user', 'пользователь'),
@@ -21,6 +22,12 @@ class YamdbUser(AbstractUser):
         verbose_name = 'пользователь'
         verbose_name_plural = 'пользователи'
         ordering = ['pk']
+
+    def clean(self):
+        super().clean()
+        if self.username == 'me':
+            raise ValidationError(
+                'Запрещено использовать "me" как имя пользователя.')
 
     def __str__(self):
         return self.username

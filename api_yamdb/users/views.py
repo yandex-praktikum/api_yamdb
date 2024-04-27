@@ -1,6 +1,6 @@
 import random
 
-from api.permissions import AdminAccess, UserSelfPermission
+from api.permissions import AdminAccess, UserSelfAccess
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, viewsets
@@ -38,7 +38,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class UserRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
-    permission_classes = (UserSelfPermission,)
+    permission_classes = (UserSelfAccess,)
     http_method_names = ['get', 'patch']
 
     def get_object(self):

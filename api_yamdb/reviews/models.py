@@ -1,6 +1,10 @@
 from django.db import models
 
 
+# Можно добавить BaseModel в соседний файл
+# И наследовать в категориях и жанрах от него
+# class NameSlugBaseModel(models.Model):
+# class Meta:// abstract = True
 class Category(models.Model):
     name = models.CharField(max_length=256,
                             verbose_name='Название категории')
@@ -42,13 +46,15 @@ class Title(models.Model):
     description = models.TextField(blank=True,
                                    null=True,
                                    verbose_name='Описание произведения')
-    genres = models.ManyToManyField(
+    genre = models.ManyToManyField(
         Genre, through='TitleGenre',
         verbose_name='Жанры произведения'
     )
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True,
-        related_name='titles', verbose_name='Категория произведения'
+        related_name='titles',
+        #related_name='category',
+        verbose_name='Категория произведения'
     )
 
     class Meta:

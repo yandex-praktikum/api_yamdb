@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -105,3 +107,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 AUTH_USER_MODEL = 'users.YamdbUser'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}

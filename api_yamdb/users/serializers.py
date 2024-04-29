@@ -1,6 +1,7 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import YamdbUser
+User = get_user_model()
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -8,7 +9,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
         source='user.password', required=False, write_only=True)
 
     class Meta:
-        model = YamdbUser
+        model = User
         fields = ('username', 'email', 'password')
 
     def validate_username(self, value):
@@ -22,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source='user.role', read_only=True)
 
     class Meta:
-        model = YamdbUser
+        model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
 
@@ -36,7 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserPatchSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = YamdbUser
+        model = User
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio')
 

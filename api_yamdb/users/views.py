@@ -1,6 +1,6 @@
 import random
 
-# from api.permissions import AdminAccess, UserSelfAccess
+from api.permissions import AdminAccess, UserSelfAccess
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
@@ -21,7 +21,7 @@ class UserRegistrationView(generics.CreateAPIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = (AdminAccess,)
+    permission_classes = (AdminAccess,)
     lookup_field = 'username'
 
     def perform_create(self, serializer):
@@ -40,7 +40,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class UserRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
-    # permission_classes = (UserSelfAccess,)
+    permission_classes = (UserSelfAccess,)
     http_method_names = ['get', 'patch']
 
     def get_object(self):

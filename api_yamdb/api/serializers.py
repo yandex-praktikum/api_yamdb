@@ -1,9 +1,11 @@
 import datetime as dt
 
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review, Comment
+from django.forms import ValidationError
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -55,3 +57,36 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
         fields = ('name', 'slug',)
         lookup_field = 'slug'
+        
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+
+    def validate(self, data):
+        request = self.context['request']
+        title_id = self.context['view'].kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title_id)
+        if (request.method == 'POST' and Review.objects.filter(
+                author=request.user, title=title).exists()):
+            raise ValidationError(
+                'Можно cделать только один отзыв'
+            )
+        return data
+    
+class CommentSerializers(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+    slug_field='username', read_only=True,
+    default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')
+        read_only_fields = ('author', )

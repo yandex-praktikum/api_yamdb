@@ -82,8 +82,6 @@ class TitleGenre(models.Model):
         return f'{self.title} {self.genre}'
 
 
-# Надо не забыть создать миграции для отзывов
-# Сейчас пока не работают миграции
 class Review(models.Model):
     text = models.TextField(verbose_name='текст отзыва')
     title = models.ForeignKey(

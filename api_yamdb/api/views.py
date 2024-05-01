@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, mixins, viewsets, permissions
 from reviews.models import Category, Genre, Title
 
 from .serializers import (CategorySerializer,
@@ -7,6 +7,7 @@ from .serializers import (CategorySerializer,
                           TitleReadSerializer,
                           TitleCreateUpdateSerializer)
 from .filters import TitleFilter
+from .permissions import AdminAccess
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -16,6 +17,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     http_method_names = ['get', 'post',
                          'patch', 'delete']
+    permission_classes = (AdminAccess,)
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return (permissions.AllowAny(),)
+        return super().get_permissions()
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
@@ -27,7 +34,12 @@ class ListCreateDestroyViewSet(mixins.ListModelMixin,
                                mixins.CreateModelMixin,
                                mixins.DestroyModelMixin,
                                viewsets.GenericViewSet):
-    pass
+    permission_classes = (AdminAccess,)
+
+    def get_permissions(self):
+        if self.action == 'list':
+            return (permissions.AllowAny(),)
+        return super().get_permissions()
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):

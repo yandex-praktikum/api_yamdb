@@ -1,42 +1,18 @@
 from django.db import models
 
+from core.models import NameSlugBaseModel
 
-# Можно добавить BaseModel в соседний файл
-# И наследовать в категориях и жанрах от него
-# class NameSlugBaseModel(models.Model):
-# class Meta:// abstract = True
-class Category(models.Model):
-    name = models.CharField(max_length=256,
-                            verbose_name='Название категории')
-    slug = models.SlugField(max_length=50,
-                            unique=True,
-                            verbose_name='Слаг')
+
+class Category(NameSlugBaseModel):
 
     class Meta:
         verbose_name = 'объект «Категория»'
-        default_permissions = (
-            'add', 'delete', 'view'
-        )
-
-    def __str__(self):
-        return self.name
 
 
-class Genre(models.Model):
-    name = models.CharField(max_length=256,
-                            verbose_name='Название жанра')
-    slug = models.SlugField(max_length=50,
-                            unique=True,
-                            verbose_name='Слаг')
+class Genre(NameSlugBaseModel):
 
     class Meta:
         verbose_name = 'объект «Жанр»'
-        default_permissions = (
-            'add', 'delete', 'view'
-        )
-
-    def __str__(self):
-        return self.name
 
 
 class Title(models.Model):

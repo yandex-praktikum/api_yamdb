@@ -2,33 +2,25 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from reviews.models import Category, Genre, Title
 
-from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
+from .serializers import (CategorySerializer,
+                          GenreSerializer,
+                          TitleReadSerializer,
+                          TitleCreateUpdateSerializer)
+from .filters import TitleFilter
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+    serializer_class = TitleReadSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
     http_method_names = ['get', 'post',
                          'patch', 'delete']
 
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year',
-                        'category__slug', 'genre__slug'
-                        )
-
-    def get_queryset(self):
-        queryset = Title.objects.all(
-        ).select_related('category').prefetch_related('genre')
-        category_slug = self.request.query_params.get('category')
-        genre_slug = self.request.query_params.get('genre')
-        if (category_slug is not None) and (genre_slug is not None):
-            queryset = queryset.filter(
-                category__slug=category_slug, genre__slug=genre_slug)
-        if category_slug is not None:
-            queryset = queryset.filter(category__slug=category_slug)
-        if genre_slug is not None:
-            queryset = queryset.filter(genre__slug=genre_slug)
-        return queryset
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return TitleReadSerializer
+        return TitleCreateUpdateSerializer
 
 
 class ListCreateDestroyViewSet(mixins.ListModelMixin,

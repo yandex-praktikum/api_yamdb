@@ -76,6 +76,16 @@ class UserPatchSerializer(serializers.ModelSerializer):
         return value
 
 
-class CustomTokenObtainSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    confirmation_code = serializers.CharField()
+class TokenObtainSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
+    confirmation_code = serializers.CharField(max_length=5)
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        username = attrs['username']
+        confirmation_code = attrs['confirmation_code']
+        user = User.objects.filter(username=username).first()
+        if user and user.confirmation_code != confirmation_code:
+            raise serializers.ValidationError(
+                {'confirmation_code': 'Неверный код подтверждения!'})
+        return data

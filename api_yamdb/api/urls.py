@@ -1,6 +1,6 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from users.views import (CustomTokenObtainView, UserSelfRetrieveUpdateAPIView,
+from users.views import (TokenObtainView, UserSelfRetrieveUpdateAPIView,
                          UserSignupView, UserViewSet)
 
 app_name = 'api'
@@ -21,7 +21,7 @@ urlpatterns = [
     ),
     path(
         'v1/auth/token/',
-        CustomTokenObtainView.as_view(),
+        TokenObtainView.as_view(),
         name='token_obtain'
     ),
     path('v1/', include(router_v1.urls)),

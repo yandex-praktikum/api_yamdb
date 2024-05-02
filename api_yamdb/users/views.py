@@ -4,10 +4,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, generics, status, views, viewsets
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .authentication import ConfirmationCodeAuthentication
-from .serializers import (CustomTokenObtainSerializer, UserPatchSerializer,
+from .serializers import (TokenObtainSerializer, UserPatchSerializer,
                           UserSerializer, UserSignupSerializer)
 
 User = get_user_model()
@@ -54,11 +52,10 @@ class UserSelfRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
         return super().get_serializer_class()
 
 
-class CustomTokenObtainView(TokenObtainPairView):
-    authentication_classes = [ConfirmationCodeAuthentication]
+class TokenObtainView(views.APIView):
 
-    def post(self, request, *args, **kwargs):
-        serializer = CustomTokenObtainSerializer(data=request.data)
+    def post(self, request):
+        serializer = TokenObtainSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data.get('username')
             confirmation_code = serializer.validated_data.get(
@@ -67,13 +64,11 @@ class CustomTokenObtainView(TokenObtainPairView):
                 username=username, confirmation_code=confirmation_code).first()
             if user:
                 refresh = RefreshToken.for_user(user)
-                data = {
-                    'token': str(refresh.access_token),
-                }
+                data = {'token': str(refresh.access_token), }
                 return Response(data)
             else:
                 return Response(
-                    {'error': 'Неверное имя пользователя'},
+                    {'username': 'Пользователя с такими именем не существует'},
                     status=status.HTTP_404_NOT_FOUND
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

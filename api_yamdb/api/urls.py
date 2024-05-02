@@ -17,7 +17,7 @@ urlpatterns = [
     path(
         'v1/auth/signup/',
         UserSignupView.as_view(),
-        name='user_registration'
+        name='user_signup'
     ),
     path(
         'v1/auth/token/',

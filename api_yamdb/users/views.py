@@ -1,8 +1,7 @@
 from api.permissions import AdminAccess, UserSelfAccess
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, generics, permissions, status, viewsets
+from rest_framework import filters, generics, status, views, viewsets
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -14,39 +13,13 @@ from .serializers import (CustomTokenObtainSerializer, UserPatchSerializer,
 User = get_user_model()
 
 
-class UserSignupView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSignupSerializer
-    permission_classes = (permissions.AllowAny,)
-
-    def send_confirmation_code(self, username, email):
-        user = User.objects.get(username=username, email=email)
-        subject = 'Код подтверждения'
-        message = (f'Привет, {username}!\n'
-                   f'Ваш код подтверждения: {user.confirmation_code}.')
-        from_email = 'from@example.com'
-        recipient_list = [email]
-        return send_mail(
-            subject=subject,
-            message=message,
-            from_email=from_email,
-            recipient_list=recipient_list,
-            fail_silently=True
-        )
-
-    def create(self, request):
+class UserSignupView(views.APIView):
+    def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
         if serializer.is_valid():
-            username = serializer.validated_data['username']
-            email = serializer.validated_data['email']
-            user = User.objects.filter(
-                username=username, email=email).first()
+            user = serializer.save()
             if user:
-                return Response({"username": username, "email": email},
-                                status=status.HTTP_200_OK)
-            else:
-                serializer.save(data=request.data)
-                self.send_confirmation_code(username, email)
+                user.send_confirmation_email()
                 return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

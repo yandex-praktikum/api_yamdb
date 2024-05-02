@@ -1,35 +1,50 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+
+from .models import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
 
 User = get_user_model()
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(
-        source='user.password', required=False, write_only=True)
-    email = serializers.EmailField(
-        required=True,
-        max_length=254,
-        validators=[UniqueValidator(queryset=User.objects.all(
-        ), message=('Пользователь с таким почтовым '
-                    'адресом уже зарегистрирован!'))]
+    username = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH,
+        validators=[UnicodeUsernameValidator(),]
     )
+    email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password')
+        fields = ('username', 'email')
 
     def create(self, validated_data):
-        username = validated_data.pop('username')
-        email = validated_data.pop('email')
-        user = User.objects.create(username=username, email=email)
+        username = validated_data.get('username')
+        email = validated_data.get('email')
+        existing_user = User.objects.filter(
+            username=username, email=email).first()
+        if existing_user:
+            return existing_user
+        user = User.objects.create_user(**validated_data)
         return user
+
+    def validate(self, attrs):
+        if (
+            User.objects.filter(email=attrs['email']).first()
+            and not User.objects.filter(username=attrs['username']).first()
+        ):
+            raise serializers.ValidationError(
+                'Пользователя с таким именем не существует!')
+        if (User.objects.filter(username=attrs['username']).first()
+                and not User.objects.filter(email=attrs['email']).first()):
+            raise serializers.ValidationError(
+                'Пользователя с такой почтой не существует!')
+        return super().validate(attrs)
 
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(
-                'Запрещено использовать "me" как имя пользователя.')
+                'Запрещено использовать "me" как имя пользователя!')
         return value
 
 
@@ -43,7 +58,7 @@ class UserSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(
-                'Запрещено использовать "me" как имя пользователя.')
+                'Запрещено использовать "me" как имя пользователя!')
         return value
 
 
@@ -57,7 +72,7 @@ class UserPatchSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(
-                'Запрещено использовать "me" как имя пользователя.')
+                'Запрещено использовать "me" как имя пользователя!')
         return value
 
 

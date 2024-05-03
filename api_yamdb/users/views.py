@@ -19,9 +19,8 @@ class UserSignupView(views.APIView):
         serializer = UserSignupSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            if user:
-                user.send_confirmation_email()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+            user.send_confirmation_email()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

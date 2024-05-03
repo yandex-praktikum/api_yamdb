@@ -25,18 +25,17 @@ class UserSignupSerializer(serializers.ModelSerializer):
             username=username, email=email).first()
         if existing_user:
             return existing_user
-        user = User.objects.create_user(**validated_data)
+        user = User.objects.create(**validated_data)
         return user
 
     def validate(self, attrs):
-        if (
-            User.objects.filter(email=attrs['email']).first()
-            and not User.objects.filter(username=attrs['username']).first()
-        ):
+        user_with_username = User.objects.filter(
+            username=attrs['username']).first()
+        user_with_email = User.objects.filter(email=attrs['email']).first()
+        if (user_with_email and not user_with_username):
             raise serializers.ValidationError(
                 'Пользователя с таким именем не существует!')
-        if (User.objects.filter(username=attrs['username']).first()
-                and not User.objects.filter(email=attrs['email']).first()):
+        if (user_with_username and not user_with_email):
             raise serializers.ValidationError(
                 'Пользователя с такой почтой не существует!')
         return super().validate(attrs)

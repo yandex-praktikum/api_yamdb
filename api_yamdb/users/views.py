@@ -1,7 +1,8 @@
 from api.permissions import AdminAccess, UserSelfAccess
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, generics, status, views, viewsets
+from rest_framework import (filters, generics, permissions, status, views,
+                            viewsets)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -12,6 +13,8 @@ User = get_user_model()
 
 
 class UserSignupView(views.APIView):
+    permission_classes = (permissions.AllowAny,)
+
     def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
         if serializer.is_valid():
@@ -53,6 +56,7 @@ class UserSelfRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
 
 
 class TokenObtainView(views.APIView):
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         serializer = TokenObtainSerializer(data=request.data)

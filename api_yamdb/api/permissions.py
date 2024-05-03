@@ -15,6 +15,7 @@ class UserSelfAccess(permissions.BasePermission):
     """Разрешения для владельца профиля.
 
     Просмотр и изменение данных профиля."""
+
     def has_permission(self, request, view):
         return request.user.is_authenticated
 

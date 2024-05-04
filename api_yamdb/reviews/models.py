@@ -79,7 +79,6 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-<<<<<<< HEAD
         return f'{self.title} {self.genre}'
 
 
@@ -118,8 +117,6 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-=======
->>>>>>> develop
         # в модель YamdbUser нужно добавить поле username
         return f'Отзыв {self.author.username} на {self.title.name}'
 

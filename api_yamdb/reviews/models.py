@@ -44,6 +44,19 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
+
+class TitleGenre(models.Model):
+    title = models.ForeignKey(Title, on_delete=models.SET_NULL,
+                              related_name='titles',
+                              null=True)
+    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL,
+                              related_name='genres',
+                              null=True)
+
+    def __str__(self):
+        return f'{self.title} {self.genre}'
+
+
 class Review(models.Model):
     text = models.TextField(verbose_name='текст отзыва')
     title = models.ForeignKey(

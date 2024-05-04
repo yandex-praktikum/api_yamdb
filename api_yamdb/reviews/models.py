@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Avg
 
 from core.models import NameSlugBaseModel
 
@@ -23,13 +22,6 @@ class Title(models.Model):
     description = models.TextField(blank=True,
                                    null=True,
                                    verbose_name='Описание произведения')
-    # Вариант для связи с review
-    # reviews = models.ForeignKey(
-    #     Review, on_delete=models.SET_NULL, null=True,
-    #     blank=True
-    #     related_name='reviews'
-    # )
-    #  rating = models.DecimalField
     genre = models.ManyToManyField(
         Genre, through='TitleGenre',
         verbose_name='Жанры произведения'
@@ -47,13 +39,6 @@ class Title(models.Model):
             'add', 'change', 'delete', 'view'
         )
 
-    # def reviews_count(self):
-    #     return Review.objects.filter(title=self).count()
-
-    # def average_rating(self):
-    #     return (Review.objects.filter(product=self).aggregate(
-    #         Avg('rating'))['rating__avg'])
-
     def __str__(self):
         return self.name
 
@@ -68,3 +53,70 @@ class TitleGenre(models.Model):
 
     def __str__(self):
         return f'{self.title} {self.genre}'
+
+
+class Review(models.Model):
+    text = models.TextField(verbose_name='текст отзыва')
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Название произведения'
+    )
+
+    author = models.ForeignKey(
+        YamdbUser,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        related_name='reviews')
+    score = models.PositiveSmallIntegerField(
+        default=10,
+        validators=[
+            MinValueValidator(
+                1, 'Значение рейтинга должно быть больше 1.'),
+            MaxValueValidator(
+                10, 'Значение рейтинга должно быть меньше 10.')],
+        verbose_name='Рейтинг')
+    pub_date = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата публикации отзыва'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['author', 'title'],
+                                    name='unique_author_title')
+        ]
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        # в модель YamdbUser нужно добавить поле username
+        return f'Отзыв {self.author.username} на {self.title.name}'
+
+
+class Comment(models.Model):
+    text = models.TextField(verbose_name='text')
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        verbose_name='Комментарии',
+        related_name='comments'
+    )
+    author = models.ForeignKey(
+        YamdbUser,
+        on_delete=models.CASCADE,
+        verbose_name='Автор комментария',
+        related_name='comments',
+        null=True
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации комментария',
+        auto_now_add=True,
+    )
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.text

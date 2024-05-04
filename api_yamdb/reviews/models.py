@@ -22,6 +22,12 @@ class Title(models.Model):
     description = models.TextField(blank=True,
                                    null=True,
                                    verbose_name='Описание произведения')
+    # Вариант для связи с review
+    # reviews = models.ForeignKey(
+    #     Review, on_delete=models.SET_NULL, null=True,
+    #     blank=True
+    #     related_name='reviews'
+    # )
     genre = models.ManyToManyField(
         Genre, through='TitleGenre',
         verbose_name='Жанры произведения'
@@ -29,7 +35,7 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True,
         related_name='titles',
-        #related_name='category',
+        # related_name='category',
         verbose_name='Категория произведения'
     )
 

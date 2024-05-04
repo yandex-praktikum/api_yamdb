@@ -2,23 +2,10 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from users.models import YamdbUser
+from core.models import NameSlugBaseModel
 
-<<<<<<< HEAD
-from django.contrib.auth import get_user_model
 
-=======
->>>>>>> parent of 63081a4 (add models comments and reviwes + migration + serializer + views ver.2)
-
-# Можно добавить BaseModel в соседний файл
-# И наследовать в категориях и жанрах от него
-# class NameSlugBaseModel(models.Model):
-# class Meta:// abstract = True
-class Category(models.Model):
-    name = models.CharField(max_length=256,
-                            verbose_name='Название категории')
-    slug = models.SlugField(max_length=50,
-                            unique=True,
-                            verbose_name='Слаг')
+class Category(NameSlugBaseModel):
 
     class Meta:
         verbose_name = 'объект «Категория»'
@@ -56,19 +43,6 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class TitleGenre(models.Model):
-    title = models.ForeignKey(Title, on_delete=models.SET_NULL,
-                              related_name='titles',
-                              null=True)
-    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL,
-                              related_name='genres',
-                              null=True)
-
-    def __str__(self):
-        return f'{self.title} {self.genre}'
-
 
 class Review(models.Model):
     text = models.TextField(verbose_name='текст отзыва')

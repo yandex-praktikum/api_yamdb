@@ -1,8 +1,11 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from users.models import YamdbUser
+# from users.models import YamdbUser
+from django.contrib.auth import get_user_model
 from core.models import NameSlugBaseModel
+
+User = get_user_model()
 
 
 class Category(NameSlugBaseModel):
@@ -66,7 +69,8 @@ class Review(models.Model):
     )
 
     author = models.ForeignKey(
-        YamdbUser,
+        # YamdbUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
         related_name='reviews')
@@ -92,7 +96,6 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        # в модель YamdbUser нужно добавить поле username
         return f'Отзыв {self.author.username} на {self.title.name}'
 
 
@@ -105,11 +108,12 @@ class Comment(models.Model):
         related_name='comments'
     )
     author = models.ForeignKey(
-        YamdbUser,
+        # YamdbUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Автор комментария',
         related_name='comments',
-        null=True
+        # null=True
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации комментария',

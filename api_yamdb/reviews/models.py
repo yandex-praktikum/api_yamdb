@@ -1,10 +1,13 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-# from users.models import YamdbUser
+from users.models import YamdbUser
 
+<<<<<<< HEAD
 from django.contrib.auth import get_user_model
 
+=======
+>>>>>>> parent of 63081a4 (add models comments and reviwes + migration + serializer + views ver.2)
 
 # Можно добавить BaseModel в соседний файл
 # И наследовать в категориях и жанрах от него
@@ -76,13 +79,12 @@ class Review(models.Model):
     )
 
     author = models.ForeignKey(
-        # YamdbUser,
-        User,
+        YamdbUser,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
         related_name='reviews')
     score = models.PositiveSmallIntegerField(
-        # default=10,
+        default=10,
         validators=[
             MinValueValidator(
                 1, 'Значение рейтинга должно быть больше 1.'),
@@ -103,6 +105,7 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
+        # в модель YamdbUser нужно добавить поле username
         return f'Отзыв {self.author.username} на {self.title.name}'
 
 
@@ -115,12 +118,11 @@ class Comment(models.Model):
         related_name='comments'
     )
     author = models.ForeignKey(
-        # YamdbUser,
-        User,
+        YamdbUser,
         on_delete=models.CASCADE,
         verbose_name='Автор комментария',
         related_name='comments',
-        # null=True
+        null=True
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации комментария',

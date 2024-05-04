@@ -71,7 +71,7 @@ class Review(models.Model):
         verbose_name='Пользователь',
         related_name='reviews')
     score = models.PositiveSmallIntegerField(
-        default=10,
+        # default=10,
         validators=[
             MinValueValidator(
                 1, 'Значение рейтинга должно быть больше 1.'),

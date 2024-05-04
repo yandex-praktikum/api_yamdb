@@ -1,8 +1,11 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from users.models import YamdbUser
+# from users.models import YamdbUser
+from django.contrib.auth import get_user_model
 from core.models import NameSlugBaseModel
+
+User = get_user_model()
 
 
 class Category(NameSlugBaseModel):
@@ -66,12 +69,13 @@ class Review(models.Model):
     )
 
     author = models.ForeignKey(
-        YamdbUser,
+        # YamdbUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
         related_name='reviews')
     score = models.PositiveSmallIntegerField(
-        default=10,
+        # default=10,
         validators=[
             MinValueValidator(
                 1, 'Значение рейтинга должно быть больше 1.'),
@@ -92,45 +96,6 @@ class Review(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return f'{self.title} {self.genre}'
-
-
-class Review(models.Model):
-    text = models.TextField(verbose_name='текст отзыва')
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        verbose_name='Название произведения'
-    )
-
-    author = models.ForeignKey(
-        YamdbUser,
-        on_delete=models.CASCADE,
-        verbose_name='Пользователь',
-        related_name='reviews')
-    score = models.PositiveSmallIntegerField(
-        default=10,
-        validators=[
-            MinValueValidator(
-                1, 'Значение рейтинга должно быть больше 1.'),
-            MaxValueValidator(
-                10, 'Значение рейтинга должно быть меньше 10.')],
-        verbose_name='Рейтинг')
-    pub_date = models.DateTimeField(
-        auto_now_add=True, verbose_name='Дата публикации отзыва'
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['author', 'title'],
-                                    name='unique_author_title')
-        ]
-        verbose_name = 'Отзыв'
-        verbose_name_plural = 'Отзывы'
-        ordering = ('-pub_date',)
-
-    def __str__(self):
-        # в модель YamdbUser нужно добавить поле username
         return f'Отзыв {self.author.username} на {self.title.name}'
 
 
@@ -143,11 +108,12 @@ class Comment(models.Model):
         related_name='comments'
     )
     author = models.ForeignKey(
-        YamdbUser,
+        # YamdbUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Автор комментария',
         related_name='comments',
-        null=True
+        # null=True
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации комментария',

@@ -4,7 +4,7 @@ from django.db.models import Avg, Count, Max
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -72,37 +72,38 @@ class TitleCreateUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 # Рабочий без rating
-class TitleReadSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True)
-
-    class Meta:
-        model = Title
-        fields = (
-            'id', 'name', 'year', 'description',
-            'genre', 'category'
-        )
-
-# Тесты + Шаблоны для rating
 # class TitleReadSerializer(serializers.ModelSerializer):
 #     genre = GenreSerializer(many=True, read_only=True)
 #     category = CategorySerializer(read_only=True)
-#     rating = serializers.SerializerMethodField()
 
 #     class Meta:
 #         model = Title
 #         fields = (
-#             'id', 'name', 'year', 'rating', 'description',
+#             'id', 'name', 'year', 'description',
 #             'genre', 'category'
-        # )
+#         )
+
+# Тесты + Шаблоны для rating
+class TitleReadSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Title
+        fields = (
+            'id', 'name', 'year', 'rating', 'description',
+            'genre', 'category'
+        )
 
     # def get_rating(self, obj):
-    #     Возможно добавить .select_related('reviews')
+    #     #  Возможно добавить .select_related('reviews')
     #     rating = Title.objects.filter(
-    #         title_id=obj.id
-    #         ).annotate(Avg('reviews__score', default=0))  # Возможно aggrregate
+    #         id=obj.id
+    #         ).annotate(Avg('review__score', default=0))  # Возможно aggrregate
     #     print(rating)
-    #     return round(rating['rating__avg'])
+    #     #return round(rating['rating__avg'])
+    #     return
 
     # def get_rating(self, obj):
     #     rating = Title.objects.filter(

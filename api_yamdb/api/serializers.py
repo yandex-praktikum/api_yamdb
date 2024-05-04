@@ -72,28 +72,29 @@ class TitleCreateUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 # Рабочий без rating
-# class TitleReadSerializer(serializers.ModelSerializer):
-#     genre = GenreSerializer(many=True, read_only=True)
-#     category = CategorySerializer(read_only=True)
-
-#     class Meta:
-#         model = Title
-#         fields = (
-#             'id', 'name', 'year', 'description',
-#             'genre', 'category'
-#         )
-
 class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'rating', 'description',
+            'id', 'name', 'year', 'description',
             'genre', 'category'
         )
+
+# Тесты + Шаблоны для rating
+# class TitleReadSerializer(serializers.ModelSerializer):
+#     genre = GenreSerializer(many=True, read_only=True)
+#     category = CategorySerializer(read_only=True)
+#     rating = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Title
+#         fields = (
+#             'id', 'name', 'year', 'rating', 'description',
+#             'genre', 'category'
+        # )
 
     # def get_rating(self, obj):
     #     Возможно добавить .select_related('reviews')
@@ -103,7 +104,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
     #     print(rating)
     #     return round(rating['rating__avg'])
 
-    def get_rating(self, obj):
-        rating = Title.objects.filter(
-            id=obj.id).aggregate(Avg('year'))
-        return round(rating['year__avg'])
+    # def get_rating(self, obj):
+    #     rating = Title.objects.filter(
+    #         id=obj.id).aggregate(Avg('year'))
+    #     return round(rating['year__avg'])

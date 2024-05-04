@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 
 from core.models import NameSlugBaseModel
 
@@ -28,6 +29,7 @@ class Title(models.Model):
     #     blank=True
     #     related_name='reviews'
     # )
+    #  rating = models.DecimalField
     genre = models.ManyToManyField(
         Genre, through='TitleGenre',
         verbose_name='Жанры произведения'
@@ -44,6 +46,13 @@ class Title(models.Model):
         default_permissions = (
             'add', 'change', 'delete', 'view'
         )
+
+    # def reviews_count(self):
+    #     return Review.objects.filter(title=self).count()
+
+    # def average_rating(self):
+    #     return (Review.objects.filter(product=self).aggregate(
+    #         Avg('rating'))['rating__avg'])
 
     def __str__(self):
         return self.name

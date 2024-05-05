@@ -1,9 +1,7 @@
-from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
-
-# from users.models import YamdbUser
-from django.contrib.auth import get_user_model
 from core.models import NameSlugBaseModel
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
 
 User = get_user_model()
 
@@ -70,13 +68,11 @@ class Review(models.Model):
     )
 
     author = models.ForeignKey(
-        # YamdbUser,
         User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
         related_name='reviews')
     score = models.PositiveSmallIntegerField(
-        # default=10,
         validators=[
             MinValueValidator(
                 1, 'Значение рейтинга должно быть больше 1.'),
@@ -109,12 +105,10 @@ class Comment(models.Model):
         related_name='comments'
     )
     author = models.ForeignKey(
-        # YamdbUser,
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор комментария',
         related_name='comments',
-        # null=True
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации комментария',

@@ -1,14 +1,12 @@
 import datetime as dt
 
+from django.db.models import Avg
 from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
-
-
-from django.db.models import Avg, Count, Max
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
-from reviews.models import Category, Genre, Title, Review, Comment
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -60,7 +58,6 @@ class TitleCreateUpdateSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'year', 'description',
             'genre', 'category',
-            # rating
         )
         read_only_fields = ('id',)
 
@@ -69,12 +66,6 @@ class TitleCreateUpdateSerializer(serializers.ModelSerializer):
         if not (value <= current_year):
             raise serializers.ValidationError('Проверьте год выпуска!')
         return value
-
-    def update(self, instance, validated_data):
-        instance.category = validated_data.get('category')
-        instance.genre.set(validated_data.get('genre'))
-        instance.save()
-        return instance
 
 
 class TitleReadSerializer(serializers.ModelSerializer):

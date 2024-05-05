@@ -1,17 +1,13 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, viewsets, permissions
-from reviews.models import Category, Genre, Title, Review
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, mixins, permissions, viewsets
+from reviews.models import Category, Genre, Review, Title
 
-
-from .serializers import (CategorySerializer,
-                          GenreSerializer,
-                          TitleCreateUpdateSerializer,
-                          TitleReadSerializer,
-                          ReviewSerializer,
-                          CommentSerializers)
 from .filters import TitleFilter
 from .permissions import AdminAccess, AuthorOrModeratorOrAdminAccess
+from .serializers import (CategorySerializer, CommentSerializers,
+                          GenreSerializer, ReviewSerializer,
+                          TitleCreateUpdateSerializer, TitleReadSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -21,7 +17,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     http_method_names = ['get', 'post',
                          'patch', 'delete']
-    # permission_classes = (permissions.AllowAny,) #  Для тестов
     permission_classes = (AdminAccess,)
 
     def get_permissions(self):
@@ -42,7 +37,6 @@ class ListCreateDestroyViewSet(mixins.ListModelMixin,
     lookup_field = 'slug'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'slug',)
-    # permission_classes = (permissions.AllowAny,)  # Для тестов
     permission_classes = (AdminAccess,)
 
     def get_permissions(self):
@@ -59,18 +53,14 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    lookup_field = 'slug'
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('slug',)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    # permission_classes = (AuthorOrModeratorOrAdminAccess,)
-    permission_classes = (permissions.AllowAny,)  # Установил на время ручного тестирования
+    permission_classes = (AuthorOrModeratorOrAdminAccess,)
     http_method_names = ['get', 'post',
-                         'patch', 'delete']  # Исключил put-запросы
-    lookup_field = 'id'  # Устанавливаем, что переменная для поиска называется id
+                         'patch', 'delete']
+    lookup_field = 'id'
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -85,10 +75,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializers
-    # permission_classes = (AuthorOrModeratorOrAdminAccess,)
-    permission_classes = (permissions.AllowAny,)  # Установил на время ручного тестирования
+    permission_classes = (AuthorOrModeratorOrAdminAccess,)
     http_method_names = ['get', 'post',
-                         'patch', 'delete']  # Исключил put-запросы
+                         'patch', 'delete']
     lookup_field = 'id'
 
     def get_queryset(self):

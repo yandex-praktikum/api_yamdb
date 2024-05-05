@@ -76,20 +76,6 @@ class TitleCreateUpdateSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-# Рабочий без rating
-# class TitleReadSerializer(serializers.ModelSerializer):
-#     genre = GenreSerializer(many=True, read_only=True)
-#     category = CategorySerializer(read_only=True)
-
-#     class Meta:
-#         model = Title
-#         fields = (
-#             'id', 'name', 'year', 'description',
-#             'genre', 'category'
-#         )
-
-# Тесты + Шаблоны для rating
-
 
 class TitleReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
@@ -103,20 +89,13 @@ class TitleReadSerializer(serializers.ModelSerializer):
             'genre', 'category'
         )
 
-    # def get_rating(self, obj):
-    #     #  Возможно добавить .select_related('reviews')
-    #     rating = Title.objects.filter(
-    #         id=obj.id
-    #         ).annotate(Avg('review__score', default=0))
-    # # Возможно aggrregate
-    #     print(rating)
-    #     #return round(rating['rating__avg'])
-    #     return
-
-    # def get_rating(self, obj):
-    #     rating = Title.objects.filter(
-    #         id=obj.id).aggregate(Avg('year'))
-    #     return round(rating['year__avg'])
+    def get_rating(self, obj):
+        rating = Review.objects.filter(title_id=obj.id).aggregate(
+            Avg('score')
+        )['score__avg']
+        if rating:
+            return round(rating)
+        return rating
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -124,10 +103,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True,
     )
+    text = serializers.CharField()
+    score = serializers.IntegerField(
+        max_value=10,
+        min_value=0
+    )
 
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
+        #  lookup_field Возможно необходимо добавить
 
     def validate(self, data):
         request = self.context['request']

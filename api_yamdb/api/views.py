@@ -66,20 +66,30 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = AuthorOrModeratorOrAdminAccess
+    # permission_classes = (AuthorOrModeratorOrAdminAccess,)
+    permission_classes = (permissions.AllowAny,)  # Установил на время ручного тестирования
+    http_method_names = ['get', 'post',
+                         'patch', 'delete']  # Исключил put-запросы
+    lookup_field = 'id'  # Устанавливаем, что переменная для поиска называется id
 
     def get_queryset(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-        return title.reviews.all()
+        title_id = self.kwargs.get('title_id')
+        new_queryset = Review.objects.filter(title_id=title_id)
+        return new_queryset
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title.objects, id=title_id)
         serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializers
-    permission_classes = AuthorOrModeratorOrAdminAccess
+    # permission_classes = (AuthorOrModeratorOrAdminAccess,)
+    permission_classes = (permissions.AllowAny,)  # Установил на время ручного тестирования
+    http_method_names = ['get', 'post',
+                         'patch', 'delete']  # Исключил put-запросы
+    lookup_field = 'id'
 
     def get_queryset(self):
         review = get_object_or_404(

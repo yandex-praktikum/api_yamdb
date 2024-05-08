@@ -111,6 +111,8 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 AUTH_USER_MODEL = 'users.YamdbUser'
 
+DEFAULT_FROM_EMAIL = "YaMDb_api <yamdb@mail.com>"
+
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'

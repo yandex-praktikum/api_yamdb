@@ -1,26 +1,19 @@
-import random
-
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.mail import send_mail
 from django.db import models
 from django.forms import ValidationError
 
-USER_ROLES_CHOICES = (
-    ('user', 'пользователь'),
-    ('moderator', 'модератор'),
-    ('admin', 'администратор'),
-)
-
-USERNAME_MAX_LENGTH = 150
-EMAIL_MAX_LENGTH = 254
+from api_yamdb.settings import DEFAULT_FROM_EMAIL
+from core import constants as const
 
 
 class YamdbUser(AbstractUser):
     username_validator = UnicodeUsernameValidator()
     username = models.CharField(
         'Имя пользователя',
-        max_length=USERNAME_MAX_LENGTH,
+        max_length=const.USERNAME_MAX_LENGTH,
         unique=True,
         validators=[username_validator],
         error_messages={
@@ -29,7 +22,7 @@ class YamdbUser(AbstractUser):
     )
     email = models.EmailField(
         'Электронная почта',
-        max_length=EMAIL_MAX_LENGTH,
+        max_length=const.EMAIL_MAX_LENGTH,
         unique=True,
         error_messages={
             'unique': (
@@ -39,20 +32,15 @@ class YamdbUser(AbstractUser):
     bio = models.TextField('Биография', blank=True)
     role = models.CharField(
         'Роль пользователя',
-        max_length=9,
-        choices=USER_ROLES_CHOICES,
-        default='user'
-    )
-    confirmation_code = models.CharField(
-        'Код подтверждения',
-        max_length=5,
-        blank=True
+        max_length=const.ROLE_MAX_LENGTH,
+        choices=const.USER_ROLES_CHOICES,
+        default=const.USER
     )
 
     class Meta:
         verbose_name = 'пользователь'
         verbose_name_plural = 'пользователи'
-        ordering = ['pk']
+        ordering = ['username']
 
     def clean(self):
         super().clean()
@@ -60,19 +48,25 @@ class YamdbUser(AbstractUser):
             raise ValidationError(
                 'Запрещено использовать "me" как имя пользователя!')
 
-    def send_confirmation_email(self):
-        confirmation_code = random.randint(10000, 99999)
-        self.confirmation_code = confirmation_code
-        self.save()
+    def send_confirmation_email(self, user):
+        confirmation_code = default_token_generator.make_token(user)
 
         send_mail(
-            'Код подтверждения',
-            (f'Привет, {self.username}!\n'
-             f'Ваш код подтверждения: {self.confirmation_code}'),
-            'from@example.com',
-            [self.email],
+            subject='Код подтверждения',
+            message=(f'Привет, {self.username}!\n'
+                     f'Ваш код подтверждения: {confirmation_code}'),
+            from_email=DEFAULT_FROM_EMAIL,
+            recipient_list=[self.email],
             fail_silently=False,
         )
+
+    @property
+    def is_admin(self):
+        return self.role == const.ADMIN or self.is_staff or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == const.MODERATOR
 
     def __str__(self):
         return self.username

@@ -16,9 +16,6 @@ class UserSelfAccess(permissions.BasePermission):
 
     Просмотр и изменение данных профиля."""
 
-    def has_permission(self, request, view):
-        return request.user.is_authenticated
-
     def has_object_permission(self, request, view, obj):
         return obj.username == request.user.username
 
@@ -27,28 +24,14 @@ class AdminAccess(permissions.BasePermission):
     """Разрешения для администратора и суперпользователя."""
 
     def has_permission(self, request, view):
-        return (request.user.is_authenticated
-                and (request.user.role == 'admin'
-                     or request.user.is_superuser))
-
-    def has_object_permission(self, request, view, obj):
-        return (request.user.is_authenticated
-                and (request.user.role == 'admin'
-                     or request.user.is_superuser))
+        return request.user.is_admin
 
 
 class ModeratorAccess(permissions.BasePermission):
     """Разрешения для модератора и суперпользователя."""
 
     def has_permission(self, request, view):
-        return (request.user.is_authenticated
-                and (request.user.role == 'moderator'
-                     or request.user.is_superuser))
-
-    def has_object_permission(self, request, view, obj):
-        return (request.user.is_authenticated
-                and (request.user.role == 'moderator'
-                     or request.user.is_superuser))
+        return request.user.is_moderator
 
 
 class AuthorOrModeratorOrAdminAccess(permissions.BasePermission):

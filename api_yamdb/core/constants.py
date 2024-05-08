@@ -1,0 +1,9 @@
+
+
+MAX_LENGTH_NAME_FIELD = 256
+MESSAGE_VALIDATION_YEAR_ERROR = 'Проверьте год выпуска'
+RATING_MIN_VALUE = 0
+RATING_MAX_VALUE = 10
+ADMIN = 'admin'
+MODERATOR = 'moderator'
+USER = 'user'

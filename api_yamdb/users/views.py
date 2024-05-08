@@ -1,13 +1,12 @@
-from api.permissions import AdminAccess, UserSelfAccess
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from rest_framework import (filters, generics, permissions, status, views,
-                            viewsets)
+from rest_framework import filters, permissions, status, views, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import (TokenObtainSerializer, UserPatchSerializer,
-                          UserSerializer, UserSignupSerializer)
+from api.permissions import AdminAccess, UserSelfAccess
+from users.serializers import (TokenObtainSerializer, UserSerializer,
+                               UserSignupSerializer)
 
 User = get_user_model()
 
@@ -17,41 +16,37 @@ class UserSignupView(views.APIView):
 
     def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            user.send_confirmation_email()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        user.send_confirmation_email(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
-    permission_classes = (AdminAccess,)
+    permission_classes = (permissions.IsAuthenticated, AdminAccess)
     lookup_field = 'username'
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
-    def perform_create(self, serializer):
-        username = self.request.data['username']
-        email = self.request.data['email']
-        serializer.save(username=username, email=email)
-
-
-class UserSelfRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
-    serializer_class = UserSerializer
-    permission_classes = (UserSelfAccess,)
-    http_method_names = ['get', 'patch']
-
-    def get_object(self):
-        username = self.request.user.username
-        return get_object_or_404(User, username=username)
-
-    def get_serializer_class(self):
-        if self.request.method == 'PATCH':
-            return UserPatchSerializer
-        return super().get_serializer_class()
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        permission_classes=(permissions.IsAuthenticated, UserSelfAccess)
+    )
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        if request.method == 'GET':
+            return Response(serializer.data)
+        elif request.method == 'PATCH':
+            instance = request.user
+            serializer = self.get_serializer(
+                request.user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(role=instance.role)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TokenObtainView(views.APIView):
@@ -59,19 +54,16 @@ class TokenObtainView(views.APIView):
 
     def post(self, request):
         serializer = TokenObtainSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data.get('username')
-            confirmation_code = serializer.validated_data.get(
-                'confirmation_code')
-            user = User.objects.filter(
-                username=username, confirmation_code=confirmation_code).first()
-            if user:
-                refresh = RefreshToken.for_user(user)
-                data = {'token': str(refresh.access_token), }
-                return Response(data)
-            else:
-                return Response(
-                    {'username': 'Пользователя с такими именем не существует'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data.get('username')
+        user = User.objects.filter(
+            username=username).first()
+        if user:
+            refresh = RefreshToken.for_user(user)
+            data = {'token': str(refresh.access_token), }
+            return Response(data)
+        else:
+            return Response(
+                {'username': 'Пользователя с такими именем не существует'},
+                status=status.HTTP_404_NOT_FOUND
+            )

@@ -7,3 +7,4 @@ RATING_MAX_VALUE = 10
 ADMIN = 'admin'
 MODERATOR = 'moderator'
 USER = 'user'
+SUCCESSFULL_IMPORT = 'Импорт прошел успешно!'

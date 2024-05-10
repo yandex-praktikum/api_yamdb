@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 
-from .models import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
+from users.models import EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
 
 User = get_user_model()
 

@@ -1,21 +1,16 @@
 from django.db import models
 
+from core import constants as const
 
 class NameSlugBaseModel(models.Model):
-    """
-    Абстрактная модель.
-    Добавляет к модели поля название и слаг.
-    Ограничивает набор допустимых запросов.
-    Переопределяет метод __str__.
-    """
-    name = models.CharField(max_length=256,
+    name = models.CharField(max_length=const.MAX_LENGTH_NAME_FIELD,
                             verbose_name='Название')
-    slug = models.SlugField(max_length=50,
-                            unique=True,
+    slug = models.SlugField(unique=True,
                             verbose_name='Слаг')
 
     class Meta:
         abstract = True
+        ordering = ('name',)
         default_permissions = (
             'add', 'delete', 'view'
         )

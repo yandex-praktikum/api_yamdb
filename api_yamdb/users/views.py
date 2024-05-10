@@ -1,4 +1,3 @@
-from api.permissions import AdminAccess, UserSelfAccess
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import (filters, generics, permissions, status, views,
@@ -6,8 +5,9 @@ from rest_framework import (filters, generics, permissions, status, views,
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .serializers import (TokenObtainSerializer, UserPatchSerializer,
-                          UserSerializer, UserSignupSerializer)
+from api.permissions import AdminAccess, UserSelfAccess
+from users.serializers import (TokenObtainSerializer, UserPatchSerializer,
+                               UserSerializer, UserSignupSerializer)
 
 User = get_user_model()
 

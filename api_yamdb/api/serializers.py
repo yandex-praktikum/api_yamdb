@@ -5,18 +5,12 @@ from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-from rest_framework.validators import UniqueValidator
+
+from core import constants as const
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    slug = serializers.SlugField(
-        max_length=50,
-        validators=[UniqueValidator(queryset=Category.objects.all())]
-    )
-    name = serializers.CharField(
-        max_length=256
-    )
 
     class Meta:
         model = Category
@@ -25,13 +19,6 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    slug = serializers.SlugField(
-        max_length=50,
-        validators=[UniqueValidator(queryset=Genre.objects.all())]
-    )
-    name = serializers.CharField(
-        max_length=256
-    )
 
     class Meta:
         model = Genre
@@ -39,19 +26,35 @@ class GenreSerializer(serializers.ModelSerializer):
         lookup_field = 'slug'
 
 
+class TitleReadSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+    rating = serializers.IntegerField(min_value=const.RATING_MIN_VALUE,
+                                      max_value=const.RATING_MAX_VALUE,
+                                      read_only=True,
+                                      allow_null=True)
+
+    class Meta:
+        model = Title
+        fields = (
+            'id', 'name', 'year', 'description',
+            'rating', 'genre', 'category',
+        )
+
+
 class TitleCreateUpdateSerializer(serializers.ModelSerializer):
     genre = SlugRelatedField(
         many=True,
         slug_field='slug',
-        queryset=Genre.objects.all()
+        queryset=Genre.objects.all(),
+        allow_empty=False,
+        allow_null=False
     )
     category = SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all()
     )
-    name = serializers.CharField(
-        max_length=256
-    )
+    year = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -59,34 +62,17 @@ class TitleCreateUpdateSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'description',
             'genre', 'category',
         )
-        read_only_fields = ('id',)
 
     def validate_year(self, value):
         current_year = dt.datetime.today().year
         if not (value <= current_year):
-            raise serializers.ValidationError('Проверьте год выпуска!')
+            raise serializers.ValidationError(
+                const.MESSAGE_VALIDATION_YEAR_ERROR)
         return value
 
-
-class TitleReadSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Title
-        fields = (
-            'id', 'name', 'year', 'rating', 'description',
-            'genre', 'category'
-        )
-
-    def get_rating(self, obj):
-        rating = Review.objects.filter(title_id=obj.id).aggregate(
-            Avg('score')
-        )['score__avg']
-        if rating:
-            return round(rating)
-        return rating
+    def to_representation(self, instance):
+        serializer = TitleReadSerializer(instance)
+        return serializer.data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -103,7 +89,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        #  lookup_field Возможно необходимо добавить
 
     def validate(self, data):
         request = self.context['request']

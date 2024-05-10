@@ -1,7 +1,10 @@
-from core.models import NameSlugBaseModel
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from core.models import NameSlugBaseModel
+
+from .validators import validate_year
 
 User = get_user_model()
 
@@ -10,18 +13,21 @@ class Category(NameSlugBaseModel):
 
     class Meta:
         verbose_name = 'объект «Категория»'
+        verbose_name_plural = 'объекты «Категорий»'
 
 
 class Genre(NameSlugBaseModel):
 
     class Meta:
         verbose_name = 'объект «Жанр»'
+        verbose_name_plural = 'объекты «Жанров»'
 
 
 class Title(models.Model):
     name = models.CharField(max_length=256,
                             verbose_name='Название произведения')
-    year = models.IntegerField(verbose_name='Год выпуска')
+    year = models.PositiveSmallIntegerField(validators=[validate_year],
+                                            verbose_name='Год выпуска')
     description = models.TextField(blank=True,
                                    null=True,
                                    verbose_name='Описание произведения')
@@ -32,7 +38,6 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, null=True,
         related_name='titles',
-        # related_name='category',
         verbose_name='Категория произведения'
     )
 
@@ -48,10 +53,10 @@ class Title(models.Model):
 
 class TitleGenre(models.Model):
     title = models.ForeignKey(Title, on_delete=models.SET_NULL,
-                              related_name='titles',
+                              related_name='titlesgenres',
                               null=True)
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL,
-                              related_name='genres',
+                              related_name='titlesgenres',
                               null=True)
 
     def __str__(self):

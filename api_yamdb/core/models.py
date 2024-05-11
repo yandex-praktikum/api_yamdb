@@ -2,6 +2,7 @@ from django.db import models
 
 from core import constants as const
 
+
 class NameSlugBaseModel(models.Model):
     name = models.CharField(max_length=const.MAX_LENGTH_NAME_FIELD,
                             verbose_name='Название')
@@ -17,3 +18,17 @@ class NameSlugBaseModel(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ReviewCommentBaseModel(models.Model):
+    text = models.TextField(verbose_name='Текст')
+    pub_date = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата публикации'
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('-pub_date', 'text')
+
+    def __str__(self):
+        return self.text

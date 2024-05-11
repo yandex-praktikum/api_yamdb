@@ -80,7 +80,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         read_only=True,
     )
-    text = serializers.CharField()
     score = serializers.IntegerField(
         max_value=10,
         min_value=0
@@ -111,4 +110,3 @@ class CommentSerializers(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-        read_only_fields = ('author', )

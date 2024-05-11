@@ -3,8 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from api.views import (CategoryViewSet, CommentViewSet, GenreViewSet,
                        ReviewViewSet, TitleViewSet)
-from users.views import (TokenObtainView, UserSelfRetrieveUpdateAPIView,
-                         UserSignupView, UserViewSet)
+from users.views import TokenObtainView, UserSignupView, UserViewSet
 
 app_name = 'api'
 
@@ -21,11 +20,6 @@ router_v1.register(
     CommentViewSet, basename='comment')
 
 urlpatterns = [
-    path(
-        'v1/users/me/',
-        UserSelfRetrieveUpdateAPIView.as_view(),
-        name='user_self'
-    ),
     path(
         'v1/auth/signup/',
         UserSignupView.as_view(),

@@ -1,6 +1,13 @@
+MIN_SCORE = 1
+MAX_SCORE = 10
+MAX_LENGTH_NAME_FIELD = 256
+MESSAGE_VALIDATION_YEAR_ERROR = 'Проверьте год выпуска'
+RATING_MIN_VALUE = 0
+RATING_MAX_VALUE = 10
 ADMIN = 'admin'
 MODERATOR = 'moderator'
 USER = 'user'
+SUCCESSFULL_IMPORT = 'Импорт прошел успешно!'
 USER_ROLES_CHOICES = (
     (USER, 'пользователь'),
     (MODERATOR, 'модератор'),

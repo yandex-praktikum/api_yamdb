@@ -1203,8 +1203,7 @@ components:
       properties:
         username:
           type: string
-          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
-            only.
+          description: Не является обязательным, но не может быть пустым.
           pattern: ^[\w.@+-]+\Z
           maxLength: 150
         role:
@@ -1216,6 +1215,7 @@ components:
           readOnly: true
         email:
           type: string
+          description: Не является обязательным, но не может быть пустым.
           format: email
           maxLength: 254
         first_name:

@@ -808,7 +808,7 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: '#/components/schemas/User'
+                      $ref: '#/components/schemas/UserReadOrPatch'
         401:
           description: Необходим JWT-токен
       security:
@@ -868,7 +868,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserReadOrPatch'
         401:
           description: Необходим JWT-токен
         403:
@@ -890,14 +890,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserReadOrPatch'
       responses:
         200:
           description: Удачное выполнение запроса
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserReadOrPatch'
         400:
           description: 'Отсутствует обязательное поле или оно некорректно'
           content:
@@ -947,7 +947,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserReadOrPatch'
       security:
       - jwt-token:
         - read:admin,moderator,user
@@ -991,6 +991,37 @@ components:
       required:
           - username
           - email
+      properties:
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+\Z
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        bio:
+          type: string
+        role:
+          type: string
+          description: Администратор, модератор или пользователь. По умолчанию `user`.
+          enum:
+            - user
+            - moderator
+            - admin
+
+    UserReadOrPatch:
+      title: Пользователь
+      type: object
+      description: Обеновление данных пользователя
       properties:
         username:
           type: string
@@ -1195,9 +1226,6 @@ components:
           maxLength: 150
         bio:
           type: string
-      required:
-      - username
-      - email
 
     Category:
       type: object
